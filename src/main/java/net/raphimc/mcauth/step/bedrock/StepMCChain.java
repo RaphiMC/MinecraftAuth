@@ -1,7 +1,29 @@
+/*
+ * This file is part of MinecraftAuth - https://github.com/RaphiMC/MinecraftAuth
+ * Copyright (C) 2023 RK_01/RaphiMC and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package net.raphimc.mcauth.step.bedrock;
 
-import com.google.gson.*;
-import io.jsonwebtoken.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import net.raphimc.mcauth.MinecraftAuth;
 import net.raphimc.mcauth.step.AbstractStep;
 import net.raphimc.mcauth.step.xbl.StepXblXstsToken;
@@ -16,8 +38,13 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.*;
-import java.util.*;
+import java.security.spec.ECGenParameterSpec;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepMCChain.MCChain> {
 
