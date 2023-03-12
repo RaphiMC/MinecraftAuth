@@ -21,7 +21,7 @@ System.out.println("Logged in with access token: " + mcProfile.prevResult().prev
 // Log in using device code (Blocks until the user has logged in or timeout is reached)
 mcProfile = MinecraftAuth.requestJavaLogin(msaDeviceCode -> {
     System.out.println("Go to " + msaDeviceCode.verificationUri());
-    System.out.println("Enter code " + msaDeviceCode.deviceCode());
+    System.out.println("Enter code " + msaDeviceCode.userCode());
 });
 System.out.println("Logged in as: " + mcProfile.name());
 
