@@ -26,8 +26,9 @@ import org.apache.http.client.utils.URIBuilder;
 import java.net.ServerSocket;
 import java.net.URISyntaxException;
 import java.util.Objects;
+import java.util.function.Consumer;
 
-public class StepExternalBrowser extends AbstractStep<AbstractStep.StepResult<?>, StepExternalBrowser.ExternalBrowser> {
+public class StepExternalBrowser extends AbstractStep<StepExternalBrowser.ExternalBrowserCallback, StepExternalBrowser.ExternalBrowser> {
 
     public static final String AUTHORIZE_URL = "https://login.live.com/oauth20_authorize.srf";
 
@@ -42,8 +43,10 @@ public class StepExternalBrowser extends AbstractStep<AbstractStep.StepResult<?>
     }
 
     @Override
-    public StepExternalBrowser.ExternalBrowser applyStep(HttpClient httpClient, StepResult<?> prevResult) throws Exception {
+    public StepExternalBrowser.ExternalBrowser applyStep(HttpClient httpClient, StepExternalBrowser.ExternalBrowserCallback prevResult) throws Exception {
         MinecraftAuth.LOGGER.info("Creating URL for MSA login via external browser...");
+
+        if (prevResult == null) throw new IllegalStateException("Missing StepExternalBrowser.ExternalBrowserCallback input");
 
         try (final ServerSocket localServer = new ServerSocket(0)) {
             final int localPort = localServer.getLocalPort();
@@ -54,6 +57,7 @@ public class StepExternalBrowser extends AbstractStep<AbstractStep.StepResult<?>
                     localPort);
 
             MinecraftAuth.LOGGER.info("Created external browser MSA authentication URL: " + result.authenticationUrl);
+            prevResult.callback.accept(result);
             return result;
         }
     }
@@ -136,6 +140,20 @@ public class StepExternalBrowser extends AbstractStep<AbstractStep.StepResult<?>
                     "authenticationUrl=" + authenticationUrl + ", " +
                     "redirectUri=" + redirectUri + ", " +
                     "port=" + port + ']';
+        }
+
+    }
+
+    public static final class ExternalBrowserCallback implements AbstractStep.InitialInput {
+
+        private final Consumer<ExternalBrowser> callback;
+
+        public ExternalBrowserCallback(Consumer<ExternalBrowser> callback) {
+            this.callback = callback;
+        }
+
+        public Consumer<ExternalBrowser> callback() {
+            return callback;
         }
 
     }

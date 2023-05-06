@@ -34,8 +34,9 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
-public class StepMsaDeviceCode extends AbstractStep<AbstractStep.StepResult<?>, StepMsaDeviceCode.MsaDeviceCode> {
+public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceCodeCallback, StepMsaDeviceCode.MsaDeviceCode> {
 
     public static final String CONNECT_URL = "https://login.live.com/oauth20_connect.srf";
 
@@ -50,8 +51,10 @@ public class StepMsaDeviceCode extends AbstractStep<AbstractStep.StepResult<?>, 
     }
 
     @Override
-    public MsaDeviceCode applyStep(HttpClient httpClient, StepResult<?> prevResult) throws Exception {
+    public MsaDeviceCode applyStep(HttpClient httpClient, StepMsaDeviceCode.MsaDeviceCodeCallback prevResult) throws Exception {
         MinecraftAuth.LOGGER.info("Getting device code for MSA login...");
+
+        if (prevResult == null) throw new IllegalStateException("Missing StepMsaDeviceCode.MsaDeviceCodeCallback input");
 
         final List<NameValuePair> postData = new ArrayList<>();
         postData.add(new BasicNameValuePair("client_id", this.clientId));
@@ -71,6 +74,7 @@ public class StepMsaDeviceCode extends AbstractStep<AbstractStep.StepResult<?>, 
                 obj.get("verification_uri").getAsString()
         );
         MinecraftAuth.LOGGER.info("Got MSA device code, expires: " + Instant.ofEpochMilli(result.expireTimeMs).atZone(ZoneId.systemDefault()));
+        prevResult.callback.accept(result);
         return result;
     }
 
@@ -167,6 +171,20 @@ public class StepMsaDeviceCode extends AbstractStep<AbstractStep.StepResult<?>, 
                     "deviceCode=" + deviceCode + ", " +
                     "userCode=" + userCode + ", " +
                     "verificationUri=" + verificationUri + ']';
+        }
+
+    }
+
+    public static final class MsaDeviceCodeCallback implements AbstractStep.InitialInput {
+
+        private final Consumer<MsaDeviceCode> callback;
+
+        public MsaDeviceCodeCallback(Consumer<MsaDeviceCode> callback) {
+            this.callback = callback;
+        }
+
+        public Consumer<MsaDeviceCode> callback() {
+            return callback;
         }
 
     }

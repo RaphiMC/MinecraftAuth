@@ -43,6 +43,13 @@ public abstract class OptionalMergeStep<I1 extends AbstractStep.StepResult<?>, I
         return this.applyStep(httpClient, prevResult1, prevResult2);
     }
 
+    @Override
+    public O getFromInput(HttpClient httpClient, InitialInput input) throws Exception {
+        final I1 prevResult1 = this.prevStep.getFromInput(httpClient, input);
+        final I2 prevResult2 = this.prevStep2 != null ? this.prevStep2.getFromInput(httpClient, input) : null;
+        return this.applyStep(httpClient, prevResult1, prevResult2);
+    }
+
     public interface StepResult<P1 extends AbstractStep.StepResult<?>, P2 extends AbstractStep.StepResult<?>> extends AbstractStep.StepResult<P1> {
         P2 prevResult2();
 

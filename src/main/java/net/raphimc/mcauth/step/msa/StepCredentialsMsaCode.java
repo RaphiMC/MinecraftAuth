@@ -44,7 +44,6 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.MsaCredentials> {
 
@@ -62,7 +61,7 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
     public MsaCode applyStep(HttpClient httpClient, StepCredentialsMsaCode.MsaCredentials prevResult) throws Exception {
         MinecraftAuth.LOGGER.info("Trying to get MSA Code using email and password...");
 
-        if (prevResult == null) throw new IllegalStateException("Missing login credentials");
+        if (prevResult == null) throw new IllegalStateException("Missing StepCredentialsMsaCode.MsaCredentials input");
 
         final BasicCookieStore cookieStore = new BasicCookieStore();
         final HttpClientContext context = HttpClientContext.create();
@@ -113,7 +112,7 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
                 .build();
     }
 
-    public static final class MsaCredentials implements AbstractStep.StepResult<AbstractStep.StepResult<?>> {
+    public static final class MsaCredentials implements AbstractStep.InitialInput {
 
         private final String email;
         private final String password;
@@ -125,11 +124,6 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
 
         public static MsaCredentials fromJson(final JsonObject json) {
             return new MsaCredentials(json.get("email").getAsString(), json.get("password").getAsString());
-        }
-
-        @Override
-        public StepResult<?> prevResult() {
-            return null;
         }
 
         @Override
@@ -146,27 +140,6 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
 
         public String password() {
             return password;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) return true;
-            if (obj == null || obj.getClass() != this.getClass()) return false;
-            MsaCredentials that = (MsaCredentials) obj;
-            return Objects.equals(this.email, that.email) &&
-                    Objects.equals(this.password, that.password);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(email, password);
-        }
-
-        @Override
-        public String toString() {
-            return "MsaCredentials[" +
-                    "email=" + email + ", " +
-                    "password=" + password + ']';
         }
 
     }

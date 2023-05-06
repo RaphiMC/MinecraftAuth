@@ -18,141 +18,212 @@
 package net.raphimc.mcauth;
 
 import net.raphimc.mcauth.step.AbstractStep;
+import net.raphimc.mcauth.step.OptionalMergeStep;
 import net.raphimc.mcauth.step.bedrock.StepMCChain;
 import net.raphimc.mcauth.step.java.StepGameOwnership;
 import net.raphimc.mcauth.step.java.StepMCProfile;
 import net.raphimc.mcauth.step.java.StepMCToken;
 import net.raphimc.mcauth.step.msa.*;
-import net.raphimc.mcauth.step.xbl.StepXblDeviceToken;
-import net.raphimc.mcauth.step.xbl.StepXblSisuAuthentication;
+import net.raphimc.mcauth.step.xbl.*;
+import net.raphimc.mcauth.step.xbl.session.StepFullXblSession;
 import net.raphimc.mcauth.step.xbl.session.StepInitialXblSession;
 import net.raphimc.mcauth.util.MicrosoftConstants;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.client.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.function.Consumer;
 
 public class MinecraftAuth {
 
     public static final Logger LOGGER = LoggerFactory.getLogger("MinecraftAuth");
 
-    public static class Java {
+    public static final AbstractStep<?, StepMCProfile.MCProfile> JAVA_DEVICE_CODE_LOGIN = builder()
+            .deviceCode(MicrosoftConstants.JAVA_TITLE_ID, MicrosoftConstants.SCOPE_TITLE_AUTH)
+            .withDeviceToken("Win32")
+            .sisuTitleAuthentication(MicrosoftConstants.JAVA_XSTS_RELYING_PARTY)
+            .buildMinecraftJavaProfileStep();
 
-        public static class Title {
-            // MSA Code -> MSA Token
-            public static final MsaCodeStep<AbstractStep.StepResult<?>> MSA_CODE = new MsaCodeStep<>(null, MicrosoftConstants.JAVA_TITLE_ID, MicrosoftConstants.SCOPE_TITLE_AUTH);
-            public static final StepMsaToken MSA_TOKEN = new StepMsaToken(MSA_CODE);
+    public static final AbstractStep<?, StepMCProfile.MCProfile> JAVA_CREDENTIALS_LOGIN = builder()
+            .credentials(MicrosoftConstants.JAVA_TITLE_ID, MicrosoftConstants.SCOPE_TITLE_AUTH)
+            .withDeviceToken("Win32")
+            .sisuTitleAuthentication(MicrosoftConstants.JAVA_XSTS_RELYING_PARTY)
+            .buildMinecraftJavaProfileStep();
 
-            // Nothing -> XBL Device Token
-            public static final StepXblDeviceToken XBL_DEVICE_TOKEN = new StepXblDeviceToken("Win32");
+    public static final AbstractStep<?, StepMCChain.MCChain> BEDROCK_DEVICE_CODE_LOGIN = builder()
+            .deviceCode(MicrosoftConstants.BEDROCK_NINTENDO_TITLE_ID, MicrosoftConstants.SCOPE_TITLE_AUTH)
+            .withDeviceToken("Nintendo")
+            .sisuTitleAuthentication(MicrosoftConstants.BEDROCK_XSTS_RELYING_PARTY)
+            .buildMinecraftBedrockChainStep();
 
-            // MSA Token + XBL Device Token => Initial XBL Session
-            public static final StepInitialXblSession INITIAL_XBL_SESSION = new StepInitialXblSession(MSA_TOKEN, XBL_DEVICE_TOKEN);
+    public static final AbstractStep<?, StepMCChain.MCChain> BEDROCK_CREDENTIALS_LOGIN = builder()
+            .credentials(MicrosoftConstants.JAVA_TITLE_ID, MicrosoftConstants.SCOPE_TITLE_AUTH)
+            .withDeviceToken("Nintendo")
+            .sisuTitleAuthentication(MicrosoftConstants.BEDROCK_XSTS_RELYING_PARTY)
+            .buildMinecraftBedrockChainStep();
 
-            // Initial XBL Session -> XBL XSTS Token
-            public static final StepXblSisuAuthentication XBL_SISU_AUTHENTICATION = new StepXblSisuAuthentication(INITIAL_XBL_SESSION, MicrosoftConstants.JAVA_XSTS_RELYING_PARTY);
+    public static MsaTokenBuilder builder() {
+        return new MsaTokenBuilder();
+    }
 
-            // XBL XSTS Token -> MC Profile
-            public static final StepMCToken MC_TOKEN = new StepMCToken(XBL_SISU_AUTHENTICATION);
-            public static final StepGameOwnership GAME_OWNERSHIP = new StepGameOwnership(MC_TOKEN);
-            public static final StepMCProfile MC_PROFILE = new StepMCProfile(GAME_OWNERSHIP);
+    public static class MsaTokenBuilder {
+
+        private AbstractStep<?, MsaCodeStep.MsaCode> msaCodeStep;
+
+        /**
+         * Uses the device code flow to get an MSA token. <b>This is the recommended way to get an MSA token.</b>
+         * Needs instance of {@link net.raphimc.mcauth.step.msa.StepMsaDeviceCode.MsaDeviceCodeCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
+         *
+         * @param clientId The client id of the application
+         * @param scope    The scope of the application
+         * @return The builder
+         */
+        public InitialXblSessionBuilder deviceCode(final String clientId, final String scope) {
+            return this.deviceCode(clientId, scope, 60);
         }
 
-        public static class DeviceCode {
-            // Device Code -> MSA Code
-            public static final StepMsaDeviceCode DEVICE_CODE = new StepMsaDeviceCode(MicrosoftConstants.JAVA_TITLE_ID, MicrosoftConstants.SCOPE_TITLE_AUTH);
-            public static final StepMsaDeviceCodeMsaCode MSA_CODE = new StepMsaDeviceCodeMsaCode(DEVICE_CODE, MicrosoftConstants.JAVA_TITLE_ID, MicrosoftConstants.SCOPE_TITLE_AUTH, 60_000);
+        /**
+         * Uses the device code flow to get an MSA token. <b>This is the recommended way to get an MSA token.</b>
+         * Needs instance of {@link net.raphimc.mcauth.step.msa.StepMsaDeviceCode.MsaDeviceCodeCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
+         *
+         * @param clientId The client id of the application
+         * @param scope    The scope of the application
+         * @param timeout  The timeout in seconds
+         * @return The builder
+         */
+        public InitialXblSessionBuilder deviceCode(final String clientId, final String scope, final int timeout) {
+            this.msaCodeStep = new StepMsaDeviceCodeMsaCode(new StepMsaDeviceCode(clientId, scope), clientId, scope, timeout * 1000);
+
+            return new InitialXblSessionBuilder(this);
         }
 
-        public static class Credentials {
-            // Credentials -> MSA Code
-            public static final StepCredentialsMsaCode MSA_CODE = new StepCredentialsMsaCode(MicrosoftConstants.JAVA_TITLE_ID, MicrosoftConstants.SCOPE_TITLE_AUTH, MicrosoftConstants.LIVE_OAUTH_DESKTOP_URL);
+        /**
+         * Generates a URL to open in the browser to get an MSA token. The browser redirects to a localhost URL with the token as a parameter when the user logged in.
+         * Needs instance of {@link net.raphimc.mcauth.step.msa.StepExternalBrowser.ExternalBrowserCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
+         *
+         * @param clientId The client id of the application
+         * @param scope    The scope of the application
+         * @return The builder
+         */
+        public InitialXblSessionBuilder externalBrowser(final String clientId, final String scope) {
+            return this.externalBrowser(clientId, scope, 60);
+        }
+
+        /**
+         * Generates a URL to open in the browser to get an MSA token. The browser redirects to a localhost URL with the token as a parameter when the user logged in.
+         * Needs instance of {@link net.raphimc.mcauth.step.msa.StepExternalBrowser.ExternalBrowserCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
+         *
+         * @param clientId The client id of the application
+         * @param scope    The scope of the application
+         * @param timeout  The timeout in seconds
+         * @return The builder
+         */
+        public InitialXblSessionBuilder externalBrowser(final String clientId, final String scope, final int timeout) {
+            this.msaCodeStep = new StepExternalBrowserMsaCode(new StepExternalBrowser(clientId, scope), clientId, scope, timeout * 1000);
+
+            return new InitialXblSessionBuilder(this);
+        }
+
+        /**
+         * Logs in with a Microsoft account and gets an MSA token.
+         * Needs instance of {@link net.raphimc.mcauth.step.msa.StepCredentialsMsaCode.MsaCredentials} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
+         *
+         * @param clientId The client id of the application
+         * @param scope    The scope of the application
+         * @return The builder
+         */
+        public InitialXblSessionBuilder credentials(final String clientId, final String scope) {
+            this.msaCodeStep = new StepCredentialsMsaCode(clientId, scope, MicrosoftConstants.LIVE_OAUTH_DESKTOP_URL);
+
+            return new InitialXblSessionBuilder(this);
+        }
+
+        public InitialXblSessionBuilder customMsaCodeStep(final AbstractStep<?, MsaCodeStep.MsaCode> msaCodeStep) {
+            this.msaCodeStep = msaCodeStep;
+
+            return new InitialXblSessionBuilder(this);
+        }
+
+        public AbstractStep<MsaCodeStep.MsaCode, StepMsaToken.MsaToken> build() {
+            return new StepMsaToken(this.msaCodeStep);
         }
 
     }
 
-    public static class Bedrock {
+    public static class InitialXblSessionBuilder {
 
-        public static class Title {
-            // MSA Code -> MSA Token
-            public static final MsaCodeStep<AbstractStep.StepResult<?>> MSA_CODE = new MsaCodeStep<>(null, MicrosoftConstants.BEDROCK_NINTENDO_TITLE_ID, MicrosoftConstants.SCOPE_TITLE_AUTH);
-            public static final StepMsaToken MSA_TOKEN = new StepMsaToken(MSA_CODE);
+        private final AbstractStep<MsaCodeStep.MsaCode, StepMsaToken.MsaToken> msaTokenStep;
+        private OptionalMergeStep<StepMsaToken.MsaToken, StepXblDeviceToken.XblDeviceToken, StepInitialXblSession.InitialXblSession> initialXblSessionStep;
 
-            // Nothing -> XBL Device Token
-            public static final StepXblDeviceToken XBL_DEVICE_TOKEN = new StepXblDeviceToken("Nintendo");
-
-            // MSA Token + XBL Device Token => Initial XBL Session
-            public static final StepInitialXblSession INITIAL_XBL_SESSION = new StepInitialXblSession(MSA_TOKEN, XBL_DEVICE_TOKEN);
-
-            // Initial XBL Session -> XBL XSTS Token
-            public static final StepXblSisuAuthentication XBL_SISU_AUTHENTICATION = new StepXblSisuAuthentication(INITIAL_XBL_SESSION, MicrosoftConstants.BEDROCK_XSTS_RELYING_PARTY);
-
-            // XBL XSTS Token -> MC Chain
-            public static final StepMCChain MC_CHAIN = new StepMCChain(XBL_SISU_AUTHENTICATION);
+        private InitialXblSessionBuilder(final MsaTokenBuilder parent) {
+            this.msaTokenStep = parent.build();
         }
 
-        public static class DeviceCode {
-            // Device Code -> MSA Code
-            public static final StepMsaDeviceCode DEVICE_CODE = new StepMsaDeviceCode(MicrosoftConstants.BEDROCK_NINTENDO_TITLE_ID, MicrosoftConstants.SCOPE_TITLE_AUTH);
-            public static final StepMsaDeviceCodeMsaCode MSA_CODE = new StepMsaDeviceCodeMsaCode(DEVICE_CODE, MicrosoftConstants.BEDROCK_NINTENDO_TITLE_ID, MicrosoftConstants.SCOPE_TITLE_AUTH, 60_000);
+        public XblXstsTokenBuilder withDeviceToken(final String deviceType) {
+            this.initialXblSessionStep = new StepInitialXblSession(this.msaTokenStep, new StepXblDeviceToken(deviceType));
+
+            return new XblXstsTokenBuilder(this);
         }
 
-        public static class Credentials {
-            // Credentials -> MSA Code
-            public static final StepCredentialsMsaCode MSA_CODE = new StepCredentialsMsaCode(MicrosoftConstants.BEDROCK_NINTENDO_TITLE_ID, MicrosoftConstants.SCOPE_TITLE_AUTH, MicrosoftConstants.LIVE_OAUTH_DESKTOP_URL);
+        public XblXstsTokenBuilder withoutDeviceToken() {
+            this.initialXblSessionStep = new StepInitialXblSession(this.msaTokenStep, null);
+
+            return new XblXstsTokenBuilder(this);
+        }
+
+        public OptionalMergeStep<StepMsaToken.MsaToken, StepXblDeviceToken.XblDeviceToken, StepInitialXblSession.InitialXblSession> build() {
+            return this.initialXblSessionStep;
         }
 
     }
 
-    public static StepMCProfile.MCProfile requestJavaLogin(final Consumer<StepMsaDeviceCode.MsaDeviceCode> msaDeviceCodeConsumer) throws Exception {
-        try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-            final StepMsaDeviceCode.MsaDeviceCode msaDeviceCode = Java.DeviceCode.DEVICE_CODE.applyStep(httpClient, null);
-            msaDeviceCodeConsumer.accept(msaDeviceCode);
-            final MsaCodeStep.MsaCode msaCode = Java.DeviceCode.MSA_CODE.applyStep(httpClient, msaDeviceCode);
-            return javaTitleLogin(httpClient, msaCode);
+    public static class XblXstsTokenBuilder {
+
+        private final OptionalMergeStep<StepMsaToken.MsaToken, StepXblDeviceToken.XblDeviceToken, StepInitialXblSession.InitialXblSession> initialXblSessionStep;
+        private AbstractStep<?, StepXblXstsToken.XblXsts<?>> xblXstsTokenStep;
+
+        private XblXstsTokenBuilder(final InitialXblSessionBuilder parent) {
+            this.initialXblSessionStep = parent.build();
         }
-    }
 
-    public static StepMCProfile.MCProfile requestJavaLogin(final StepCredentialsMsaCode.MsaCredentials msaCredentials) throws Exception {
-        try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-            final MsaCodeStep.MsaCode msaCode = Java.Credentials.MSA_CODE.applyStep(httpClient, msaCredentials);
-            return javaTitleLogin(httpClient, msaCode);
+        public MinecraftBuilder sisuTitleAuthentication(final String relyingParty) {
+            this.xblXstsTokenStep = new StepXblSisuAuthentication(this.initialXblSessionStep, relyingParty);
+
+            return new MinecraftBuilder(this);
         }
-    }
 
-    private static StepMCProfile.MCProfile javaTitleLogin(final CloseableHttpClient httpClient, final MsaCodeStep.MsaCode msaCode) throws Exception {
-        final StepMsaToken.MsaToken msaToken = Java.Title.MSA_TOKEN.applyStep(httpClient, msaCode);
-        final StepXblDeviceToken.XblDeviceToken xblDeviceToken = Java.Title.XBL_DEVICE_TOKEN.applyStep(httpClient, null);
-        final StepInitialXblSession.InitialXblSession initialXblSession = Java.Title.INITIAL_XBL_SESSION.applyStep(httpClient, msaToken, xblDeviceToken);
-        final StepXblSisuAuthentication.XblSisuTokens xblSisuTokens = Java.Title.XBL_SISU_AUTHENTICATION.applyStep(httpClient, initialXblSession);
-        final StepMCToken.MCToken mcToken = Java.Title.MC_TOKEN.applyStep(httpClient, xblSisuTokens);
-        final StepGameOwnership.GameOwnership gameOwnership = Java.Title.GAME_OWNERSHIP.applyStep(httpClient, mcToken);
-        return Java.Title.MC_PROFILE.applyStep(httpClient, gameOwnership);
-    }
+        public MinecraftBuilder titleAuthentication(final String relyingParty) {
+            this.xblXstsTokenStep = new StepXblXstsToken(new StepFullXblSession(new StepXblUserToken(this.initialXblSessionStep), new StepXblTitleToken(this.initialXblSessionStep)), relyingParty);
 
-    public static StepMCChain.MCChain requestBedrockLogin(final Consumer<StepMsaDeviceCode.MsaDeviceCode> msaDeviceCodeConsumer) throws Exception {
-        try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-            final StepMsaDeviceCode.MsaDeviceCode msaDeviceCode = Bedrock.DeviceCode.DEVICE_CODE.applyStep(httpClient, null);
-            msaDeviceCodeConsumer.accept(msaDeviceCode);
-            final MsaCodeStep.MsaCode msaCode = Bedrock.DeviceCode.MSA_CODE.applyStep(httpClient, msaDeviceCode);
-            return bedrockTitleLogin(httpClient, msaCode);
+            return new MinecraftBuilder(this);
         }
-    }
 
-    public static StepMCChain.MCChain requestBedrockLogin(final StepCredentialsMsaCode.MsaCredentials msaCredentials) throws Exception {
-        try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-            final MsaCodeStep.MsaCode msaCode = Bedrock.Credentials.MSA_CODE.applyStep(httpClient, msaCredentials);
-            return bedrockTitleLogin(httpClient, msaCode);
+        public MinecraftBuilder regularAuthentication(final String relyingParty) {
+            this.xblXstsTokenStep = new StepXblXstsToken(new StepFullXblSession(new StepXblUserToken(this.initialXblSessionStep), null), relyingParty);
+
+            return new MinecraftBuilder(this);
         }
+
+        public AbstractStep<?, StepXblXstsToken.XblXsts<?>> build() {
+            return this.xblXstsTokenStep;
+        }
+
     }
 
-    private static StepMCChain.MCChain bedrockTitleLogin(final CloseableHttpClient httpClient, final MsaCodeStep.MsaCode msaCode) throws Exception {
-        final StepMsaToken.MsaToken msaToken = Bedrock.Title.MSA_TOKEN.applyStep(httpClient, msaCode);
-        final StepXblDeviceToken.XblDeviceToken xblDeviceToken = Bedrock.Title.XBL_DEVICE_TOKEN.applyStep(httpClient, null);
-        final StepInitialXblSession.InitialXblSession initialXblSession = Bedrock.Title.INITIAL_XBL_SESSION.applyStep(httpClient, msaToken, xblDeviceToken);
-        final StepXblSisuAuthentication.XblSisuTokens xblSisuTokens = Bedrock.Title.XBL_SISU_AUTHENTICATION.applyStep(httpClient, initialXblSession);
-        return Bedrock.Title.MC_CHAIN.applyStep(httpClient, xblSisuTokens);
+    public static class MinecraftBuilder {
+
+        private final AbstractStep<?, StepXblXstsToken.XblXsts<?>> xblXstsTokenStep;
+
+        private MinecraftBuilder(final XblXstsTokenBuilder parent) {
+            this.xblXstsTokenStep = parent.build();
+        }
+
+        public AbstractStep<StepGameOwnership.GameOwnership, StepMCProfile.MCProfile> buildMinecraftJavaProfileStep() {
+            return new StepMCProfile(new StepGameOwnership(new StepMCToken(this.xblXstsTokenStep)));
+        }
+
+        public AbstractStep<StepXblXstsToken.XblXsts<?>, StepMCChain.MCChain> buildMinecraftBedrockChainStep() {
+            return new StepMCChain(this.xblXstsTokenStep);
+        }
+
     }
 
 }
