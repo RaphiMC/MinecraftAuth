@@ -27,12 +27,14 @@ public class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends AbstractS
 
     protected final String clientId;
     protected final String scope;
+    protected final String clientSecret;
 
-    public MsaCodeStep(final AbstractStep<?, I> prevStep, final String clientId, final String scope) {
+    public MsaCodeStep(final AbstractStep<?, I> prevStep, final String clientId, final String scope, final String clientSecret) {
         super(prevStep);
 
         this.clientId = clientId;
         this.scope = scope;
+        this.clientSecret = clientSecret;
     }
 
     @Override
@@ -42,7 +44,7 @@ public class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends AbstractS
 
     @Override
     public MsaCode fromJson(JsonObject json) throws Exception {
-        return new MsaCode(json.get("code").getAsString(), json.get("clientId").getAsString(), json.get("scope").getAsString(), null);
+        return new MsaCode(json.get("code").getAsString(), json.get("clientId").getAsString(), json.get("scope").getAsString(), json.get("clientSecret") != null ? json.get("clientSecret").getAsString() : null, null);
     }
 
     public static final class MsaCode implements AbstractStep.StepResult<AbstractStep.StepResult<?>> {
@@ -50,12 +52,14 @@ public class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends AbstractS
         private final String code;
         private final String clientId;
         private final String scope;
+        private final String clientSecret;
         private final String redirectUri;
 
-        public MsaCode(String code, String clientId, String scope, String redirectUri) {
+        public MsaCode(String code, String clientId, String scope, String clientSecret, String redirectUri) {
             this.code = code;
             this.clientId = clientId;
             this.scope = scope;
+            this.clientSecret = clientSecret;
             this.redirectUri = redirectUri;
         }
 
@@ -70,6 +74,7 @@ public class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends AbstractS
             json.addProperty("code", this.code);
             json.addProperty("clientId", this.clientId);
             json.addProperty("scope", this.scope);
+            json.addProperty("clientSecret", this.clientSecret);
             return json;
         }
 
@@ -85,33 +90,36 @@ public class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends AbstractS
             return scope;
         }
 
+        public String clientSecret() {
+            return clientSecret;
+        }
+
         public String redirectUri() {
             return redirectUri;
         }
 
         @Override
-        public boolean equals(Object obj) {
-            if (obj == this) return true;
-            if (obj == null || obj.getClass() != this.getClass()) return false;
-            MsaCode that = (MsaCode) obj;
-            return Objects.equals(this.code, that.code) &&
-                    Objects.equals(this.clientId, that.clientId) &&
-                    Objects.equals(this.scope, that.scope) &&
-                    Objects.equals(this.redirectUri, that.redirectUri);
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            MsaCode msaCode = (MsaCode) o;
+            return Objects.equals(code, msaCode.code) && Objects.equals(clientId, msaCode.clientId) && Objects.equals(scope, msaCode.scope) && Objects.equals(clientSecret, msaCode.clientSecret) && Objects.equals(redirectUri, msaCode.redirectUri);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(code, clientId, scope, redirectUri);
+            return Objects.hash(code, clientId, scope, clientSecret, redirectUri);
         }
 
         @Override
         public String toString() {
-            return "MsaCode[" +
-                    "code=" + code + ", " +
-                    "clientId=" + clientId + ", " +
-                    "scope=" + scope + ", " +
-                    "redirectUri=" + redirectUri + ']';
+            return "MsaCode{" +
+                    "code='" + code + '\'' +
+                    ", clientId='" + clientId + '\'' +
+                    ", scope='" + scope + '\'' +
+                    ", clientSecret='" + clientSecret + '\'' +
+                    ", redirectUri='" + redirectUri + '\'' +
+                    '}';
         }
 
     }

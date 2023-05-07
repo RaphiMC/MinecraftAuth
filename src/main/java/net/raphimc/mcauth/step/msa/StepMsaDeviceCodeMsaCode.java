@@ -42,7 +42,11 @@ public class StepMsaDeviceCodeMsaCode extends MsaCodeStep<StepMsaDeviceCode.MsaD
     private final int timeout;
 
     public StepMsaDeviceCodeMsaCode(AbstractStep<?, StepMsaDeviceCode.MsaDeviceCode> prevStep, String clientId, String scope, final int timeout) {
-        super(prevStep, clientId, scope);
+        this(prevStep, clientId, scope, null, timeout);
+    }
+
+    public StepMsaDeviceCodeMsaCode(AbstractStep<?, StepMsaDeviceCode.MsaDeviceCode> prevStep, String clientId, String scope, final String clientSecret, final int timeout) {
+        super(prevStep, clientId, scope, clientSecret);
 
         this.timeout = timeout;
     }
@@ -64,7 +68,7 @@ public class StepMsaDeviceCodeMsaCode extends MsaCodeStep<StepMsaDeviceCode.MsaD
                 final String response = httpClient.execute(httpPost, new MsaResponseHandler());
                 final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
 
-                final MsaCode result = new MsaCode(obj.get("refresh_token").getAsString(), this.clientId, this.scope, null);
+                final MsaCode result = new MsaCode(obj.get("refresh_token").getAsString(), this.clientId, this.scope, this.clientSecret, null);
                 MinecraftAuth.LOGGER.info("Got MSA Code");
                 return result;
             } catch (HttpResponseException e) {

@@ -52,7 +52,11 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
     private final String redirectUri;
 
     public StepCredentialsMsaCode(String clientId, String scope, final String redirectUri) {
-        super(null, clientId, scope);
+        this(clientId, scope, null, redirectUri);
+    }
+
+    public StepCredentialsMsaCode(String clientId, String scope, final String clientSecret, final String redirectUri) {
+        super(null, clientId, clientSecret, scope);
 
         this.redirectUri = redirectUri;
     }
@@ -97,7 +101,7 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
             final URI redirect = new URI(postResponse.getFirstHeader(HttpHeaders.LOCATION).getValue());
             final String code = URLEncodedUtils.parse(redirect, StandardCharsets.UTF_8).stream().filter(p -> p.getName().equals("code")).map(NameValuePair::getValue).findFirst().orElseThrow(() -> new IllegalStateException("Could not extract code from redirect url"));
 
-            final MsaCode result = new MsaCode(code, this.clientId, this.scope, this.redirectUri);
+            final MsaCode result = new MsaCode(code, this.clientId, this.scope, this.clientSecret, this.redirectUri);
             MinecraftAuth.LOGGER.info("Got MSA Code");
             return result;
         }

@@ -81,6 +81,9 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
             postData.add(new BasicNameValuePair("code", code));
             postData.add(new BasicNameValuePair("redirect_uri", prev_result.redirectUri()));
         }
+        if (prev_result.clientSecret() != null) {
+            postData.add(new BasicNameValuePair("client_secret", prev_result.clientSecret()));
+        }
 
         final HttpPost httpPost = new HttpPost(TOKEN_URL);
         httpPost.setEntity(new UrlEncodedFormEntity(postData, StandardCharsets.UTF_8));

@@ -34,12 +34,18 @@ public class StepExternalBrowser extends AbstractStep<StepExternalBrowser.Extern
 
     private final String clientId;
     private final String scope;
+    private final String redirectUri;
 
-    public StepExternalBrowser(final String clientId, final String scope) {
+    public StepExternalBrowser(final String clientId, final String scope, final String redirectUri) {
         super(null);
 
         this.clientId = clientId;
         this.scope = scope;
+        this.redirectUri = redirectUri;
+
+        if (this.redirectUri.endsWith("/")) {
+            throw new IllegalArgumentException("Redirect URI must not end with a slash");
+        }
     }
 
     @Override
@@ -53,7 +59,7 @@ public class StepExternalBrowser extends AbstractStep<StepExternalBrowser.Extern
 
             final ExternalBrowser result = new ExternalBrowser(
                     this.getAuthenticationUrl(localPort),
-                    "http://localhost" + ":" + localPort,
+                    this.redirectUri + ":" + localPort,
                     localPort);
 
             MinecraftAuth.LOGGER.info("Created external browser MSA authentication URL: " + result.authenticationUrl);
@@ -74,7 +80,7 @@ public class StepExternalBrowser extends AbstractStep<StepExternalBrowser.Extern
     private String getAuthenticationUrl(final int localPort) throws URISyntaxException {
         return new URIBuilder(AUTHORIZE_URL)
                 .setParameter("client_id", this.clientId)
-                .setParameter("redirect_uri", "http://localhost" + ":" + localPort)
+                .setParameter("redirect_uri", this.redirectUri + ":" + localPort)
                 .setParameter("response_type", "code")
                 .setParameter("prompt", "select_account")
                 .setParameter("scope", this.scope)

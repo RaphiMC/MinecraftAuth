@@ -37,25 +37,29 @@ public class MinecraftAuth {
     public static final Logger LOGGER = LoggerFactory.getLogger("MinecraftAuth");
 
     public static final AbstractStep<?, StepMCProfile.MCProfile> JAVA_DEVICE_CODE_LOGIN = builder()
-            .deviceCode(MicrosoftConstants.JAVA_TITLE_ID, MicrosoftConstants.SCOPE_TITLE_AUTH)
+            .withClientId(MicrosoftConstants.JAVA_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
+            .deviceCode()
             .withDeviceToken("Win32")
             .sisuTitleAuthentication(MicrosoftConstants.JAVA_XSTS_RELYING_PARTY)
             .buildMinecraftJavaProfileStep();
 
     public static final AbstractStep<?, StepMCProfile.MCProfile> JAVA_CREDENTIALS_LOGIN = builder()
-            .credentials(MicrosoftConstants.JAVA_TITLE_ID, MicrosoftConstants.SCOPE_TITLE_AUTH)
+            .withClientId(MicrosoftConstants.JAVA_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
+            .credentials()
             .withDeviceToken("Win32")
             .sisuTitleAuthentication(MicrosoftConstants.JAVA_XSTS_RELYING_PARTY)
             .buildMinecraftJavaProfileStep();
 
     public static final AbstractStep<?, StepMCChain.MCChain> BEDROCK_DEVICE_CODE_LOGIN = builder()
-            .deviceCode(MicrosoftConstants.BEDROCK_NINTENDO_TITLE_ID, MicrosoftConstants.SCOPE_TITLE_AUTH)
+            .withClientId(MicrosoftConstants.BEDROCK_NINTENDO_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
+            .deviceCode()
             .withDeviceToken("Nintendo")
             .sisuTitleAuthentication(MicrosoftConstants.BEDROCK_XSTS_RELYING_PARTY)
             .buildMinecraftBedrockChainStep();
 
     public static final AbstractStep<?, StepMCChain.MCChain> BEDROCK_CREDENTIALS_LOGIN = builder()
-            .credentials(MicrosoftConstants.JAVA_TITLE_ID, MicrosoftConstants.SCOPE_TITLE_AUTH)
+            .withClientId(MicrosoftConstants.BEDROCK_NINTENDO_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
+            .credentials()
             .withDeviceToken("Nintendo")
             .sisuTitleAuthentication(MicrosoftConstants.BEDROCK_XSTS_RELYING_PARTY)
             .buildMinecraftBedrockChainStep();
@@ -66,31 +70,82 @@ public class MinecraftAuth {
 
     public static class MsaTokenBuilder {
 
+        private String clientId = MicrosoftConstants.JAVA_TITLE_ID;
+        private String scope = MicrosoftConstants.SCOPE1;
+        private String clientSecret = null;
+        private int timeout = 60;
+        private String redirectUri = null;
+
         private AbstractStep<?, MsaCodeStep.MsaCode> msaCodeStep;
 
         /**
-         * Uses the device code flow to get an MSA token. <b>This is the recommended way to get an MSA token.</b>
-         * Needs instance of {@link net.raphimc.mcauth.step.msa.StepMsaDeviceCode.MsaDeviceCodeCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
+         * Sets the client id of the application
          *
-         * @param clientId The client id of the application
-         * @param scope    The scope of the application
+         * @param clientId The client id
          * @return The builder
          */
-        public InitialXblSessionBuilder deviceCode(final String clientId, final String scope) {
-            return this.deviceCode(clientId, scope, 60);
+        public MsaTokenBuilder withClientId(final String clientId) {
+            this.clientId = clientId;
+
+            return this;
+        }
+
+        /**
+         * Sets the scope of the application
+         *
+         * @param scope The scope
+         * @return The builder
+         */
+        public MsaTokenBuilder withScope(final String scope) {
+            this.scope = scope;
+
+            return this;
+        }
+
+        /**
+         * Sets the client secret of the application
+         *
+         * @param clientSecret The client secret
+         * @return The builder
+         */
+        public MsaTokenBuilder withClientSecret(final String clientSecret) {
+            this.clientSecret = clientSecret;
+
+            return this;
+        }
+
+        /**
+         * Sets the timeout of the device code or external browser auth flow
+         *
+         * @param timeout The timeout in seconds
+         * @return The builder
+         */
+        public MsaTokenBuilder withTimeout(final int timeout) {
+            this.timeout = timeout;
+
+            return this;
+        }
+
+        /**
+         * Sets the redirect uri to use for the external browser or credentials auth flow
+         *
+         * @param redirectUri The redirect uri
+         * @return The builder
+         */
+        public MsaTokenBuilder withRedirectUri(final String redirectUri) {
+            this.redirectUri = redirectUri;
+
+            return this;
         }
 
         /**
          * Uses the device code flow to get an MSA token. <b>This is the recommended way to get an MSA token.</b>
          * Needs instance of {@link net.raphimc.mcauth.step.msa.StepMsaDeviceCode.MsaDeviceCodeCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
          *
-         * @param clientId The client id of the application
-         * @param scope    The scope of the application
-         * @param timeout  The timeout in seconds
          * @return The builder
          */
-        public InitialXblSessionBuilder deviceCode(final String clientId, final String scope, final int timeout) {
-            this.msaCodeStep = new StepMsaDeviceCodeMsaCode(new StepMsaDeviceCode(clientId, scope), clientId, scope, timeout * 1000);
+        public InitialXblSessionBuilder deviceCode() {
+            this.msaCodeStep = new StepMsaDeviceCodeMsaCode(new StepMsaDeviceCode(this.clientId, this.scope), this.clientId, this.scope, this.clientSecret, this.timeout * 1000);
 
             return new InitialXblSessionBuilder(this);
         }
@@ -99,39 +154,30 @@ public class MinecraftAuth {
          * Generates a URL to open in the browser to get an MSA token. The browser redirects to a localhost URL with the token as a parameter when the user logged in.
          * Needs instance of {@link net.raphimc.mcauth.step.msa.StepExternalBrowser.ExternalBrowserCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
          *
-         * @param clientId The client id of the application
-         * @param scope    The scope of the application
          * @return The builder
          */
-        public InitialXblSessionBuilder externalBrowser(final String clientId, final String scope) {
-            return this.externalBrowser(clientId, scope, 60);
-        }
+        public InitialXblSessionBuilder externalBrowser() {
+            if (this.redirectUri == null) {
+                this.redirectUri = "http://localhost";
+            }
 
-        /**
-         * Generates a URL to open in the browser to get an MSA token. The browser redirects to a localhost URL with the token as a parameter when the user logged in.
-         * Needs instance of {@link net.raphimc.mcauth.step.msa.StepExternalBrowser.ExternalBrowserCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
-         *
-         * @param clientId The client id of the application
-         * @param scope    The scope of the application
-         * @param timeout  The timeout in seconds
-         * @return The builder
-         */
-        public InitialXblSessionBuilder externalBrowser(final String clientId, final String scope, final int timeout) {
-            this.msaCodeStep = new StepExternalBrowserMsaCode(new StepExternalBrowser(clientId, scope), clientId, scope, timeout * 1000);
+            this.msaCodeStep = new StepExternalBrowserMsaCode(new StepExternalBrowser(this.clientId, this.scope, this.redirectUri), this.clientId, this.scope, this.clientSecret, this.timeout * 1000);
 
             return new InitialXblSessionBuilder(this);
         }
 
         /**
-         * Logs in with a Microsoft account and gets an MSA token.
+         * Logs in with a Microsoft account's credentials and gets an MSA token.
          * Needs instance of {@link net.raphimc.mcauth.step.msa.StepCredentialsMsaCode.MsaCredentials} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
          *
-         * @param clientId The client id of the application
-         * @param scope    The scope of the application
          * @return The builder
          */
-        public InitialXblSessionBuilder credentials(final String clientId, final String scope) {
-            this.msaCodeStep = new StepCredentialsMsaCode(clientId, scope, MicrosoftConstants.LIVE_OAUTH_DESKTOP_URL);
+        public InitialXblSessionBuilder credentials() {
+            if (this.redirectUri == null) {
+                this.redirectUri = MicrosoftConstants.LIVE_OAUTH_DESKTOP_URL;
+            }
+
+            this.msaCodeStep = new StepCredentialsMsaCode(this.clientId, this.scope, this.clientSecret, this.redirectUri);
 
             return new InitialXblSessionBuilder(this);
         }

@@ -31,12 +31,14 @@ import java.util.regex.Pattern;
 
 public class StepExternalBrowserMsaCode extends MsaCodeStep<StepExternalBrowser.ExternalBrowser> {
 
-    public static final String AUTHORIZE_URL = "https://login.live.com/oauth20_authorize.srf";
-
     private final int timeout;
 
     public StepExternalBrowserMsaCode(AbstractStep<?, StepExternalBrowser.ExternalBrowser> prevStep, String clientId, String scope, final int timeout) {
-        super(prevStep, clientId, scope);
+        this(prevStep, clientId, scope, null, timeout);
+    }
+
+    public StepExternalBrowserMsaCode(AbstractStep<?, StepExternalBrowser.ExternalBrowser> prevStep, String clientId, String scope, final String clientSecret, final int timeout) {
+        super(prevStep, clientId, scope, clientSecret);
 
         this.timeout = timeout;
     }
@@ -56,7 +58,7 @@ public class StepExternalBrowserMsaCode extends MsaCodeStep<StepExternalBrowser.
 
                     final Matcher m = Pattern.compile("code=([^&\\s]+)").matcher(get);
                     if (m.find()) {
-                        final MsaCode result = new MsaCode(m.group(1), this.clientId, this.scope, prevResult.redirectUri());
+                        final MsaCode result = new MsaCode(m.group(1), this.clientId, this.scope, this.clientSecret, prevResult.redirectUri());
                         MinecraftAuth.LOGGER.info("Got MSA Code");
                         return result;
                     }
