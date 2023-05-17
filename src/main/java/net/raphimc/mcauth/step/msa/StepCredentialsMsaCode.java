@@ -56,7 +56,7 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
     }
 
     public StepCredentialsMsaCode(String clientId, String scope, final String clientSecret, final String redirectUri) {
-        super(null, clientId, clientSecret, scope);
+        super(null, clientId, scope, clientSecret);
 
         this.redirectUri = redirectUri;
     }
