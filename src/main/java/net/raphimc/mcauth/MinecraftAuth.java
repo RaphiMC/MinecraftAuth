@@ -28,13 +28,13 @@ import net.raphimc.mcauth.step.xbl.*;
 import net.raphimc.mcauth.step.xbl.session.StepFullXblSession;
 import net.raphimc.mcauth.step.xbl.session.StepInitialXblSession;
 import net.raphimc.mcauth.util.MicrosoftConstants;
+import net.raphimc.mcauth.util.logging.ConsoleLogger;
+import net.raphimc.mcauth.util.logging.ILogger;
 import org.apache.http.client.HttpClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MinecraftAuth {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger("MinecraftAuth");
+    public static ILogger LOGGER = new ConsoleLogger();
 
     public static final AbstractStep<?, StepMCProfile.MCProfile> JAVA_DEVICE_CODE_LOGIN = builder()
             .withClientId(MicrosoftConstants.JAVA_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
