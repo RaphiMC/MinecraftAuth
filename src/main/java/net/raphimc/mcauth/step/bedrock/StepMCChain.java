@@ -52,6 +52,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
 
     private static final String MOJANG_PUBLIC_KEY_BASE64 = "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8ELkixyLcwlZryUQcu1TvPOmI2B7vX83ndnWRUaXm74wFfa5f/lwQNTfrLVHa2PmenpGI6JhIMUJaWZrjmMj90NoKNFSNBuKdm8rYiXsfaz3K36x/1U26HpG0ZxK/V1V";
     public static final ECPublicKey MOJANG_PUBLIC_KEY;
+    private static final int CLOCK_SKEW = 2 * 60;
 
     static {
         try {
@@ -86,9 +87,9 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         final JsonArray chain = obj.get("chain").getAsJsonArray();
         if (chain.size() != 2) throw new IllegalStateException("Invalid chain size");
 
-        final Jws<Claims> mojangJwt = Jwts.parserBuilder().setSigningKey(MOJANG_PUBLIC_KEY).build().parseClaimsJws(chain.get(0).getAsString());
+        final Jws<Claims> mojangJwt = Jwts.parserBuilder().setAllowedClockSkewSeconds(CLOCK_SKEW).setSigningKey(MOJANG_PUBLIC_KEY).build().parseClaimsJws(chain.get(0).getAsString());
         final ECPublicKey mojangJwtPublicKey = (ECPublicKey) CryptUtil.EC_KEYFACTORY.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(mojangJwt.getBody().get("identityPublicKey", String.class))));
-        final Jws<Claims> identityJwt = Jwts.parserBuilder().setSigningKey(mojangJwtPublicKey).build().parseClaimsJws(chain.get(1).getAsString());
+        final Jws<Claims> identityJwt = Jwts.parserBuilder().setAllowedClockSkewSeconds(CLOCK_SKEW).setSigningKey(mojangJwtPublicKey).build().parseClaimsJws(chain.get(1).getAsString());
 
         final Map<String, Object> extraData = identityJwt.getBody().get("extraData", Map.class);
         final String xuid = (String) extraData.get("XUID");
@@ -175,9 +176,9 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         @Override
         public boolean isExpired() throws Exception {
             try {
-                final Jws<Claims> mojangJwt = Jwts.parserBuilder().setSigningKey(MOJANG_PUBLIC_KEY).build().parseClaimsJws(this.mojangJwt);
+                final Jws<Claims> mojangJwt = Jwts.parserBuilder().setAllowedClockSkewSeconds(CLOCK_SKEW).setSigningKey(MOJANG_PUBLIC_KEY).build().parseClaimsJws(this.mojangJwt);
                 final ECPublicKey identityPublicKey = (ECPublicKey) CryptUtil.EC_KEYFACTORY.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(mojangJwt.getBody().get("identityPublicKey", String.class))));
-                Jwts.parserBuilder().setSigningKey(identityPublicKey).build().parseClaimsJws(this.identityJwt);
+                Jwts.parserBuilder().setAllowedClockSkewSeconds(CLOCK_SKEW).setSigningKey(identityPublicKey).build().parseClaimsJws(this.identityJwt);
                 return false;
             } catch (JwtException e) {
                 return true;
