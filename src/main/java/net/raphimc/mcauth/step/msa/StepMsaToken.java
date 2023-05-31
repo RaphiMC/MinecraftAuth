@@ -58,7 +58,7 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
 
     @Override
     public MsaToken fromJson(JsonObject json) throws Exception {
-        final MsaCodeStep.MsaCode prev = this.prevStep.fromJson(json.getAsJsonObject("prev"));
+        final MsaCodeStep.MsaCode prev = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("prev")) : null;
         return new MsaToken(
                 json.get("user_id").getAsString(),
                 json.get("expireTimeMs").getAsLong(),
@@ -124,7 +124,7 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
             json.addProperty("expireTimeMs", this.expireTimeMs);
             json.addProperty("access_token", this.access_token);
             json.addProperty("refresh_token", this.refresh_token);
-            json.add("prev", this.prevResult.toJson());
+            if (this.prevResult != null) json.add("prev", this.prevResult.toJson());
             return json;
         }
 

@@ -71,7 +71,7 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
 
     @Override
     public MCToken fromJson(JsonObject json) throws Exception {
-        final StepXblXstsToken.XblXsts<?> prev = this.prevStep.fromJson(json.getAsJsonObject("prev"));
+        final StepXblXstsToken.XblXsts<?> prev = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("prev")) : null;
         return new MCToken(
                 json.get("access_token").getAsString(),
                 json.get("token_type").getAsString(),
@@ -100,7 +100,7 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
             json.addProperty("access_token", this.access_token);
             json.addProperty("token_type", this.token_type);
             json.addProperty("expireTimeMs", this.expireTimeMs);
-            json.add("prev", this.prevResult.toJson());
+            if (this.prevResult != null) json.add("prev", this.prevResult.toJson());
             return json;
         }
 

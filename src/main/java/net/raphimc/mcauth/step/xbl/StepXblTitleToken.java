@@ -84,7 +84,7 @@ public class StepXblTitleToken extends AbstractStep<StepInitialXblSession.Initia
 
     @Override
     public XblTitleToken fromJson(JsonObject json) throws Exception {
-        final StepInitialXblSession.InitialXblSession prev = this.prevStep.fromJson(json.getAsJsonObject("prev"));
+        final StepInitialXblSession.InitialXblSession prev = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("prev")) : null;
         return new XblTitleToken(
                 json.get("expireTimeMs").getAsLong(),
                 json.get("token").getAsString(),
@@ -113,7 +113,7 @@ public class StepXblTitleToken extends AbstractStep<StepInitialXblSession.Initia
             json.addProperty("expireTimeMs", this.expireTimeMs);
             json.addProperty("token", this.token);
             json.addProperty("titleId", this.titleId);
-            json.add("prev", this.prevResult.toJson());
+            if (this.prevResult != null) json.add("prev", this.prevResult.toJson());
             return json;
         }
 

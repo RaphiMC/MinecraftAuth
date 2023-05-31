@@ -123,7 +123,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
 
     @Override
     public MCChain fromJson(JsonObject json) throws Exception {
-        final StepXblXstsToken.XblXsts<?> prev = this.prevStep.fromJson(json.getAsJsonObject("prev"));
+        final StepXblXstsToken.XblXsts<?> prev = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("prev")) : null;
         return new MCChain(
                 (ECPublicKey) CryptUtil.EC_KEYFACTORY.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(json.get("publicKey").getAsString()))),
                 (ECPrivateKey) CryptUtil.EC_KEYFACTORY.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(json.get("privateKey").getAsString()))),
@@ -169,7 +169,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
             json.addProperty("xuid", this.xuid);
             json.addProperty("id", this.id.toString());
             json.addProperty("displayName", this.displayName);
-            json.add("prev", this.prevResult.toJson());
+            if (this.prevResult != null) json.add("prev", this.prevResult.toJson());
             return json;
         }
 

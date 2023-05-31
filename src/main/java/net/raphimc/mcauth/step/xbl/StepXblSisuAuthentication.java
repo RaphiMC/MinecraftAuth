@@ -100,7 +100,7 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
 
     @Override
     public StepXblSisuAuthentication.XblSisuTokens fromJson(JsonObject json) throws Exception {
-        final StepInitialXblSession.InitialXblSession prev = this.prevStep.fromJson(json.getAsJsonObject("prev"));
+        final StepInitialXblSession.InitialXblSession prev = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("prev")) : null;
         return new StepXblSisuAuthentication.XblSisuTokens(
                 XblSisuTokens.SisuTitleToken.fromJson(json.getAsJsonObject("titleToken")),
                 XblSisuTokens.SisuUserToken.fromJson(json.getAsJsonObject("userToken")),
@@ -144,7 +144,7 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
             json.add("titleToken", titleToken.toJson());
             json.add("userToken", userToken.toJson());
             json.add("xstsToken", xstsToken.toJson());
-            json.add("prev", this.prevResult.toJson());
+            if (this.prevResult != null) json.add("prev", this.prevResult.toJson());
             return json;
         }
 

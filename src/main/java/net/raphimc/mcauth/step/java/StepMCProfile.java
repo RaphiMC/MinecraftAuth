@@ -63,7 +63,7 @@ public class StepMCProfile extends AbstractStep<StepGameOwnership.GameOwnership,
 
     @Override
     public MCProfile fromJson(JsonObject json) throws Exception {
-        final StepGameOwnership.GameOwnership prev = this.prevStep.fromJson(json.getAsJsonObject("prev"));
+        final StepGameOwnership.GameOwnership prev = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("prev")) : null;
         return new MCProfile(
                 UUID.fromString(json.get("id").getAsString()),
                 json.get("name").getAsString(),
@@ -92,7 +92,7 @@ public class StepMCProfile extends AbstractStep<StepGameOwnership.GameOwnership,
             json.addProperty("id", this.id.toString());
             json.addProperty("name", this.name);
             json.addProperty("skin_url", this.skin_url.toString());
-            json.add("prev", this.prevResult.toJson());
+            if (this.prevResult != null) json.add("prev", this.prevResult.toJson());
             return json;
         }
 

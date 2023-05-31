@@ -42,7 +42,7 @@ public class StepFullXblSession extends SameInputOptionalMergeStep<StepXblUserTo
 
     @Override
     public FullXblSession fromJson(JsonObject json) throws Exception {
-        final StepXblUserToken.XblUserToken prev1 = this.prevStep.fromJson(json.getAsJsonObject("prev"));
+        final StepXblUserToken.XblUserToken prev1 = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("prev")) : null;
         final StepXblTitleToken.XblTitleToken prev2 = this.prevStep2 != null ? this.prevStep2.fromJson(json.getAsJsonObject("prev2")) : null;
         return new FullXblSession(
                 prev1,
@@ -63,7 +63,7 @@ public class StepFullXblSession extends SameInputOptionalMergeStep<StepXblUserTo
         @Override
         public JsonObject toJson() {
             final JsonObject json = new JsonObject();
-            json.add("prev", this.prevResult.toJson());
+            if (this.prevResult != null) json.add("prev", this.prevResult.toJson());
             if (this.prevResult2 != null) json.add("prev2", this.prevResult2.toJson());
             return json;
         }

@@ -64,7 +64,7 @@ public class StepGameOwnership extends AbstractStep<StepMCToken.MCToken, StepGam
 
     @Override
     public GameOwnership fromJson(JsonObject json) throws Exception {
-        final StepMCToken.MCToken prev = this.prevStep.fromJson(json.getAsJsonObject("prev"));
+        final StepMCToken.MCToken prev = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("prev")) : null;
         return new GameOwnership(
                 new Gson().<List<String>>fromJson(json.get("items"), List.class),
                 prev
@@ -85,7 +85,7 @@ public class StepGameOwnership extends AbstractStep<StepMCToken.MCToken, StepGam
         public JsonObject toJson() {
             final JsonObject json = new JsonObject();
             json.add("items", new Gson().toJsonTree(items));
-            json.add("prev", this.prevResult.toJson());
+            if (this.prevResult != null) json.add("prev", this.prevResult.toJson());
             return json;
         }
 

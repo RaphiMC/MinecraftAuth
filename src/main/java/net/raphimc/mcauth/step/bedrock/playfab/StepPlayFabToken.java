@@ -97,7 +97,7 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
 
     @Override
     public PlayFabToken fromJson(JsonObject json) throws Exception {
-        final StepXblXstsToken.XblXsts<?> prev = this.prevStep.fromJson(json.getAsJsonObject("prev"));
+        final StepXblXstsToken.XblXsts<?> prev = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("prev")) : null;
         return new PlayFabToken(
                 json.get("expireTimeMs").getAsLong(),
                 json.get("entityToken").getAsString(),
@@ -134,7 +134,7 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
             json.addProperty("entityId", this.entityId);
             json.addProperty("sessionTicket", this.sessionTicket);
             json.addProperty("playFabId", this.playFabId);
-            json.add("prev", this.prevResult.toJson());
+            if (this.prevResult != null) json.add("prev", this.prevResult.toJson());
             return json;
         }
 
