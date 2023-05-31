@@ -21,6 +21,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.raphimc.mcauth.MinecraftAuth;
 import net.raphimc.mcauth.step.AbstractStep;
+import net.raphimc.mcauth.step.xbl.session.StepFullXblSession;
 import net.raphimc.mcauth.step.xbl.session.StepInitialXblSession;
 import net.raphimc.mcauth.util.CryptUtil;
 import net.raphimc.mcauth.util.XblResponseHandler;
@@ -153,8 +154,10 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
         }
 
         @Override
-        public StepInitialXblSession.InitialXblSession initialXblSession() {
-            return this.prevResult;
+        public StepFullXblSession.FullXblSession fullXblSession() {
+            final StepXblUserToken.XblUserToken userToken = new StepXblUserToken.XblUserToken(this.userToken.expireTimeMs, this.userToken.token, this.userToken.userHash, this.prevResult);
+            final StepXblTitleToken.XblTitleToken titleToken = new StepXblTitleToken.XblTitleToken(this.titleToken.expireTimeMs, this.titleToken.token, this.titleToken.titleId, this.prevResult);
+            return new StepFullXblSession.FullXblSession(userToken, titleToken);
         }
 
         public SisuTitleToken titleToken() {

@@ -32,11 +32,10 @@ import java.util.Map;
 
 public class MicrosoftConstants {
 
-    // Constants
-    // Device types: Win32 | Nintendo | Android
-
     public static final String JAVA_TITLE_ID = "00000000402b5328"; // Win32
     public static final String BEDROCK_NINTENDO_TITLE_ID = "00000000441cc96b"; // Nintendo
+
+    public static final String BEDROCK_PLAY_FAB_TITLE_ID = "20CA2";
 
     public static final String SCOPE1 = "XboxLive.signin XboxLive.offline_access";
     public static final String SCOPE2 = "XboxLive.signin offline_access";
@@ -47,6 +46,7 @@ public class MicrosoftConstants {
 
     public static final String JAVA_XSTS_RELYING_PARTY = "rp://api.minecraftservices.com/";
     public static final String BEDROCK_XSTS_RELYING_PARTY = "https://multiplayer.minecraft.net/";
+    public static final String BEDROCK_PLAY_FAB_XSTS_RELYING_PARTY = "https://b980a380.minecraft.playfabapi.com/";
 
     public static final Map<Long, String> XBOX_LIVE_ERRORS = new HashMap<>();
 

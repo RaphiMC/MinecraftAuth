@@ -20,6 +20,7 @@ package net.raphimc.mcauth;
 import net.raphimc.mcauth.step.AbstractStep;
 import net.raphimc.mcauth.step.OptionalMergeStep;
 import net.raphimc.mcauth.step.bedrock.StepMCChain;
+import net.raphimc.mcauth.step.bedrock.playfab.StepPlayFabToken;
 import net.raphimc.mcauth.step.java.StepGameOwnership;
 import net.raphimc.mcauth.step.java.StepMCProfile;
 import net.raphimc.mcauth.step.java.StepMCToken;
@@ -63,6 +64,9 @@ public class MinecraftAuth {
             .withDeviceToken("Nintendo")
             .sisuTitleAuthentication(MicrosoftConstants.BEDROCK_XSTS_RELYING_PARTY)
             .buildMinecraftBedrockChainStep();
+
+    private static final StepXblXstsToken BEDROCK_PLAY_FAB_XSTS_TOKEN = new StepXblXstsToken(null, MicrosoftConstants.BEDROCK_PLAY_FAB_XSTS_RELYING_PARTY);
+    public static final StepPlayFabToken BEDROCK_PLAY_FAB_TOKEN = new StepPlayFabToken(BEDROCK_PLAY_FAB_XSTS_TOKEN);
 
     public static MsaTokenBuilder builder() {
         return new MsaTokenBuilder();
@@ -140,7 +144,7 @@ public class MinecraftAuth {
 
         /**
          * Uses the device code flow to get an MSA token. <b>This is the recommended way to get an MSA token.</b>
-         * Needs instance of {@link net.raphimc.mcauth.step.msa.StepMsaDeviceCode.MsaDeviceCodeCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
+         * Needs instance of {@link net.raphimc.mcauth.step.msa.StepMsaDeviceCode.MsaDeviceCodeCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, Object)}.
          *
          * @return The builder
          */
@@ -152,7 +156,7 @@ public class MinecraftAuth {
 
         /**
          * Generates a URL to open in the browser to get an MSA token. The browser redirects to a localhost URL with the token as a parameter when the user logged in.
-         * Needs instance of {@link net.raphimc.mcauth.step.msa.StepExternalBrowser.ExternalBrowserCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
+         * Needs instance of {@link net.raphimc.mcauth.step.msa.StepExternalBrowser.ExternalBrowserCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, Object)}.
          *
          * @return The builder
          */
@@ -168,7 +172,7 @@ public class MinecraftAuth {
 
         /**
          * Logs in with a Microsoft account's credentials and gets an MSA token.
-         * Needs instance of {@link net.raphimc.mcauth.step.msa.StepCredentialsMsaCode.MsaCredentials} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
+         * Needs instance of {@link net.raphimc.mcauth.step.msa.StepCredentialsMsaCode.MsaCredentials} as input when calling {@link AbstractStep#getFromInput(HttpClient, Object)}.
          *
          * @return The builder
          */

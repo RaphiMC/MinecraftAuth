@@ -133,8 +133,8 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
         }
 
         @Override
-        public StepInitialXblSession.InitialXblSession initialXblSession() {
-            return this.prevResult.prevResult().prevResult();
+        public StepFullXblSession.FullXblSession fullXblSession() {
+            return this.prevResult;
         }
 
         @Override
@@ -192,7 +192,11 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
 
         String userHash();
 
-        StepInitialXblSession.InitialXblSession initialXblSession();
+        default StepInitialXblSession.InitialXblSession initialXblSession() {
+            return this.fullXblSession().prevResult().prevResult();
+        }
+
+        StepFullXblSession.FullXblSession fullXblSession();
 
         @Override
         JsonObject toJson();
