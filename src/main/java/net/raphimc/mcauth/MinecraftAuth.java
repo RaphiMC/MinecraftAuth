@@ -20,10 +20,11 @@ package net.raphimc.mcauth;
 import net.raphimc.mcauth.step.AbstractStep;
 import net.raphimc.mcauth.step.OptionalMergeStep;
 import net.raphimc.mcauth.step.bedrock.StepMCChain;
-import net.raphimc.mcauth.step.bedrock.playfab.StepPlayFabToken;
+import net.raphimc.mcauth.step.bedrock.StepPlayFabToken;
 import net.raphimc.mcauth.step.java.StepGameOwnership;
 import net.raphimc.mcauth.step.java.StepMCProfile;
 import net.raphimc.mcauth.step.java.StepMCToken;
+import net.raphimc.mcauth.step.java.StepPlayerCertificates;
 import net.raphimc.mcauth.step.msa.*;
 import net.raphimc.mcauth.step.xbl.*;
 import net.raphimc.mcauth.step.xbl.session.StepFullXblSession;
@@ -64,6 +65,8 @@ public class MinecraftAuth {
             .withDeviceToken("Nintendo")
             .sisuTitleAuthentication(MicrosoftConstants.BEDROCK_XSTS_RELYING_PARTY)
             .buildMinecraftBedrockChainStep();
+
+    public static final StepPlayerCertificates JAVA_PLAYER_CERTIFICATES = new StepPlayerCertificates(null);
 
     private static final StepXblXstsToken BEDROCK_PLAY_FAB_XSTS_TOKEN = new StepXblXstsToken(null, MicrosoftConstants.BEDROCK_PLAY_FAB_XSTS_RELYING_PARTY);
     public static final StepPlayFabToken BEDROCK_PLAY_FAB_TOKEN = new StepPlayFabToken(BEDROCK_PLAY_FAB_XSTS_TOKEN);

@@ -38,9 +38,15 @@ import java.util.Base64;
 
 public class CryptUtil {
 
+    public static final KeyFactory RSA_KEYFACTORY;
     public static final KeyFactory EC_KEYFACTORY;
 
     static {
+        try {
+            RSA_KEYFACTORY = KeyFactory.getInstance("RSA");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Could not create RSA KeyFactory", e);
+        }
         try {
             EC_KEYFACTORY = KeyFactory.getInstance("EC");
         } catch (NoSuchAlgorithmException e) {
