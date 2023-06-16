@@ -22,7 +22,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import net.raphimc.mcauth.MinecraftAuth;
 import net.raphimc.mcauth.step.AbstractStep;
@@ -171,18 +170,6 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
             json.addProperty("displayName", this.displayName);
             if (this.prevResult != null) json.add("prev", this.prevResult.toJson());
             return json;
-        }
-
-        @Override
-        public boolean isExpired() throws Exception {
-            try {
-                final Jws<Claims> mojangJwt = Jwts.parserBuilder().setAllowedClockSkewSeconds(CLOCK_SKEW).setSigningKey(MOJANG_PUBLIC_KEY).build().parseClaimsJws(this.mojangJwt);
-                final ECPublicKey identityPublicKey = (ECPublicKey) CryptUtil.EC_KEYFACTORY.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(mojangJwt.getBody().get("identityPublicKey", String.class))));
-                Jwts.parserBuilder().setAllowedClockSkewSeconds(CLOCK_SKEW).setSigningKey(identityPublicKey).build().parseClaimsJws(this.identityJwt);
-                return false;
-            } catch (JwtException e) {
-                return true;
-            }
         }
 
         public ECPublicKey publicKey() {
