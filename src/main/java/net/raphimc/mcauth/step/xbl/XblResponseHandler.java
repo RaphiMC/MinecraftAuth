@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.mcauth.util;
+package net.raphimc.mcauth.step.xbl;
 
+import net.raphimc.mcauth.util.MicrosoftConstants;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -33,9 +34,9 @@ public class XblResponseHandler implements ResponseHandler<String> {
         final StatusLine statusLine = response.getStatusLine();
         final HttpEntity entity = response.getEntity();
         if (statusLine.getStatusCode() >= 300) {
-            EntityUtils.consume(entity);
+            EntityUtils.consumeQuietly(entity);
             if (response.containsHeader("X-Err")) {
-                throw new HttpResponseException(statusLine.getStatusCode(), MicrosoftConstants.XBOX_LIVE_ERRORS.getOrDefault(Long.valueOf(response.getFirstHeader("X-Err").getValue()), statusLine.getReasonPhrase()));
+                throw new HttpResponseException(statusLine.getStatusCode(), MicrosoftConstants.XBOX_LIVE_ERRORS.getOrDefault(Long.valueOf(response.getFirstHeader("X-Err").getValue()), "Error code: " + response.getFirstHeader("X-Err").getValue()));
             }
             throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
         }

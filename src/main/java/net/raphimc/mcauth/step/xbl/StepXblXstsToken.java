@@ -26,7 +26,6 @@ import net.raphimc.mcauth.step.AbstractStep;
 import net.raphimc.mcauth.step.xbl.session.StepFullXblSession;
 import net.raphimc.mcauth.step.xbl.session.StepInitialXblSession;
 import net.raphimc.mcauth.util.CryptUtil;
-import net.raphimc.mcauth.util.XblResponseHandler;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;

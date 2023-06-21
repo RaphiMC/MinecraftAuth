@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.mcauth.util;
+package net.raphimc.mcauth.step.bedrock;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -29,7 +29,7 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 
-public class MsaResponseHandler implements ResponseHandler<String> {
+public class PlayFabResponseHandler implements ResponseHandler<String> {
 
     @Override
     public String handleResponse(HttpResponse response) throws IOException {
@@ -39,8 +39,8 @@ public class MsaResponseHandler implements ResponseHandler<String> {
         if (statusLine.getStatusCode() >= 300) {
             if (body != null && ContentType.getOrDefault(entity).getMimeType().equals(ContentType.APPLICATION_JSON.getMimeType())) {
                 final JsonObject obj = (JsonObject) JsonParser.parseString(body);
-                if (obj.has("error") && obj.has("error_description")) {
-                    throw new HttpResponseException(statusLine.getStatusCode(), obj.get("error").getAsString() + ": " + obj.get("error_description").getAsString());
+                if (obj.has("error") && obj.has("errorMessage")) {
+                    throw new HttpResponseException(statusLine.getStatusCode(), obj.get("error").getAsString() + ": " + obj.get("errorMessage").getAsString());
                 }
             }
             throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());

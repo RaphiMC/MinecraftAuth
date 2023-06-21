@@ -27,7 +27,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicResponseHandler;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -71,7 +70,7 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
 
         final HttpPost httpPost = new HttpPost(PLAY_FAB_URL);
         httpPost.setEntity(new StringEntity(postData.toString(), ContentType.APPLICATION_JSON));
-        final String response = httpClient.execute(httpPost, new BasicResponseHandler());
+        final String response = httpClient.execute(httpPost, new PlayFabResponseHandler());
         final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
         final JsonObject data = obj.getAsJsonObject("data");
         final JsonObject entityToken = data.getAsJsonObject("EntityToken");

@@ -21,7 +21,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.raphimc.mcauth.MinecraftAuth;
 import net.raphimc.mcauth.step.AbstractStep;
-import net.raphimc.mcauth.util.MsaResponseHandler;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
