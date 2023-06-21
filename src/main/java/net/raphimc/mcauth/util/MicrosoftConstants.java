@@ -68,15 +68,20 @@ public class MicrosoftConstants {
                 .setConnectionRequestTimeout(timeout * 1000)
                 .setSocketTimeout(timeout * 1000).build();
 
-        final List<Header> headers = new ArrayList<>();
-        headers.add(new BasicHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType()));
-        headers.add(new BasicHeader(HttpHeaders.ACCEPT_LANGUAGE, "en-US,en"));
-        headers.add(new BasicHeader(HttpHeaders.USER_AGENT, "MinecraftAuth/2.0.0"));
+        final List<Header> headers = getDefaultHeaders();
+        headers.add(new BasicHeader(HttpHeaders.USER_AGENT, "MinecraftAuth/2.1"));
 
         return HttpClientBuilder.create()
                 .setDefaultRequestConfig(requestConfig)
                 .setDefaultHeaders(headers)
                 .build();
+    }
+
+    public static List<Header> getDefaultHeaders() {
+        final List<Header> headers = new ArrayList<>();
+        headers.add(new BasicHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType()));
+        headers.add(new BasicHeader(HttpHeaders.ACCEPT_LANGUAGE, "en-US,en"));
+        return headers;
     }
 
 }
