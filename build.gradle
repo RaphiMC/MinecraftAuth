@@ -1,6 +1,7 @@
 plugins {
     id "java-library"
     id "maven-publish"
+    id "signing"
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8)
@@ -35,11 +36,16 @@ jar {
     }
 }
 
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
 publishing {
     repositories {
         maven {
             name = "reposilite"
             url = project.maven_version.endsWith("SNAPSHOT") ? "https://maven.lenni0451.net/snapshots" : "https://maven.lenni0451.net/releases"
+
             credentials(PasswordCredentials)
             authentication {
                 basic(BasicAuthentication)
@@ -53,6 +59,38 @@ publishing {
             version = project.maven_version
 
             from components.java
+
+            pom {
+                name = "MinecraftAuth"
+                description = "Simple and easy to use Minecraft microsoft authentication library (Java and Bedrock)"
+                url = "https://github.com/RaphiMC/MinecraftAuth"
+                licenses {
+                    license {
+                        name = "LGPL-3.0 License"
+                        url = "https://github.com/RaphiMC/MinecraftAuth/blob/main/LICENSE"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "RK_01"
+                    }
+                }
+                scm {
+                    connection = "scm:git:git://github.com/RaphiMC/MinecraftAuth.git"
+                    developerConnection = "scm:git:ssh://github.com/RaphiMC/MinecraftAuth.git"
+                    url = "https://github.com/RaphiMC/MinecraftAuth.git"
+                }
+            }
         }
     }
+}
+
+signing {
+    setRequired(false)
+    sign configurations.archives
+    sign publishing.publications.maven
+}
+
+project.tasks.withType(PublishToMavenRepository).forEach {
+    it.dependsOn(project.tasks.withType(Sign))
 }
