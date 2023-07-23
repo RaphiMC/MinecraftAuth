@@ -34,6 +34,8 @@ public class MicrosoftConstants {
 
     public static final String JAVA_TITLE_ID = "00000000402b5328"; // Win32
     public static final String BEDROCK_NINTENDO_TITLE_ID = "00000000441cc96b"; // Nintendo
+    public static final String BEDROCK_ANDROID_TITLE_ID = "0000000048183522"; // Android
+    public static final String BEDROCK_IOS_TITLE_ID = "000000004c17c01a"; // iOS
 
     public static final String BEDROCK_PLAY_FAB_TITLE_ID = "20CA2";
 
