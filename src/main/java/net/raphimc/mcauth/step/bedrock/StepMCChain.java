@@ -38,6 +38,7 @@ import java.security.KeyPairGenerator;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECGenParameterSpec;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -50,16 +51,8 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     public static final String MINECRAFT_LOGIN_URL = "https://multiplayer.minecraft.net/authentication";
 
     private static final String MOJANG_PUBLIC_KEY_BASE64 = "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAECRXueJeTDqNRRgJi/vlRufByu/2G0i2Ebt6YMar5QX/R0DIIyrJMcUpruK4QveTfJSTp3Shlq4Gk34cD/4GUWwkv0DVuzeuB+tXija7HBxii03NHDbPAD0AKnLr2wdAp";
-    private static final ECPublicKey MOJANG_PUBLIC_KEY;
+    private static final ECPublicKey MOJANG_PUBLIC_KEY = publicKeyFromBase64(MOJANG_PUBLIC_KEY_BASE64);
     private static final int CLOCK_SKEW = 60;
-
-    static {
-        try {
-            MOJANG_PUBLIC_KEY = (ECPublicKey) CryptUtil.EC_KEYFACTORY.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(MOJANG_PUBLIC_KEY_BASE64)));
-        } catch (Throwable e) {
-            throw new RuntimeException("Could not create Mojang public key", e);
-        }
-    }
 
     public StepMCChain(AbstractStep<?, StepXblXstsToken.XblXsts<?>> prevStep) {
         super(prevStep);
@@ -86,11 +79,11 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         final JsonArray chain = obj.get("chain").getAsJsonArray();
         if (chain.size() != 2) throw new IllegalStateException("Invalid chain size");
 
-        final Jws<Claims> mojangJwt = Jwts.parserBuilder().setAllowedClockSkewSeconds(CLOCK_SKEW).setSigningKey(MOJANG_PUBLIC_KEY).build().parseClaimsJws(chain.get(0).getAsString());
-        final ECPublicKey mojangJwtPublicKey = (ECPublicKey) CryptUtil.EC_KEYFACTORY.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(mojangJwt.getBody().get("identityPublicKey", String.class))));
-        final Jws<Claims> identityJwt = Jwts.parserBuilder().setAllowedClockSkewSeconds(CLOCK_SKEW).setSigningKey(mojangJwtPublicKey).build().parseClaimsJws(chain.get(1).getAsString());
+        final Jws<Claims> mojangJwt = Jwts.parser().clockSkewSeconds(CLOCK_SKEW).verifyWith(MOJANG_PUBLIC_KEY).build().parseSignedClaims(chain.get(0).getAsString());
+        final ECPublicKey mojangJwtPublicKey = publicKeyFromBase64(mojangJwt.getPayload().get("identityPublicKey", String.class));
+        final Jws<Claims> identityJwt = Jwts.parser().clockSkewSeconds(CLOCK_SKEW).verifyWith(mojangJwtPublicKey).build().parseSignedClaims(chain.get(1).getAsString());
 
-        final Map<String, Object> extraData = identityJwt.getBody().get("extraData", Map.class);
+        final Map<String, Object> extraData = identityJwt.getPayload().get("extraData", Map.class);
         final String xuid = (String) extraData.get("XUID");
         final UUID id = UUID.fromString((String) extraData.get("identity"));
         final String displayName = (String) extraData.get("displayName");
@@ -124,7 +117,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     public MCChain fromJson(JsonObject json) throws Exception {
         final StepXblXstsToken.XblXsts<?> prev = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("prev")) : null;
         return new MCChain(
-                (ECPublicKey) CryptUtil.EC_KEYFACTORY.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(json.get("publicKey").getAsString()))),
+                publicKeyFromBase64(json.get("publicKey").getAsString()),
                 (ECPrivateKey) CryptUtil.EC_KEYFACTORY.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(json.get("privateKey").getAsString()))),
                 json.get("mojangJwt").getAsString(),
                 json.get("identityJwt").getAsString(),
@@ -133,6 +126,14 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
                 json.get("displayName").getAsString(),
                 prev
         );
+    }
+
+    private static ECPublicKey publicKeyFromBase64(final String base64) {
+        try {
+            return (ECPublicKey) CryptUtil.EC_KEYFACTORY.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(base64)));
+        } catch (InvalidKeySpecException e) {
+            throw new RuntimeException("Could not decode base64 public key", e);
+        }
     }
 
     public static final class MCChain implements AbstractStep.StepResult<StepXblXstsToken.XblXsts<?>> {

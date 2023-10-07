@@ -18,19 +18,17 @@
 package net.raphimc.mcauth.util;
 
 import com.google.gson.JsonObject;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.crypto.EllipticCurveProvider;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.impl.security.DefaultSecureRequest;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
@@ -54,7 +52,7 @@ public class CryptUtil {
         }
     }
 
-    public static BasicHeader getSignatureHeader(final HttpUriRequest httpRequest, final ECPrivateKey privateKey) throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public static BasicHeader getSignatureHeader(final HttpUriRequest httpRequest, final ECPrivateKey privateKey) throws IOException {
         final long windowsTimestamp = (Instant.now().getEpochSecond() + 11644473600L) * 10000000L;
 
         final ByteArrayOutputStream signatureContent = new ByteArrayOutputStream();
@@ -81,16 +79,11 @@ public class CryptUtil {
         }
         data.writeByte(0); // 0 byte
 
-        final Signature sha256withECDSA = Signature.getInstance("SHA256withECDSA");
-        sha256withECDSA.initSign(privateKey);
-        sha256withECDSA.update(signatureContent.toByteArray());
-        final byte[] signature = sha256withECDSA.sign();
-
         final ByteArrayOutputStream header = new ByteArrayOutputStream();
         data = new DataOutputStream(header);
         data.writeInt(1); // Policy Version
         data.writeLong(windowsTimestamp); // Timestamp
-        data.write(EllipticCurveProvider.transcodeDERToConcat(signature, EllipticCurveProvider.getSignatureByteArrayLength(SignatureAlgorithm.ES256))); // Signature
+        data.write(Jwts.SIG.ES256.digest(new DefaultSecureRequest<>(new ByteArrayInputStream(signatureContent.toByteArray()), null, null, privateKey))); // Signature
 
         return new BasicHeader("Signature", Base64.getEncoder().encodeToString(header.toByteArray()));
     }

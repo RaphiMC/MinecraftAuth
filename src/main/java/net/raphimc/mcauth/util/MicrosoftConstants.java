@@ -44,7 +44,7 @@ public class MicrosoftConstants {
     public static final String SCOPE3 = "offline_access XboxLive.signin XboxLive.offline_access";
     public static final String SCOPE_TITLE_AUTH = "service::user.auth.xboxlive.com::MBI_SSL";
 
-    public static String LIVE_OAUTH_DESKTOP_URL = "https://login.live.com/oauth20_desktop.srf";
+    public static final String LIVE_OAUTH_DESKTOP_URL = "https://login.live.com/oauth20_desktop.srf";
 
     public static final String XBL_XSTS_RELYING_PARTY = "http://xboxlive.com";
     public static final String JAVA_XSTS_RELYING_PARTY = "rp://api.minecraftservices.com/";
