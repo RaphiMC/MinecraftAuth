@@ -5,11 +5,11 @@ It also supports serializing/deserializing the whole token chain to and from a j
 
 ## Releases
 ### Gradle/Maven
-To use MinecraftAuth with Gradle/Maven you can get it from [Maven central](https://mvnrepository.com/artifact/net.raphimc/MinecraftAuth), [Lenni0451's maven](https://maven.lenni0451.net/#/releases/net/raphimc/MinecraftAuth) or [Jitpack](https://jitpack.io/#RaphiMC/MinecraftAuth).
+To use MinecraftAuth with Gradle/Maven you can get it from [Maven Central](https://mvnrepository.com/artifact/net.raphimc/MinecraftAuth), [Lenni0451's Maven](https://maven.lenni0451.net/#/releases/net/raphimc/MinecraftAuth) or [Jitpack](https://jitpack.io/#RaphiMC/MinecraftAuth).
 You can also find instructions how to implement it into your build script there.
 
 ### Jar File
-If you just want the latest jar file you can download it from this [Jenkins](https://build.lenni0451.net/job/MinecraftAuth/).
+If you just want the latest jar file you can download it from [GitHub Actions](https://github.com/RaphiMC/MinecraftAuth/actions/workflows/build.yml) or [Lenni0451's Jenkins](https://build.lenni0451.net/job/MinecraftAuth/).
 
 ## Usage
 Here is an example of how to use the library:
