@@ -2,6 +2,8 @@ plugins {
     id "java-library"
     id "maven-publish"
     id "signing"
+    id "net.raphimc.class-token-replacer" version "1.0.0"
+    id "io.freefair.lombok" version "8.4"
 }
 
 base {
@@ -27,6 +29,15 @@ dependencies {
     api "org.slf4j:slf4j-api:2.0.9"
 }
 
+sourceSets {
+    main {
+        classTokenReplacer {
+            property("\${version}", project.version)
+            property("\${impl_version}", "git-${project.name}-${project.version}:${project.latestCommitHash()}")
+        }
+    }
+}
+
 java {
     withSourcesJar()
     withJavadocJar()
@@ -36,6 +47,11 @@ jar {
     from("LICENSE") {
         rename { "${it}_${project.name ?: rootProject.name}" }
     }
+}
+
+sourcesJar {
+    from delombok
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 artifacts {
@@ -104,4 +120,13 @@ signing {
 
 project.tasks.withType(PublishToMavenRepository).forEach {
     it.dependsOn(project.tasks.withType(Sign))
+}
+
+String latestCommitHash() {
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine "git", "rev-parse", "--short", "HEAD"
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
 }
