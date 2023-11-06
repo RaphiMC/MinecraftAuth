@@ -118,6 +118,10 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
             return this.expireTimeMs <= System.currentTimeMillis();
         }
 
+        public String getDirectVerificationUri() {
+            return this.verificationUri + "?otc=" + this.userCode;
+        }
+
     }
 
     @Value
