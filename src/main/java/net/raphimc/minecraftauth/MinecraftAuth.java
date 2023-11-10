@@ -55,16 +55,16 @@ public class MinecraftAuth {
             .buildMinecraftJavaProfileStep();
 
     public static final AbstractStep<?, StepMCChain.MCChain> BEDROCK_DEVICE_CODE_LOGIN = builder()
-            .withClientId(MicrosoftConstants.BEDROCK_NINTENDO_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
+            .withClientId(MicrosoftConstants.BEDROCK_ANDROID_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
             .deviceCode()
-            .withDeviceToken("Nintendo")
+            .withDeviceToken("Android")
             .sisuTitleAuthentication(MicrosoftConstants.BEDROCK_XSTS_RELYING_PARTY)
             .buildMinecraftBedrockChainStep();
 
     public static final AbstractStep<?, StepMCChain.MCChain> BEDROCK_CREDENTIALS_LOGIN = builder()
-            .withClientId(MicrosoftConstants.BEDROCK_NINTENDO_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
+            .withClientId(MicrosoftConstants.BEDROCK_ANDROID_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
             .credentials()
-            .withDeviceToken("Nintendo")
+            .withDeviceToken("Android")
             .sisuTitleAuthentication(MicrosoftConstants.BEDROCK_XSTS_RELYING_PARTY)
             .buildMinecraftBedrockChainStep();
 
