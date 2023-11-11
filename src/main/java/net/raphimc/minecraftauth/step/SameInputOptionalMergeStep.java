@@ -22,8 +22,7 @@ import com.google.gson.JsonObject;
 import org.apache.http.client.HttpClient;
 
 import java.lang.reflect.ParameterizedType;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -47,8 +46,35 @@ public abstract class SameInputOptionalMergeStep<I1 extends AbstractStep.StepRes
     @Override
     public O getFromInput(final HttpClient httpClient, final Object input) throws Exception {
         final I1 prevResult1 = this.prevStep.getFromInput(httpClient, input);
-        final I2 prevResult2 = this.prevStep2 != null ? ((AbstractStep<I, I2>) this.prevStep2).applyStep(httpClient, (I) prevResult1.prevResult()) : null;
-        return this.applyStep(httpClient, prevResult1, prevResult2);
+
+        if (this.prevStep2 != null) {
+            final List<AbstractStep<?, ?>> steps = new ArrayList<>();
+            steps.add(this.prevStep2);
+            AbstractStep<?, ?> step2 = this.prevStep2;
+            while ((step2 = step2.prevStep) != null) {
+                steps.add(step2);
+                AbstractStep<?, ?> step1 = this.prevStep;
+                AbstractStep.StepResult<?> result2 = prevResult1;
+                while ((step1 = step1.prevStep) != null) {
+                    result2 = result2.prevResult();
+                    if (step2 == step1) {
+                        Collections.reverse(steps);
+                        steps.remove(0);
+
+                        for (AbstractStep step : steps) {
+                            result2 = step.applyStep(httpClient, result2);
+                        }
+
+                        return this.applyStep(httpClient, prevResult1, (I2) result2);
+                    }
+                }
+            }
+
+        } else {
+            return this.applyStep(httpClient, prevResult1, null);
+        }
+
+        throw new IllegalStateException("Cannot find a common step");
     }
 
     @Override
