@@ -18,6 +18,7 @@
 package net.raphimc.minecraftauth.step.msa;
 
 import com.google.gson.JsonObject;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
@@ -88,14 +89,15 @@ public class StepExternalBrowser extends AbstractStep<StepExternalBrowser.Extern
     }
 
     @Value
-    public static class ExternalBrowser implements AbstractStep.StepResult<AbstractStep.StepResult<?>> {
+    @EqualsAndHashCode(callSuper = false)
+    public static class ExternalBrowser extends AbstractStep.StepResult<AbstractStep.StepResult<?>> {
 
         String authenticationUrl;
         String redirectUri;
         int port;
 
         @Override
-        public StepResult<?> prevResult() {
+        protected StepResult<?> prevResult() {
             return null;
         }
 
@@ -111,7 +113,8 @@ public class StepExternalBrowser extends AbstractStep<StepExternalBrowser.Extern
     }
 
     @Value
-    public static class ExternalBrowserCallback implements AbstractStep.InitialInput {
+    @EqualsAndHashCode(callSuper = false)
+    public static class ExternalBrowserCallback extends AbstractStep.InitialInput {
         Consumer<ExternalBrowser> callback;
     }
 

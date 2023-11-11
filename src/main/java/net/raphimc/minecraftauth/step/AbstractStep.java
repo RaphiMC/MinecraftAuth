@@ -22,7 +22,7 @@ import org.apache.http.client.HttpClient;
 
 public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O extends AbstractStep.StepResult<?>> {
 
-    public final AbstractStep<?, I> prevStep;
+    protected final AbstractStep<?, I> prevStep;
 
     public AbstractStep(final AbstractStep<?, I> prevStep) {
         this.prevStep = prevStep;
@@ -40,32 +40,32 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
 
     public abstract O fromJson(final JsonObject json);
 
-    public interface StepResult<P extends StepResult<?>> {
+    public abstract static class StepResult<P extends StepResult<?>> {
 
-        P prevResult();
+        protected abstract P prevResult();
 
-        JsonObject toJson();
+        public abstract JsonObject toJson();
 
-        default boolean isExpired() {
+        public boolean isExpired() {
             return true;
         }
 
     }
 
-    public interface InitialInput extends StepResult<StepResult<?>> {
+    public abstract static class InitialInput extends StepResult<StepResult<?>> {
 
         @Override
-        default StepResult<?> prevResult() {
+        protected StepResult<?> prevResult() {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        default JsonObject toJson() {
+        public JsonObject toJson() {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        default boolean isExpired() {
+        public boolean isExpired() {
             throw new UnsupportedOperationException();
         }
 

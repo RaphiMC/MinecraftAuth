@@ -19,6 +19,7 @@ package net.raphimc.minecraftauth.step.xbl;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
@@ -111,7 +112,8 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
     }
 
     @Value
-    public static class XblDeviceToken implements AbstractStep.StepResult<AbstractStep.StepResult<?>> {
+    @EqualsAndHashCode(callSuper = false)
+    public static class XblDeviceToken extends AbstractStep.StepResult<AbstractStep.StepResult<?>> {
 
         ECPublicKey publicKey;
         ECPrivateKey privateKey;
@@ -121,7 +123,7 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
         String deviceId;
 
         @Override
-        public StepResult<?> prevResult() {
+        protected StepResult<?> prevResult() {
             return null;
         }
 

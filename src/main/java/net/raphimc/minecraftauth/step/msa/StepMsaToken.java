@@ -19,6 +19,7 @@ package net.raphimc.minecraftauth.step.msa;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
@@ -100,7 +101,8 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
     }
 
     @Value
-    public static class MsaToken implements AbstractStep.StepResult<MsaCodeStep.MsaCode> {
+    @EqualsAndHashCode(callSuper = false)
+    public static class MsaToken extends AbstractStep.StepResult<MsaCodeStep.MsaCode> {
 
         String userId;
         long expireTimeMs;
@@ -109,7 +111,7 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
         MsaCodeStep.MsaCode msaCode;
 
         @Override
-        public MsaCodeStep.MsaCode prevResult() {
+        protected MsaCodeStep.MsaCode prevResult() {
             return this.msaCode;
         }
 

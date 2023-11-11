@@ -18,6 +18,7 @@
 package net.raphimc.minecraftauth.step.msa;
 
 import com.google.gson.JsonObject;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import org.apache.http.client.HttpClient;
@@ -47,7 +48,8 @@ public class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends AbstractS
     }
 
     @Value
-    public static class MsaCode implements AbstractStep.StepResult<AbstractStep.StepResult<?>> {
+    @EqualsAndHashCode(callSuper = false)
+    public static class MsaCode extends AbstractStep.StepResult<AbstractStep.StepResult<?>> {
 
         String code;
         String clientId;
@@ -56,7 +58,7 @@ public class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends AbstractS
         String redirectUri;
 
         @Override
-        public StepResult<?> prevResult() {
+        protected StepResult<?> prevResult() {
             return null;
         }
 

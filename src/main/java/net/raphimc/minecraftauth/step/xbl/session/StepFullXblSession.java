@@ -18,6 +18,7 @@
 package net.raphimc.minecraftauth.step.xbl.session;
 
 import com.google.gson.JsonObject;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.SameInputOptionalMergeStep;
@@ -44,23 +45,24 @@ public class StepFullXblSession extends SameInputOptionalMergeStep<StepXblUserTo
     }
 
     @Value
-    public static class FullXblSession implements SameInputOptionalMergeStep.StepResult<StepXblUserToken.XblUserToken, StepXblTitleToken.XblTitleToken> {
+    @EqualsAndHashCode(callSuper = false)
+    public static class FullXblSession extends SameInputOptionalMergeStep.StepResult<StepXblUserToken.XblUserToken, StepXblTitleToken.XblTitleToken> {
 
         StepXblUserToken.XblUserToken xblUserToken;
         StepXblTitleToken.XblTitleToken xblTitleToken;
 
         @Override
-        public StepXblUserToken.XblUserToken prevResult() {
+        protected StepXblUserToken.XblUserToken prevResult() {
             return this.xblUserToken;
         }
 
         @Override
-        public StepXblTitleToken.XblTitleToken prevResult2() {
+        protected StepXblTitleToken.XblTitleToken prevResult2() {
             return this.xblTitleToken;
         }
 
         @Override
-        public JsonObject _toJson() {
+        protected JsonObject _toJson() {
             final JsonObject json = new JsonObject();
             if (this.xblUserToken != null) json.add("xblUserToken", this.xblUserToken.toJson());
             if (this.xblTitleToken != null) json.add("xblTitleToken", this.xblTitleToken.toJson());

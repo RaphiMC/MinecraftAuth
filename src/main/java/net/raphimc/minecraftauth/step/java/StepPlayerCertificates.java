@@ -19,6 +19,7 @@ package net.raphimc.minecraftauth.step.java;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
@@ -101,7 +102,8 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
     }
 
     @Value
-    public static class PlayerCertificates implements AbstractStep.StepResult<StepMCToken.MCToken> {
+    @EqualsAndHashCode(callSuper = false)
+    public static class PlayerCertificates extends AbstractStep.StepResult<StepMCToken.MCToken> {
 
         long expireTimeMs;
         RSAPublicKey publicKey;
@@ -111,7 +113,7 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
         StepMCToken.MCToken mcToken;
 
         @Override
-        public StepMCToken.MCToken prevResult() {
+        protected StepMCToken.MCToken prevResult() {
             return this.mcToken;
         }
 

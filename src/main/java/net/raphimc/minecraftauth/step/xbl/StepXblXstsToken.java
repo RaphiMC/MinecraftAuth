@@ -21,6 +21,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
@@ -103,7 +104,8 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
     }
 
     @Value
-    public static class XblXstsToken implements AbstractStep.StepResult<StepFullXblSession.FullXblSession>, XblXsts<StepFullXblSession.FullXblSession> {
+    @EqualsAndHashCode(callSuper = false)
+    public static class XblXstsToken extends XblXsts<StepFullXblSession.FullXblSession> {
 
         long expireTimeMs;
         String token;
@@ -111,7 +113,7 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
         StepFullXblSession.FullXblSession fullXblSession;
 
         @Override
-        public StepFullXblSession.FullXblSession prevResult() {
+        protected StepFullXblSession.FullXblSession prevResult() {
             return this.fullXblSession;
         }
 
@@ -132,22 +134,19 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
 
     }
 
-    public interface XblXsts<P extends AbstractStep.StepResult<?>> extends AbstractStep.StepResult<P> {
+    public abstract static class XblXsts<P extends AbstractStep.StepResult<?>> extends AbstractStep.StepResult<P> {
 
-        long getExpireTimeMs();
+        public abstract long getExpireTimeMs();
 
-        String getToken();
+        public abstract String getToken();
 
-        String getUserHash();
+        public abstract String getUserHash();
 
-        StepFullXblSession.FullXblSession getFullXblSession();
+        public abstract StepFullXblSession.FullXblSession getFullXblSession();
 
-        default StepInitialXblSession.InitialXblSession getInitialXblSession() {
+        public StepInitialXblSession.InitialXblSession getInitialXblSession() {
             return this.getFullXblSession().getXblUserToken().getInitialXblSession();
         }
-
-        @Override
-        JsonObject toJson();
 
     }
 

@@ -21,7 +21,7 @@ import org.apache.http.client.HttpClient;
 
 public abstract class OptionalMergeStep<I1 extends AbstractStep.StepResult<?>, I2 extends AbstractStep.StepResult<?>, O extends OptionalMergeStep.StepResult<?, ?>> extends AbstractStep<I1, O> {
 
-    public final AbstractStep<?, I2> prevStep2;
+    protected final AbstractStep<?, I2> prevStep2;
 
     public OptionalMergeStep(final AbstractStep<?, I1> prevStep1, final AbstractStep<?, I2> prevStep2) {
         super(prevStep1);
@@ -50,13 +50,15 @@ public abstract class OptionalMergeStep<I1 extends AbstractStep.StepResult<?>, I
         return this.applyStep(httpClient, prevResult1, prevResult2);
     }
 
-    public interface StepResult<P1 extends AbstractStep.StepResult<?>, P2 extends AbstractStep.StepResult<?>> extends AbstractStep.StepResult<P1> {
-        P2 prevResult2();
+    public abstract static class StepResult<P1 extends AbstractStep.StepResult<?>, P2 extends AbstractStep.StepResult<?>> extends AbstractStep.StepResult<P1> {
+
+        protected abstract P2 prevResult2();
 
         @Override
-        default boolean isExpired() {
-            return AbstractStep.StepResult.super.isExpired() || (this.prevResult2() != null && this.prevResult2().isExpired());
+        public boolean isExpired() {
+            return super.isExpired() || (this.prevResult2() != null && this.prevResult2().isExpired());
         }
+
     }
 
 }

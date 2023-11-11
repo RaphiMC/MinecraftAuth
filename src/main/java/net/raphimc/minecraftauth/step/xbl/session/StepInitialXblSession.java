@@ -18,6 +18,7 @@
 package net.raphimc.minecraftauth.step.xbl.session;
 
 import com.google.gson.JsonObject;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.OptionalMergeStep;
@@ -44,18 +45,19 @@ public class StepInitialXblSession extends OptionalMergeStep<StepMsaToken.MsaTok
     }
 
     @Value
-    public static class InitialXblSession implements OptionalMergeStep.StepResult<StepMsaToken.MsaToken, StepXblDeviceToken.XblDeviceToken> {
+    @EqualsAndHashCode(callSuper = false)
+    public static class InitialXblSession extends OptionalMergeStep.StepResult<StepMsaToken.MsaToken, StepXblDeviceToken.XblDeviceToken> {
 
         StepMsaToken.MsaToken msaToken;
         StepXblDeviceToken.XblDeviceToken xblDeviceToken;
 
         @Override
-        public StepMsaToken.MsaToken prevResult() {
+        protected StepMsaToken.MsaToken prevResult() {
             return this.msaToken;
         }
 
         @Override
-        public StepXblDeviceToken.XblDeviceToken prevResult2() {
+        protected StepXblDeviceToken.XblDeviceToken prevResult2() {
             return this.xblDeviceToken;
         }
 

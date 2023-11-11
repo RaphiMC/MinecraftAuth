@@ -19,6 +19,7 @@ package net.raphimc.minecraftauth.step.xbl;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
@@ -109,7 +110,8 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
     }
 
     @Value
-    public static class XblSisuTokens implements AbstractStep.StepResult<StepInitialXblSession.InitialXblSession>, StepXblXstsToken.XblXsts<StepInitialXblSession.InitialXblSession> {
+    @EqualsAndHashCode(callSuper = false)
+    public static class XblSisuTokens extends StepXblXstsToken.XblXsts<StepInitialXblSession.InitialXblSession> {
 
         SisuTitleToken titleToken;
         SisuUserToken userToken;
@@ -139,7 +141,7 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
         }
 
         @Override
-        public StepInitialXblSession.InitialXblSession prevResult() {
+        protected StepInitialXblSession.InitialXblSession prevResult() {
             return this.initialXblSession;
         }
 

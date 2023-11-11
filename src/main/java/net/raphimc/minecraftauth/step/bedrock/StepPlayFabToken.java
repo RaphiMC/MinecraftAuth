@@ -19,6 +19,7 @@ package net.raphimc.minecraftauth.step.bedrock;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
@@ -108,7 +109,8 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
     }
 
     @Value
-    public static class PlayFabToken implements AbstractStep.StepResult<StepXblXstsToken.XblXsts<?>> {
+    @EqualsAndHashCode(callSuper = false)
+    public static class PlayFabToken extends AbstractStep.StepResult<StepXblXstsToken.XblXsts<?>> {
 
         long expireTimeMs;
         String entityToken;
@@ -118,7 +120,7 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
         StepXblXstsToken.XblXsts<?> xblXsts;
 
         @Override
-        public StepXblXstsToken.XblXsts<?> prevResult() {
+        protected StepXblXstsToken.XblXsts<?> prevResult() {
             return this.xblXsts;
         }
 

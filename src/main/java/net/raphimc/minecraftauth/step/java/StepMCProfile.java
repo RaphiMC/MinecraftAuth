@@ -19,6 +19,7 @@ package net.raphimc.minecraftauth.step.java;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
@@ -72,7 +73,8 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
     }
 
     @Value
-    public static class MCProfile implements AbstractStep.StepResult<StepMCToken.MCToken> {
+    @EqualsAndHashCode(callSuper = false)
+    public static class MCProfile extends AbstractStep.StepResult<StepMCToken.MCToken> {
 
         UUID id;
         String name;
@@ -80,7 +82,7 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
         StepMCToken.MCToken mcToken;
 
         @Override
-        public StepMCToken.MCToken prevResult() {
+        protected StepMCToken.MCToken prevResult() {
             return this.mcToken;
         }
 

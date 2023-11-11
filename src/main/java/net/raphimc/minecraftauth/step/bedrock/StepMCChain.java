@@ -23,6 +23,7 @@ import com.google.gson.JsonParser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
@@ -126,7 +127,8 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     }
 
     @Value
-    public static class MCChain implements AbstractStep.StepResult<StepXblXstsToken.XblXsts<?>> {
+    @EqualsAndHashCode(callSuper = false)
+    public static class MCChain extends AbstractStep.StepResult<StepXblXstsToken.XblXsts<?>> {
 
         ECPublicKey publicKey;
         ECPrivateKey privateKey;
@@ -138,7 +140,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         StepXblXstsToken.XblXsts<?> xblXsts;
 
         @Override
-        public StepXblXstsToken.XblXsts<?> prevResult() {
+        protected StepXblXstsToken.XblXsts<?> prevResult() {
             return this.xblXsts;
         }
 

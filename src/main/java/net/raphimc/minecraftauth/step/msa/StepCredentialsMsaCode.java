@@ -18,6 +18,7 @@
 package net.raphimc.minecraftauth.step.msa;
 
 import com.google.gson.JsonObject;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
@@ -104,7 +105,8 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
     }
 
     @Value
-    public static class MsaCredentials implements AbstractStep.InitialInput {
+    @EqualsAndHashCode(callSuper = false)
+    public static class MsaCredentials extends AbstractStep.InitialInput {
 
         String email;
         String password;

@@ -19,6 +19,7 @@ package net.raphimc.minecraftauth.step.msa;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
@@ -89,7 +90,8 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
     }
 
     @Value
-    public static class MsaDeviceCode implements AbstractStep.StepResult<AbstractStep.StepResult<?>> {
+    @EqualsAndHashCode(callSuper = false)
+    public static class MsaDeviceCode extends AbstractStep.StepResult<AbstractStep.StepResult<?>> {
 
         long expireTimeMs;
         long intervalMs;
@@ -98,7 +100,7 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
         String verificationUri;
 
         @Override
-        public StepResult<?> prevResult() {
+        protected StepResult<?> prevResult() {
             return null;
         }
 
@@ -125,7 +127,8 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
     }
 
     @Value
-    public static class MsaDeviceCodeCallback implements AbstractStep.InitialInput {
+    @EqualsAndHashCode(callSuper = false)
+    public static class MsaDeviceCodeCallback extends AbstractStep.InitialInput {
         Consumer<MsaDeviceCode> callback;
     }
 
