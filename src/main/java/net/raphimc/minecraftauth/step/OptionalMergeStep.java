@@ -38,8 +38,8 @@ public abstract class OptionalMergeStep<I1 extends AbstractStep.StepResult<?>, I
 
     @Override
     public O refresh(final HttpClient httpClient, final O result) throws Exception {
-        final I1 prevResult1 = this.prevStep.refresh(httpClient, result != null ? (I1) result.prevResult() : null);
-        final I2 prevResult2 = this.prevStep2 != null ? this.prevStep2.refresh(httpClient, result != null ? (I2) result.prevResult2() : null) : null;
+        final I1 prevResult1 = this.prevStep.refresh(httpClient, (I1) result.prevResult());
+        final I2 prevResult2 = this.prevStep2 != null ? this.prevStep2.refresh(httpClient, (I2) result.prevResult2()) : null;
         return this.applyStep(httpClient, prevResult1, prevResult2);
     }
 

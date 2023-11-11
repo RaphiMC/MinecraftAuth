@@ -89,7 +89,7 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
 
     @Override
     public PlayFabToken refresh(final HttpClient httpClient, final PlayFabToken result) throws Exception {
-        if (result == null || result.isExpired()) return super.refresh(httpClient, result);
+        if (result.isExpired()) return super.refresh(httpClient, result);
 
         return result;
     }

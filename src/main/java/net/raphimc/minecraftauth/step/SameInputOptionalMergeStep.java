@@ -17,9 +17,15 @@
  */
 package net.raphimc.minecraftauth.step;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.apache.http.client.HttpClient;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public abstract class SameInputOptionalMergeStep<I1 extends AbstractStep.StepResult<?>, I2 extends AbstractStep.StepResult<?>, I extends AbstractStep.StepResult<?>, O extends OptionalMergeStep.StepResult<?, ?>> extends OptionalMergeStep<I1, I2, O> {
 
@@ -33,14 +39,66 @@ public abstract class SameInputOptionalMergeStep<I1 extends AbstractStep.StepRes
 
     @Override
     public O refresh(final HttpClient httpClient, final O result) throws Exception {
-        final I1 prevResult1 = this.prevStep.refresh(httpClient, result != null ? (I1) result.prevResult() : null);
-        I2 prevResult2;
-        if (this.prevStep2 != null && result == null) {
-            prevResult2 = ((AbstractStep<I, I2>) this.prevStep2).applyStep(httpClient, (I) prevResult1.prevResult());
-        } else {
-            prevResult2 = this.prevStep2 != null ? this.prevStep2.refresh(httpClient, (I2) result.prevResult2()) : null;
-        }
+        final I1 prevResult1 = this.prevStep.refresh(httpClient, (I1) result.prevResult());
+        I2 prevResult2 = this.prevStep2 != null ? this.prevStep2.refresh(httpClient, (I2) result.prevResult2()) : null;
         return this.applyStep(httpClient, prevResult1, prevResult2);
+    }
+
+    @Override
+    public O getFromInput(final HttpClient httpClient, final Object input) throws Exception {
+        final I1 prevResult1 = this.prevStep.getFromInput(httpClient, input);
+        final I2 prevResult2 = this.prevStep2 != null ? ((AbstractStep<I, I2>) this.prevStep2).applyStep(httpClient, (I) prevResult1.prevResult()) : null;
+        return this.applyStep(httpClient, prevResult1, prevResult2);
+    }
+
+    @Override
+    public O fromJson(final JsonObject json) throws Exception {
+        if (json.has("shared")) {
+            final JsonObject shared = json.getAsJsonObject("shared");
+            json.remove("shared");
+            for (Map.Entry<String, JsonElement> entry : shared.entrySet()) {
+                json.asMap().values().stream()
+                        .filter(JsonElement::isJsonObject)
+                        .map(JsonElement::getAsJsonObject)
+                        .forEach(jsonObject -> jsonObject.add(entry.getKey(), entry.getValue()));
+            }
+        }
+
+        return this.fromDeduplicatedJson(json);
+    }
+
+    protected abstract O fromDeduplicatedJson(final JsonObject json) throws Exception;
+
+    public interface StepResult<P1 extends AbstractStep.StepResult<?>, P2 extends AbstractStep.StepResult<?>> extends OptionalMergeStep.StepResult<P1, P2> {
+
+        @Override
+        default JsonObject toJson() throws Exception {
+            final JsonObject json = this._toJson();
+
+            final Map<String, JsonElement> shared = json.asMap().values().stream()
+                    .filter(JsonElement::isJsonObject)
+                    .map(JsonElement::getAsJsonObject)
+                    .map(JsonObject::entrySet)
+                    .flatMap(Set::stream)
+                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream()
+                    .filter(entry -> entry.getValue() > 1)
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+            json.asMap().values().stream()
+                    .filter(JsonElement::isJsonObject)
+                    .map(JsonElement::getAsJsonObject)
+                    .forEach(jsonObject -> jsonObject.entrySet().removeIf(entry -> shared.containsKey(entry.getKey())));
+
+            final JsonObject sharedObj = new JsonObject();
+            shared.forEach(sharedObj::add);
+            json.add("shared", sharedObj);
+
+            return json;
+        }
+
+        JsonObject _toJson() throws Exception;
+
     }
 
 }

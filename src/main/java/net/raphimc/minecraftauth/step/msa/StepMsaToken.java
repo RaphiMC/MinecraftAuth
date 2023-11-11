@@ -49,7 +49,6 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
 
     @Override
     public MsaToken refresh(HttpClient httpClient, MsaToken result) throws Exception {
-        if (result == null) return super.refresh(httpClient, null);
         if (result.isExpired()) return this.apply(httpClient, result.getRefreshToken(), "refresh_token", result.getMsaCode());
 
         return result;

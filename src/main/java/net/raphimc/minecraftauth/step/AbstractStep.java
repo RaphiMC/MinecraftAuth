@@ -31,7 +31,7 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
     public abstract O applyStep(final HttpClient httpClient, final I prevResult) throws Exception;
 
     public O refresh(final HttpClient httpClient, final O result) throws Exception {
-        return this.applyStep(httpClient, this.prevStep != null ? this.prevStep.refresh(httpClient, result != null ? (I) result.prevResult() : null) : null);
+        return this.applyStep(httpClient, this.prevStep != null ? this.prevStep.refresh(httpClient, (I) result.prevResult()) : null);
     }
 
     public O getFromInput(final HttpClient httpClient, final Object input) throws Exception {
@@ -41,6 +41,7 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
     public abstract O fromJson(final JsonObject json) throws Exception;
 
     public interface StepResult<P extends StepResult<?>> {
+
         P prevResult();
 
         JsonObject toJson() throws Exception;
@@ -48,9 +49,11 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
         default boolean isExpired() throws Exception {
             return true;
         }
+
     }
 
     public interface InitialInput extends StepResult<StepResult<?>> {
+
         @Override
         default StepResult<?> prevResult() {
             throw new UnsupportedOperationException();
@@ -65,6 +68,7 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
         default boolean isExpired() throws Exception {
             throw new UnsupportedOperationException();
         }
+
     }
 
 }

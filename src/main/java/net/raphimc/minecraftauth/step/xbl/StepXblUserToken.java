@@ -77,7 +77,7 @@ public class StepXblUserToken extends AbstractStep<StepInitialXblSession.Initial
 
     @Override
     public XblUserToken refresh(final HttpClient httpClient, final XblUserToken result) throws Exception {
-        if (result == null || result.isExpired()) return super.refresh(httpClient, result);
+        if (result.isExpired()) return super.refresh(httpClient, result);
 
         return result;
     }

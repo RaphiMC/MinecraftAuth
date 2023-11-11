@@ -82,7 +82,7 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
 
     @Override
     public PlayerCertificates refresh(final HttpClient httpClient, final PlayerCertificates result) throws Exception {
-        if (result == null || result.isExpired()) return super.refresh(httpClient, result);
+        if (result.isExpired()) return super.refresh(httpClient, result);
 
         return result;
     }

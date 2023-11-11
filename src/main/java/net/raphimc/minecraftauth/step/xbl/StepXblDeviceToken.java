@@ -93,7 +93,7 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
 
     @Override
     public XblDeviceToken refresh(final HttpClient httpClient, final XblDeviceToken result) throws Exception {
-        if (result == null || result.isExpired()) return this.applyStep(httpClient, null);
+        if (result.isExpired()) return this.applyStep(httpClient, null);
 
         return result;
     }
