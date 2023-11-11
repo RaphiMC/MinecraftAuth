@@ -55,7 +55,7 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
     }
 
     @Override
-    public MsaToken fromJson(JsonObject json) throws Exception {
+    public MsaToken fromJson(JsonObject json) {
         final MsaCodeStep.MsaCode msaCode = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("msaCode")) : null;
         return new MsaToken(
                 json.get("userId").getAsString(),

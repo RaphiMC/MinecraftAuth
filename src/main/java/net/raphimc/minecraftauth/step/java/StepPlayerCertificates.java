@@ -88,7 +88,7 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
     }
 
     @Override
-    public PlayerCertificates fromJson(final JsonObject json) throws Exception {
+    public PlayerCertificates fromJson(final JsonObject json) {
         final StepMCToken.MCToken mcToken = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("mcToken")) : null;
         return new PlayerCertificates(
                 json.get("expireTimeMs").getAsLong(),

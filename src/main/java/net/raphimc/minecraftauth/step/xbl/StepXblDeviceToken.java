@@ -99,7 +99,7 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
     }
 
     @Override
-    public XblDeviceToken fromJson(final JsonObject json) throws Exception {
+    public XblDeviceToken fromJson(final JsonObject json) {
         return new XblDeviceToken(
                 CryptUtil.publicKeyFromBase64(json.get("publicKey").getAsString()),
                 CryptUtil.privateKeyFromBase64(json.get("privateKey").getAsString()),

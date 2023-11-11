@@ -98,7 +98,7 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
     }
 
     @Override
-    public StepXblSisuAuthentication.XblSisuTokens fromJson(final JsonObject json) throws Exception {
+    public StepXblSisuAuthentication.XblSisuTokens fromJson(final JsonObject json) {
         final StepInitialXblSession.InitialXblSession initialXblSession = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("initialXblSession")) : null;
         return new StepXblSisuAuthentication.XblSisuTokens(
                 XblSisuTokens.SisuTitleToken.fromJson(json.getAsJsonObject("titleToken")),

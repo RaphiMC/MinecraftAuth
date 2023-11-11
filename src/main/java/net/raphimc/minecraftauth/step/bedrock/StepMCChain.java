@@ -111,7 +111,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     }
 
     @Override
-    public MCChain fromJson(final JsonObject json) throws Exception {
+    public MCChain fromJson(final JsonObject json) {
         final StepXblXstsToken.XblXsts<?> xblXsts = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("xblXsts")) : null;
         return new MCChain(
                 CryptUtil.publicKeyFromBase64(json.get("publicKey").getAsString()),

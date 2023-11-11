@@ -83,7 +83,7 @@ public class StepXblUserToken extends AbstractStep<StepInitialXblSession.Initial
     }
 
     @Override
-    public XblUserToken fromJson(final JsonObject json) throws Exception {
+    public XblUserToken fromJson(final JsonObject json) {
         final StepInitialXblSession.InitialXblSession initialXblSession = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("initialXblSession")) : null;
         return new XblUserToken(
                 json.get("expireTimeMs").getAsLong(),

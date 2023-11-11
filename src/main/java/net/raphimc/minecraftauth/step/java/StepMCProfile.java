@@ -27,7 +27,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.UUID;
 
 public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfile.MCProfile> {
@@ -54,7 +53,7 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
         final MCProfile result = new MCProfile(
                 UUID.fromString(obj.get("id").getAsString().replaceFirst("(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)", "$1-$2-$3-$4-$5")),
                 obj.get("name").getAsString(),
-                new URL(obj.get("skins").getAsJsonArray().get(0).getAsJsonObject().get("url").getAsString()),
+                obj.get("skins").getAsJsonArray().get(0).getAsJsonObject().get("url").getAsString(),
                 mcToken
         );
         MinecraftAuth.LOGGER.info("Got MC Profile, name: " + result.name + ", uuid: " + result.id);
@@ -62,12 +61,12 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
     }
 
     @Override
-    public MCProfile fromJson(final JsonObject json) throws Exception {
+    public MCProfile fromJson(final JsonObject json) {
         final StepMCToken.MCToken mcToken = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("mcToken")) : null;
         return new MCProfile(
                 UUID.fromString(json.get("id").getAsString()),
                 json.get("name").getAsString(),
-                new URL(json.get("skinUrl").getAsString()),
+                json.get("skinUrl").getAsString(),
                 mcToken
         );
     }
@@ -77,7 +76,7 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
 
         UUID id;
         String name;
-        URL skinUrl;
+        String skinUrl;
         StepMCToken.MCToken mcToken;
 
         @Override
@@ -90,7 +89,7 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
             final JsonObject json = new JsonObject();
             json.addProperty("id", this.id.toString());
             json.addProperty("name", this.name);
-            json.addProperty("skinUrl", this.skinUrl.toString());
+            json.addProperty("skinUrl", this.skinUrl);
             if (this.mcToken != null) json.add("mcToken", this.mcToken.toJson());
             return json;
         }

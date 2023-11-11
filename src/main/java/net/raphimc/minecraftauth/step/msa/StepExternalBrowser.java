@@ -69,7 +69,7 @@ public class StepExternalBrowser extends AbstractStep<StepExternalBrowser.Extern
     }
 
     @Override
-    public ExternalBrowser fromJson(JsonObject json) throws Exception {
+    public ExternalBrowser fromJson(JsonObject json) {
         return new ExternalBrowser(
                 json.get("authenticationUrl").getAsString(),
                 json.get("redirectUri").getAsString(),

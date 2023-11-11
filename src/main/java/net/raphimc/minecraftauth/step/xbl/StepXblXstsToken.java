@@ -92,7 +92,7 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
     }
 
     @Override
-    public XblXstsToken fromJson(final JsonObject json) throws Exception {
+    public XblXstsToken fromJson(final JsonObject json) {
         final StepFullXblSession.FullXblSession fullXblSession = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("fullXblSession")) : null;
         return new XblXstsToken(
                 json.get("expireTimeMs").getAsLong(),

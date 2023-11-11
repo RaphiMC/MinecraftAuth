@@ -52,7 +52,7 @@ public abstract class SameInputOptionalMergeStep<I1 extends AbstractStep.StepRes
     }
 
     @Override
-    public O fromJson(final JsonObject json) throws Exception {
+    public O fromJson(final JsonObject json) {
         if (json.has("shared")) {
             final JsonObject shared = json.getAsJsonObject("shared");
             json.remove("shared");
@@ -67,12 +67,12 @@ public abstract class SameInputOptionalMergeStep<I1 extends AbstractStep.StepRes
         return this.fromDeduplicatedJson(json);
     }
 
-    protected abstract O fromDeduplicatedJson(final JsonObject json) throws Exception;
+    protected abstract O fromDeduplicatedJson(final JsonObject json);
 
     public interface StepResult<P1 extends AbstractStep.StepResult<?>, P2 extends AbstractStep.StepResult<?>> extends OptionalMergeStep.StepResult<P1, P2> {
 
         @Override
-        default JsonObject toJson() throws Exception {
+        default JsonObject toJson() {
             final JsonObject json = this._toJson();
 
             final Map<String, JsonElement> shared = json.asMap().values().stream()
@@ -97,7 +97,7 @@ public abstract class SameInputOptionalMergeStep<I1 extends AbstractStep.StepRes
             return json;
         }
 
-        JsonObject _toJson() throws Exception;
+        JsonObject _toJson();
 
     }
 

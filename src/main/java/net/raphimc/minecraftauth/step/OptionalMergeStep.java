@@ -54,7 +54,7 @@ public abstract class OptionalMergeStep<I1 extends AbstractStep.StepResult<?>, I
         P2 prevResult2();
 
         @Override
-        default boolean isExpired() throws Exception {
+        default boolean isExpired() {
             return AbstractStep.StepResult.super.isExpired() || (this.prevResult2() != null && this.prevResult2().isExpired());
         }
     }

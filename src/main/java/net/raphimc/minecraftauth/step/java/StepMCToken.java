@@ -70,7 +70,7 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     }
 
     @Override
-    public MCToken fromJson(final JsonObject json) throws Exception {
+    public MCToken fromJson(final JsonObject json) {
         final StepXblXstsToken.XblXsts<?> xblXsts = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("xblXsts")) : null;
         return new MCToken(
                 json.get("accessToken").getAsString(),

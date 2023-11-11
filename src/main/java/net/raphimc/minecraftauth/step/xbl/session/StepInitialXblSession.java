@@ -37,7 +37,7 @@ public class StepInitialXblSession extends OptionalMergeStep<StepMsaToken.MsaTok
     }
 
     @Override
-    public InitialXblSession fromJson(JsonObject json) throws Exception {
+    public InitialXblSession fromJson(JsonObject json) {
         final StepMsaToken.MsaToken msaToken = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("msaToken")) : null;
         final StepXblDeviceToken.XblDeviceToken xblDeviceToken = this.prevStep2 != null ? this.prevStep2.fromJson(json.getAsJsonObject("xblDeviceToken")) : null;
         return new InitialXblSession(msaToken, xblDeviceToken);

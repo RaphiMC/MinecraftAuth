@@ -78,7 +78,7 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
     }
 
     @Override
-    public MsaDeviceCode fromJson(JsonObject json) throws Exception {
+    public MsaDeviceCode fromJson(JsonObject json) {
         return new MsaDeviceCode(
                 json.get("expireTimeMs").getAsLong(),
                 json.get("intervalMs").getAsLong(),
@@ -114,7 +114,7 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
         }
 
         @Override
-        public boolean isExpired() throws Exception {
+        public boolean isExpired() {
             return this.expireTimeMs <= System.currentTimeMillis();
         }
 
