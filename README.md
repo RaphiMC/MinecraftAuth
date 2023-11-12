@@ -12,45 +12,61 @@ You can also find instructions how to implement it into your build script there.
 If you just want the latest jar file you can download it from [GitHub Actions](https://github.com/RaphiMC/MinecraftAuth/actions/workflows/build.yml) or [Lenni0451's Jenkins](https://build.lenni0451.net/job/MinecraftAuth/).
 
 ## Usage
-Here is an example of how to use the library:
+MinecraftAuth provides most of its functionality through the ``MinecraftAuth`` class.
+It contains predefined login flows for Minecraft: Java Edition and Minecraft: Bedrock Edition using the official client ids and scopes.
+
+To change the client id or the scope of the application you can use the ``MinecraftAuth.builder()`` method.
+For examples, you can look at the predefined login flows in the ``MinecraftAuth`` class.
+
+Here is an example of how to manage a Minecraft: Java Edition account, but it works the same for Minecraft: Bedrock Edition.
+### Log in using credentials
 ```java
-public class Test {
-
-    public static void main(String[] args) throws Throwable {
-        // Log in using credentials
-        try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-            StepMCProfile.MCProfile mcProfile = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(httpClient, new StepCredentialsMsaCode.MsaCredentials("email@test.com", "P4ssw0rd"));
-            System.out.println("Logged in with access token: " + mcProfile.prevResult().prevResult().access_token());
-        }
-
-        // Log in using device code (Blocks until the user has logged in or timeout is reached)
-        StepMCProfile.MCProfile mcProfile;
-        try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-            mcProfile = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCode -> {
-                System.out.println("Go to " + msaDeviceCode.verificationUri());
-                System.out.println("Enter code " + msaDeviceCode.userCode());
-            }));
-            System.out.println("Logged in as: " + mcProfile.name());
-        }
-
-        // Save the whole chain of tokens
-        final JsonObject serializedProfile = mcProfile.toJson();
-
-        // Load the chain of tokens
-        StepMCProfile.MCProfile loadedProfile = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.fromJson(serializedProfile);
-
-        // Refresh the chain of tokens (It only refreshes those necessary)
-        try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-            loadedProfile = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.refresh(httpClient, mcProfile);
-        }
-
-        // loadedProfile is now valid again and can be used
-    }
-
+try (CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
+    StepFullJavaSession.FullJavaSession javaSession = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(httpClient, new StepCredentialsMsaCode.MsaCredentials("email@test.com", "P4ssw0rd"));
+    System.out.println("Username: " + javaSession.getMcProfile().getName());
+    System.out.println("Access token: " + javaSession.getMcProfile().getMcToken().getAccessToken());
+    System.out.println("Player certificates: " + javaSession.getPlayerCertificates());
 }
 ```
-To change the client id or the scope of the application you can use the ``MinecraftAuth.builder()`` method.
-For examples, you can look at the predefined login flows in the ``MinecraftAuth`` class. Note: This library uses the official client id and scope and changing it could lead to certain features not working or being detectable by servers.
+### Log in using device code
+The device code auth flow blocks the thread until the user has logged in and throws an exception if the process times out.
+The timeout is 120 seconds by default.
+```java
+try (CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
+    StepFullJavaSession.FullJavaSession javaSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCode -> {
+        // Method to generate a verification URL and a code for the user to enter on that page
+        System.out.println("Go to " + msaDeviceCode.getVerificationUri());
+        System.out.println("Enter code " + msaDeviceCode.getUserCode());
+
+        // There is also a method to generate a direct URL without needing the user to enter a code
+        System.out.println("Go to " + msaDeviceCode.getDirectVerificationUri());
+    }));
+    System.out.println("Username: " + javaSession.getMcProfile().getName());
+    System.out.println("Access token: " + javaSession.getMcProfile().getMcToken().getAccessToken());
+    System.out.println("Player certificates: " + javaSession.getPlayerCertificates());
+}
+```
+### Save the token chain to a json object
+```java
+JsonObject serializedSession = javaSession.toJson();
+```
+### Load the token chain from a json object
+When loading the token chain it is important to use the same login flow as when the token chain was created.
+```java
+StepFullJavaSession.FullJavaSession loadedSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.fromJson(serializedSession);
+```
+### Refresh the token chain
+MinecraftAuth implements a refresh method that only refreshes the tokens that are expired and reuses the valid ones.
+You can call this everytime before you access/use the token chain to make sure it is valid. (Don't spam it though or else you will be rate limited by Microsoft)
+This method will throw an exception if the refresh fails (The initial refresh token is no longer valid and the user has to login again).
+```java
+try (CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
+    StepFullJavaSession.FullJavaSession readyToUseSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.refresh(httpClient, loadedSession);
+}
+```
+### Logging
+MinecraftAuth by default uses SLF4J for logging.
+You can however easily redirect the log messages to your own code by setting ``MinecraftAuth.LOGGER`` to your own ``ILogger``.
 
 ## Contact
 If you encounter any issues, please report them on the
