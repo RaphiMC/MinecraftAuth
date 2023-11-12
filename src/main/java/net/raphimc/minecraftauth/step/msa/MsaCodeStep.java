@@ -23,7 +23,7 @@ import lombok.Value;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import org.apache.http.client.HttpClient;
 
-public class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends AbstractStep<I, MsaCodeStep.MsaCode> {
+public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends AbstractStep<I, MsaCodeStep.MsaCode> {
 
     protected final String clientId;
     protected final String scope;

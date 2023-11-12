@@ -20,6 +20,7 @@ package net.raphimc.minecraftauth.step.msa;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.raphimc.minecraftauth.MinecraftAuth;
+import net.raphimc.minecraftauth.responsehandler.MsaResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;

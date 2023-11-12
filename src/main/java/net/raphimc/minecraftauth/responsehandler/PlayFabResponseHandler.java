@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.minecraftauth.step.bedrock;
+package net.raphimc.minecraftauth.responsehandler;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

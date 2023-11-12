@@ -15,32 +15,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.minecraftauth.step.xbl;
+package net.raphimc.minecraftauth.responsehandler;
 
-import net.raphimc.minecraftauth.util.MicrosoftConstants;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
+import org.apache.http.entity.ContentType;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 
-public class XblResponseHandler implements ResponseHandler<String> {
+public class MsaResponseHandler implements ResponseHandler<String> {
 
     @Override
     public String handleResponse(HttpResponse response) throws IOException {
         final StatusLine statusLine = response.getStatusLine();
         final HttpEntity entity = response.getEntity();
+        final String body = entity == null ? null : EntityUtils.toString(entity);
         if (statusLine.getStatusCode() >= 300) {
-            EntityUtils.consumeQuietly(entity);
-            if (response.containsHeader("X-Err")) {
-                throw new HttpResponseException(statusLine.getStatusCode(), MicrosoftConstants.XBOX_LIVE_ERRORS.getOrDefault(Long.valueOf(response.getFirstHeader("X-Err").getValue()), "Error code: " + response.getFirstHeader("X-Err").getValue()));
+            if (body != null && ContentType.getOrDefault(entity).getMimeType().equals(ContentType.APPLICATION_JSON.getMimeType())) {
+                final JsonObject obj = (JsonObject) JsonParser.parseString(body);
+                if (obj.has("error") && obj.has("error_description")) {
+                    throw new HttpResponseException(statusLine.getStatusCode(), obj.get("error").getAsString() + ": " + obj.get("error_description").getAsString());
+                }
             }
             throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
         }
-        return entity == null ? null : EntityUtils.toString(entity);
+        return body;
     }
 
 }

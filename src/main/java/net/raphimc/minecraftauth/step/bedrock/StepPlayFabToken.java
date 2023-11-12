@@ -22,6 +22,7 @@ import com.google.gson.JsonParser;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
+import net.raphimc.minecraftauth.responsehandler.PlayFabResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
 import net.raphimc.minecraftauth.util.MicrosoftConstants;

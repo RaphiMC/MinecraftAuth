@@ -24,6 +24,7 @@ import com.google.gson.JsonPrimitive;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
+import net.raphimc.minecraftauth.responsehandler.XblResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.session.StepFullXblSession;
 import net.raphimc.minecraftauth.step.xbl.session.StepInitialXblSession;

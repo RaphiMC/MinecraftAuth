@@ -21,6 +21,7 @@ import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
+import net.raphimc.minecraftauth.responsehandler.MsaCredentialsResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import org.apache.http.HttpHeaders;
 import org.apache.http.NameValuePair;
