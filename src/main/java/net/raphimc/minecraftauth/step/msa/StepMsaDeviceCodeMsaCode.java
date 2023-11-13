@@ -41,25 +41,25 @@ public class StepMsaDeviceCodeMsaCode extends MsaCodeStep<StepMsaDeviceCode.MsaD
 
     private final int timeout;
 
-    public StepMsaDeviceCodeMsaCode(AbstractStep<?, StepMsaDeviceCode.MsaDeviceCode> prevStep, String clientId, String scope, final int timeout) {
+    public StepMsaDeviceCodeMsaCode(final AbstractStep<?, StepMsaDeviceCode.MsaDeviceCode> prevStep, final String clientId, final String scope, final int timeout) {
         this(prevStep, clientId, scope, null, timeout);
     }
 
-    public StepMsaDeviceCodeMsaCode(AbstractStep<?, StepMsaDeviceCode.MsaDeviceCode> prevStep, String clientId, String scope, final String clientSecret, final int timeout) {
+    public StepMsaDeviceCodeMsaCode(final AbstractStep<?, StepMsaDeviceCode.MsaDeviceCode> prevStep, final String clientId, final String scope, final String clientSecret, final int timeout) {
         super(prevStep, clientId, scope, clientSecret);
 
         this.timeout = timeout;
     }
 
     @Override
-    public MsaCode applyStep(HttpClient httpClient, StepMsaDeviceCode.MsaDeviceCode prevResult) throws Exception {
+    public MsaCode applyStep(final HttpClient httpClient, final StepMsaDeviceCode.MsaDeviceCode msaDeviceCode) throws Exception {
         MinecraftAuth.LOGGER.info("Waiting for MSA login via device code...");
 
         final long start = System.currentTimeMillis();
-        while (!prevResult.isExpired() && System.currentTimeMillis() - start <= this.timeout) {
+        while (!msaDeviceCode.isExpired() && System.currentTimeMillis() - start <= this.timeout) {
             final List<NameValuePair> postData = new ArrayList<>();
             postData.add(new BasicNameValuePair("client_id", this.clientId));
-            postData.add(new BasicNameValuePair("device_code", prevResult.getDeviceCode()));
+            postData.add(new BasicNameValuePair("device_code", msaDeviceCode.getDeviceCode()));
             postData.add(new BasicNameValuePair("grant_type", "device_code"));
 
             final HttpPost httpPost = new HttpPost(TOKEN_URL);
@@ -68,12 +68,12 @@ public class StepMsaDeviceCodeMsaCode extends MsaCodeStep<StepMsaDeviceCode.MsaD
                 final String response = httpClient.execute(httpPost, new MsaResponseHandler());
                 final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
 
-                final MsaCode result = new MsaCode(obj.get("refresh_token").getAsString(), this.clientId, this.scope, this.clientSecret, null);
+                final MsaCode msaCode = new MsaCode(obj.get("refresh_token").getAsString(), this.clientId, this.scope, this.clientSecret, null);
                 MinecraftAuth.LOGGER.info("Got MSA Code");
-                return result;
+                return msaCode;
             } catch (HttpResponseException e) {
                 if (e.getStatusCode() == HttpStatus.SC_BAD_REQUEST && e.getReasonPhrase().startsWith("authorization_pending")) {
-                    Thread.sleep(prevResult.getIntervalMs());
+                    Thread.sleep(msaDeviceCode.getIntervalMs());
                     continue;
                 }
                 throw e;

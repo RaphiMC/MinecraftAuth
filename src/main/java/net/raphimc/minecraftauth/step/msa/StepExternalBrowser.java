@@ -50,27 +50,26 @@ public class StepExternalBrowser extends AbstractStep<StepExternalBrowser.Extern
     }
 
     @Override
-    public StepExternalBrowser.ExternalBrowser applyStep(HttpClient httpClient, StepExternalBrowser.ExternalBrowserCallback prevResult) throws Exception {
+    public StepExternalBrowser.ExternalBrowser applyStep(final HttpClient httpClient, final StepExternalBrowser.ExternalBrowserCallback externalBrowserCallback) throws Exception {
         MinecraftAuth.LOGGER.info("Creating URL for MSA login via external browser...");
 
-        if (prevResult == null) throw new IllegalStateException("Missing StepExternalBrowser.ExternalBrowserCallback input");
+        if (externalBrowserCallback == null) throw new IllegalStateException("Missing StepExternalBrowser.ExternalBrowserCallback input");
 
         try (final ServerSocket localServer = new ServerSocket(0)) {
             final int localPort = localServer.getLocalPort();
 
-            final ExternalBrowser result = new ExternalBrowser(
+            final ExternalBrowser externalBrowser = new ExternalBrowser(
                     this.getAuthenticationUrl(localPort),
                     this.redirectUri + ":" + localPort,
                     localPort);
-
-            MinecraftAuth.LOGGER.info("Created external browser MSA authentication URL: " + result.authenticationUrl);
-            prevResult.callback.accept(result);
-            return result;
+            MinecraftAuth.LOGGER.info("Created external browser MSA authentication URL: " + externalBrowser.authenticationUrl);
+            externalBrowserCallback.callback.accept(externalBrowser);
+            return externalBrowser;
         }
     }
 
     @Override
-    public ExternalBrowser fromJson(JsonObject json) {
+    public ExternalBrowser fromJson(final JsonObject json) {
         return new ExternalBrowser(
                 json.get("authenticationUrl").getAsString(),
                 json.get("redirectUri").getAsString(),
@@ -79,11 +78,11 @@ public class StepExternalBrowser extends AbstractStep<StepExternalBrowser.Extern
     }
 
     @Override
-    public JsonObject toJson(final ExternalBrowser result) {
+    public JsonObject toJson(final ExternalBrowser externalBrowser) {
         final JsonObject json = new JsonObject();
-        json.addProperty("authenticationUrl", result.authenticationUrl);
-        json.addProperty("redirectUri", result.redirectUri);
-        json.addProperty("port", result.port);
+        json.addProperty("authenticationUrl", externalBrowser.authenticationUrl);
+        json.addProperty("redirectUri", externalBrowser.redirectUri);
+        json.addProperty("port", externalBrowser.port);
         return json;
     }
 

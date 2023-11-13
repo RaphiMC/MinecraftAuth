@@ -38,12 +38,12 @@ public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends 
     }
 
     @Override
-    public MsaCode applyStep(HttpClient httpClient, I prevResult) throws Exception {
+    public MsaCode applyStep(final HttpClient httpClient, final I prevResult) throws Exception {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public MsaCode fromJson(JsonObject json) {
+    public MsaCode fromJson(final JsonObject json) {
         return new MsaCode(
                 json.get("code").getAsString(),
                 json.get("clientId").getAsString(),
@@ -53,12 +53,12 @@ public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends 
     }
 
     @Override
-    public JsonObject toJson(final MsaCode result) {
+    public JsonObject toJson(final MsaCode msaCode) {
         final JsonObject json = new JsonObject();
-        json.addProperty("code", result.code);
-        json.addProperty("clientId", result.clientId);
-        json.addProperty("scope", result.scope);
-        json.addProperty("clientSecret", result.clientSecret);
+        json.addProperty("code", msaCode.code);
+        json.addProperty("clientId", msaCode.clientId);
+        json.addProperty("scope", msaCode.scope);
+        json.addProperty("clientSecret", msaCode.clientSecret);
         return json;
     }
 

@@ -33,21 +33,21 @@ public class StepExternalBrowserMsaCode extends MsaCodeStep<StepExternalBrowser.
 
     private final int timeout;
 
-    public StepExternalBrowserMsaCode(AbstractStep<?, StepExternalBrowser.ExternalBrowser> prevStep, String clientId, String scope, final int timeout) {
+    public StepExternalBrowserMsaCode(final AbstractStep<?, StepExternalBrowser.ExternalBrowser> prevStep, final String clientId, final String scope, final int timeout) {
         this(prevStep, clientId, scope, null, timeout);
     }
 
-    public StepExternalBrowserMsaCode(AbstractStep<?, StepExternalBrowser.ExternalBrowser> prevStep, String clientId, String scope, final String clientSecret, final int timeout) {
+    public StepExternalBrowserMsaCode(final AbstractStep<?, StepExternalBrowser.ExternalBrowser> prevStep, final String clientId, final String scope, final String clientSecret, final int timeout) {
         super(prevStep, clientId, scope, clientSecret);
 
         this.timeout = timeout;
     }
 
     @Override
-    public MsaCode applyStep(HttpClient httpClient, StepExternalBrowser.ExternalBrowser prevResult) throws Exception {
+    public MsaCode applyStep(final HttpClient httpClient, final StepExternalBrowser.ExternalBrowser externalBrowser) throws Exception {
         MinecraftAuth.LOGGER.info("Waiting for MSA login via external browser...");
 
-        try (final ServerSocket localServer = new ServerSocket(prevResult.getPort())) {
+        try (final ServerSocket localServer = new ServerSocket(externalBrowser.getPort())) {
             localServer.setSoTimeout(this.timeout);
             try {
                 try (final Socket client = localServer.accept()) {
@@ -58,9 +58,9 @@ public class StepExternalBrowserMsaCode extends MsaCodeStep<StepExternalBrowser.
 
                     final Matcher m = Pattern.compile("code=([^&\\s]+)").matcher(get);
                     if (m.find()) {
-                        final MsaCode result = new MsaCode(m.group(1), this.clientId, this.scope, this.clientSecret, prevResult.getRedirectUri());
+                        final MsaCode msaCode = new MsaCode(m.group(1), this.clientId, this.scope, this.clientSecret, externalBrowser.getRedirectUri());
                         MinecraftAuth.LOGGER.info("Got MSA Code");
-                        return result;
+                        return msaCode;
                     }
                     throw new RuntimeException("Could not find MSA code");
                 }

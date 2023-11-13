@@ -52,10 +52,10 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
     }
 
     @Override
-    public MsaDeviceCode applyStep(HttpClient httpClient, StepMsaDeviceCode.MsaDeviceCodeCallback prevResult) throws Exception {
+    public MsaDeviceCode applyStep(final HttpClient httpClient, final StepMsaDeviceCode.MsaDeviceCodeCallback msaDeviceCodeCallback) throws Exception {
         MinecraftAuth.LOGGER.info("Getting device code for MSA login...");
 
-        if (prevResult == null) throw new IllegalStateException("Missing StepMsaDeviceCode.MsaDeviceCodeCallback input");
+        if (msaDeviceCodeCallback == null) throw new IllegalStateException("Missing StepMsaDeviceCode.MsaDeviceCodeCallback input");
 
         final List<NameValuePair> postData = new ArrayList<>();
         postData.add(new BasicNameValuePair("client_id", this.clientId));
@@ -67,20 +67,20 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
         final String response = httpClient.execute(httpPost, new MsaResponseHandler());
         final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
 
-        final MsaDeviceCode result = new MsaDeviceCode(
+        final MsaDeviceCode msaDeviceCode = new MsaDeviceCode(
                 System.currentTimeMillis() + obj.get("expires_in").getAsLong() * 1000,
                 obj.get("interval").getAsLong() * 1000,
                 obj.get("device_code").getAsString(),
                 obj.get("user_code").getAsString(),
                 obj.get("verification_uri").getAsString()
         );
-        MinecraftAuth.LOGGER.info("Got MSA device code, expires: " + Instant.ofEpochMilli(result.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
-        prevResult.callback.accept(result);
-        return result;
+        MinecraftAuth.LOGGER.info("Got MSA device code, expires: " + Instant.ofEpochMilli(msaDeviceCode.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        msaDeviceCodeCallback.callback.accept(msaDeviceCode);
+        return msaDeviceCode;
     }
 
     @Override
-    public MsaDeviceCode fromJson(JsonObject json) {
+    public MsaDeviceCode fromJson(final JsonObject json) {
         return new MsaDeviceCode(
                 json.get("expireTimeMs").getAsLong(),
                 json.get("intervalMs").getAsLong(),
@@ -91,13 +91,13 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
     }
 
     @Override
-    public JsonObject toJson(final MsaDeviceCode result) {
+    public JsonObject toJson(final MsaDeviceCode msaDeviceCode) {
         final JsonObject json = new JsonObject();
-        json.addProperty("expireTimeMs", result.expireTimeMs);
-        json.addProperty("intervalMs", result.intervalMs);
-        json.addProperty("deviceCode", result.deviceCode);
-        json.addProperty("userCode", result.userCode);
-        json.addProperty("verificationUrl", result.verificationUri);
+        json.addProperty("expireTimeMs", msaDeviceCode.expireTimeMs);
+        json.addProperty("intervalMs", msaDeviceCode.intervalMs);
+        json.addProperty("deviceCode", msaDeviceCode.deviceCode);
+        json.addProperty("userCode", msaDeviceCode.userCode);
+        json.addProperty("verificationUrl", msaDeviceCode.verificationUri);
         return json;
     }
 

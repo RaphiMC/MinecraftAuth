@@ -57,7 +57,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     }
 
     @Override
-    public MCChain applyStep(final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> prevResult) throws Exception {
+    public MCChain applyStep(final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
         MinecraftAuth.LOGGER.info("Authenticating with Minecraft Services...");
 
         final KeyPairGenerator secp384r1 = KeyPairGenerator.getInstance("EC");
@@ -71,7 +71,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
 
         final HttpPost httpPost = new HttpPost(MINECRAFT_LOGIN_URL);
         httpPost.setEntity(new StringEntity(postData.toString(), ContentType.APPLICATION_JSON));
-        httpPost.addHeader("Authorization", "XBL3.0 x=" + prevResult.getUserHash() + ";" + prevResult.getToken());
+        httpPost.addHeader("Authorization", "XBL3.0 x=" + xblXsts.getUserHash() + ";" + xblXsts.getToken());
         final String response = httpClient.execute(httpPost, new BasicResponseHandler());
         final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
         final JsonArray chain = obj.get("chain").getAsJsonArray();
@@ -90,7 +90,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
             MinecraftAuth.LOGGER.warn("Minecraft chain does not contain titleId! You might get kicked from some servers");
         }
 
-        final MCChain result = new MCChain(
+        final MCChain mcChain = new MCChain(
                 publicKey,
                 privateKey,
                 chain.get(0).getAsString(),
@@ -98,17 +98,17 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
                 xuid,
                 id,
                 displayName,
-                prevResult
+                xblXsts
         );
-        MinecraftAuth.LOGGER.info("Got MC Chain, name: " + result.displayName + ", uuid: " + result.id + ", xuid: " + result.xuid);
-        return result;
+        MinecraftAuth.LOGGER.info("Got MC Chain, name: " + mcChain.displayName + ", uuid: " + mcChain.id + ", xuid: " + mcChain.xuid);
+        return mcChain;
     }
 
     @Override
-    public MCChain refresh(final HttpClient httpClient, final MCChain result) throws Exception {
-        if (result.isExpired()) return super.refresh(httpClient, result);
+    public MCChain refresh(final HttpClient httpClient, final MCChain mcChain) throws Exception {
+        if (mcChain.isExpired()) return super.refresh(httpClient, mcChain);
 
-        return result;
+        return mcChain;
     }
 
     @Override
@@ -127,16 +127,16 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     }
 
     @Override
-    public JsonObject toJson(final MCChain result) {
+    public JsonObject toJson(final MCChain mcChain) {
         final JsonObject json = new JsonObject();
-        json.addProperty("publicKey", Base64.getEncoder().encodeToString(result.publicKey.getEncoded()));
-        json.addProperty("privateKey", Base64.getEncoder().encodeToString(result.privateKey.getEncoded()));
-        json.addProperty("mojangJwt", result.mojangJwt);
-        json.addProperty("identityJwt", result.identityJwt);
-        json.addProperty("xuid", result.xuid);
-        json.addProperty("id", result.id.toString());
-        json.addProperty("displayName", result.displayName);
-        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(result.xblXsts));
+        json.addProperty("publicKey", Base64.getEncoder().encodeToString(mcChain.publicKey.getEncoded()));
+        json.addProperty("privateKey", Base64.getEncoder().encodeToString(mcChain.privateKey.getEncoded()));
+        json.addProperty("mojangJwt", mcChain.mojangJwt);
+        json.addProperty("identityJwt", mcChain.identityJwt);
+        json.addProperty("xuid", mcChain.xuid);
+        json.addProperty("id", mcChain.id.toString());
+        json.addProperty("displayName", mcChain.displayName);
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(mcChain.xblXsts));
         return json;
     }
 

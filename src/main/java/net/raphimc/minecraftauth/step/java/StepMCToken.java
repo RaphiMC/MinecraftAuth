@@ -53,21 +53,21 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         final String response = httpClient.execute(httpPost, new BasicResponseHandler());
         final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
 
-        final MCToken result = new MCToken(
+        final MCToken mcToken = new MCToken(
                 obj.get("access_token").getAsString(),
                 obj.get("token_type").getAsString(),
                 System.currentTimeMillis() + obj.get("expires_in").getAsLong() * 1000,
                 xblXsts
         );
-        MinecraftAuth.LOGGER.info("Got MC Token, expires: " + Instant.ofEpochMilli(result.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
-        return result;
+        MinecraftAuth.LOGGER.info("Got MC Token, expires: " + Instant.ofEpochMilli(mcToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        return mcToken;
     }
 
     @Override
-    public MCToken refresh(final HttpClient httpClient, final MCToken result) throws Exception {
-        if (result.isExpired()) return super.refresh(httpClient, result);
+    public MCToken refresh(final HttpClient httpClient, final MCToken mcToken) throws Exception {
+        if (mcToken.isExpired()) return super.refresh(httpClient, mcToken);
 
-        return result;
+        return mcToken;
     }
 
     @Override
@@ -82,12 +82,12 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     }
 
     @Override
-    public JsonObject toJson(final MCToken result) {
+    public JsonObject toJson(final MCToken mcToken) {
         final JsonObject json = new JsonObject();
-        json.addProperty("accessToken", result.accessToken);
-        json.addProperty("tokenType", result.tokenType);
-        json.addProperty("expireTimeMs", result.expireTimeMs);
-        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(result.xblXsts));
+        json.addProperty("accessToken", mcToken.accessToken);
+        json.addProperty("tokenType", mcToken.tokenType);
+        json.addProperty("expireTimeMs", mcToken.expireTimeMs);
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(mcToken.xblXsts));
         return json;
     }
 

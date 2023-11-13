@@ -69,7 +69,7 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
         final String response = httpClient.execute(httpPost, new XblResponseHandler());
         final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
 
-        final XblSisuTokens result = new XblSisuTokens(
+        final XblSisuTokens xblSisuTokens = new XblSisuTokens(
                 new XblSisuTokens.SisuTitleToken(
                         Instant.parse(obj.getAsJsonObject("TitleToken").get("NotAfter").getAsString()).toEpochMilli(),
                         obj.getAsJsonObject("TitleToken").get("Token").getAsString(),
@@ -87,16 +87,15 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
                 ),
                 initialXblSession
         );
-
-        MinecraftAuth.LOGGER.info("Got XBL Title+User+XSTS Token, expires: " + Instant.ofEpochMilli(result.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
-        return result;
+        MinecraftAuth.LOGGER.info("Got XBL Title+User+XSTS Token, expires: " + Instant.ofEpochMilli(xblSisuTokens.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        return xblSisuTokens;
     }
 
     @Override
-    public StepXblXstsToken.XblXsts<?> refresh(final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> result) throws Exception {
-        if (result.isExpired()) return super.refresh(httpClient, result);
+    public StepXblXstsToken.XblXsts<?> refresh(final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
+        if (xblXsts.isExpired()) return super.refresh(httpClient, xblXsts);
 
-        return result;
+        return xblXsts;
     }
 
     @Override
@@ -111,8 +110,8 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
     }
 
     @Override
-    public JsonObject toJson(final StepXblXstsToken.XblXsts<?> result) {
-        final XblSisuTokens xblSisuTokens = (XblSisuTokens) result;
+    public JsonObject toJson(final StepXblXstsToken.XblXsts<?> xblXsts) {
+        final XblSisuTokens xblSisuTokens = (XblSisuTokens) xblXsts;
         final JsonObject json = new JsonObject();
         json.add("titleToken", XblSisuTokens.SisuTitleToken.toJson(xblSisuTokens.titleToken));
         json.add("userToken", XblSisuTokens.SisuUserToken.toJson(xblSisuTokens.userToken));
@@ -178,11 +177,11 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
                 );
             }
 
-            public static JsonObject toJson(final SisuTitleToken result) {
+            public static JsonObject toJson(final SisuTitleToken sisuTitleToken) {
                 final JsonObject json = new JsonObject();
-                json.addProperty("expireTimeMs", result.expireTimeMs);
-                json.addProperty("token", result.token);
-                json.addProperty("titleId", result.titleId);
+                json.addProperty("expireTimeMs", sisuTitleToken.expireTimeMs);
+                json.addProperty("token", sisuTitleToken.token);
+                json.addProperty("titleId", sisuTitleToken.titleId);
                 return json;
             }
 
@@ -203,11 +202,11 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
                 );
             }
 
-            public static JsonObject toJson(final SisuUserToken result) {
+            public static JsonObject toJson(final SisuUserToken sisuUserToken) {
                 final JsonObject json = new JsonObject();
-                json.addProperty("expireTimeMs", result.expireTimeMs);
-                json.addProperty("token", result.token);
-                json.addProperty("userHash", result.userHash);
+                json.addProperty("expireTimeMs", sisuUserToken.expireTimeMs);
+                json.addProperty("token", sisuUserToken.token);
+                json.addProperty("userHash", sisuUserToken.userHash);
                 return json;
             }
 
@@ -228,11 +227,11 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
                 );
             }
 
-            public static JsonObject toJson(final SisuXstsToken result) {
+            public static JsonObject toJson(final SisuXstsToken sisuXstsToken) {
                 final JsonObject json = new JsonObject();
-                json.addProperty("expireTimeMs", result.expireTimeMs);
-                json.addProperty("token", result.token);
-                json.addProperty("userHash", result.userHash);
+                json.addProperty("expireTimeMs", sisuXstsToken.expireTimeMs);
+                json.addProperty("token", sisuXstsToken.token);
+                json.addProperty("userHash", sisuXstsToken.userHash);
                 return json;
             }
 

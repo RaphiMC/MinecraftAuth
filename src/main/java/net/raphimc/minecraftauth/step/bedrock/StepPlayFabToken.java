@@ -43,7 +43,7 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
     }
 
     @Override
-    public PlayFabToken applyStep(final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> prevResult) throws Exception {
+    public PlayFabToken applyStep(final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
         MinecraftAuth.LOGGER.info("Authenticating with PlayFab...");
 
         final JsonObject postData = new JsonObject();
@@ -68,7 +68,7 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
         postData.add("InfoRequestParameters", infoRequestParameters);
         postData.add("PlayerSecret", null);
         postData.addProperty("TitleId", MicrosoftConstants.BEDROCK_PLAY_FAB_TITLE_ID);
-        postData.addProperty("XboxToken", "XBL3.0 x=" + prevResult.getUserHash() + ";" + prevResult.getToken());
+        postData.addProperty("XboxToken", "XBL3.0 x=" + xblXsts.getUserHash() + ";" + xblXsts.getToken());
 
         final HttpPost httpPost = new HttpPost(PLAY_FAB_URL);
         httpPost.setEntity(new StringEntity(postData.toString(), ContentType.APPLICATION_JSON));
@@ -77,23 +77,23 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
         final JsonObject data = obj.getAsJsonObject("data");
         final JsonObject entityToken = data.getAsJsonObject("EntityToken");
 
-        final PlayFabToken result = new PlayFabToken(
+        final PlayFabToken playFabToken = new PlayFabToken(
                 Instant.parse(entityToken.get("TokenExpiration").getAsString()).toEpochMilli(),
                 entityToken.get("EntityToken").getAsString(),
                 entityToken.get("Entity").getAsJsonObject().get("Id").getAsString(),
                 data.get("SessionTicket").getAsString(),
                 data.get("PlayFabId").getAsString(),
-                prevResult
+                xblXsts
         );
-        MinecraftAuth.LOGGER.info("Got PlayFab Token, expires: " + Instant.ofEpochMilli(result.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
-        return result;
+        MinecraftAuth.LOGGER.info("Got PlayFab Token, expires: " + Instant.ofEpochMilli(playFabToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        return playFabToken;
     }
 
     @Override
-    public PlayFabToken refresh(final HttpClient httpClient, final PlayFabToken result) throws Exception {
-        if (result.isExpired()) return super.refresh(httpClient, result);
+    public PlayFabToken refresh(final HttpClient httpClient, final PlayFabToken playFabToken) throws Exception {
+        if (playFabToken.isExpired()) return super.refresh(httpClient, playFabToken);
 
-        return result;
+        return playFabToken;
     }
 
     @Override
@@ -110,14 +110,14 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
     }
 
     @Override
-    public JsonObject toJson(final PlayFabToken result) {
+    public JsonObject toJson(final PlayFabToken playFabToken) {
         final JsonObject json = new JsonObject();
-        json.addProperty("expireTimeMs", result.expireTimeMs);
-        json.addProperty("entityToken", result.entityToken);
-        json.addProperty("entityId", result.entityId);
-        json.addProperty("sessionTicket", result.sessionTicket);
-        json.addProperty("playFabId", result.playFabId);
-        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(result.xblXsts));
+        json.addProperty("expireTimeMs", playFabToken.expireTimeMs);
+        json.addProperty("entityToken", playFabToken.entityToken);
+        json.addProperty("entityId", playFabToken.entityId);
+        json.addProperty("sessionTicket", playFabToken.sessionTicket);
+        json.addProperty("playFabId", playFabToken.playFabId);
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(playFabToken.xblXsts));
         return json;
     }
 

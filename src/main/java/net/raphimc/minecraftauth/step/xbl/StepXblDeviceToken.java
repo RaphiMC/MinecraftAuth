@@ -81,7 +81,7 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
         final String response = httpClient.execute(httpPost, new XblResponseHandler());
         final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
 
-        final XblDeviceToken result = new XblDeviceToken(
+        final XblDeviceToken xblDeviceToken = new XblDeviceToken(
                 publicKey,
                 privateKey,
                 id,
@@ -89,15 +89,15 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
                 obj.get("Token").getAsString(),
                 obj.getAsJsonObject("DisplayClaims").getAsJsonObject("xdi").get("did").getAsString()
         );
-        MinecraftAuth.LOGGER.info("Got XBL Device Token, expires: " + Instant.ofEpochMilli(result.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
-        return result;
+        MinecraftAuth.LOGGER.info("Got XBL Device Token, expires: " + Instant.ofEpochMilli(xblDeviceToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        return xblDeviceToken;
     }
 
     @Override
-    public XblDeviceToken refresh(final HttpClient httpClient, final XblDeviceToken result) throws Exception {
-        if (result.isExpired()) return this.applyStep(httpClient, null);
+    public XblDeviceToken refresh(final HttpClient httpClient, final XblDeviceToken xblDeviceToken) throws Exception {
+        if (xblDeviceToken.isExpired()) return this.applyStep(httpClient, null);
 
-        return result;
+        return xblDeviceToken;
     }
 
     @Override
@@ -113,14 +113,14 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
     }
 
     @Override
-    public JsonObject toJson(final XblDeviceToken result) {
+    public JsonObject toJson(final XblDeviceToken xblDeviceToken) {
         final JsonObject json = new JsonObject();
-        json.addProperty("publicKey", Base64.getEncoder().encodeToString(result.publicKey.getEncoded()));
-        json.addProperty("privateKey", Base64.getEncoder().encodeToString(result.privateKey.getEncoded()));
-        json.addProperty("id", result.id.toString());
-        json.addProperty("expireTimeMs", result.expireTimeMs);
-        json.addProperty("token", result.token);
-        json.addProperty("deviceId", result.deviceId);
+        json.addProperty("publicKey", Base64.getEncoder().encodeToString(xblDeviceToken.publicKey.getEncoded()));
+        json.addProperty("privateKey", Base64.getEncoder().encodeToString(xblDeviceToken.privateKey.getEncoded()));
+        json.addProperty("id", xblDeviceToken.id.toString());
+        json.addProperty("expireTimeMs", xblDeviceToken.expireTimeMs);
+        json.addProperty("token", xblDeviceToken.token);
+        json.addProperty("deviceId", xblDeviceToken.deviceId);
         return json;
     }
 

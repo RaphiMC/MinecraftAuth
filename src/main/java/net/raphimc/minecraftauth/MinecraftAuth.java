@@ -81,7 +81,7 @@ public class MinecraftAuth {
         private String clientId = MicrosoftConstants.JAVA_TITLE_ID;
         private String scope = MicrosoftConstants.SCOPE1;
         private String clientSecret = null;
-        private int timeout = 60;
+        private int timeout = 120;
         private String redirectUri = null;
 
         private AbstractStep<?, MsaCodeStep.MsaCode> msaCodeStep;

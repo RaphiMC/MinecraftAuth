@@ -66,21 +66,21 @@ public class StepXblTitleToken extends AbstractStep<StepInitialXblSession.Initia
         final String response = httpClient.execute(httpPost, new XblResponseHandler());
         final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
 
-        final XblTitleToken result = new XblTitleToken(
+        final XblTitleToken xblTitleToken = new XblTitleToken(
                 Instant.parse(obj.get("NotAfter").getAsString()).toEpochMilli(),
                 obj.get("Token").getAsString(),
                 obj.getAsJsonObject("DisplayClaims").getAsJsonObject("xti").get("tid").getAsString(),
                 initialXblSession
         );
-        MinecraftAuth.LOGGER.info("Got XBL Title Token, expires: " + Instant.ofEpochMilli(result.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
-        return result;
+        MinecraftAuth.LOGGER.info("Got XBL Title Token, expires: " + Instant.ofEpochMilli(xblTitleToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        return xblTitleToken;
     }
 
     @Override
-    public XblTitleToken refresh(final HttpClient httpClient, final XblTitleToken result) throws Exception {
-        if (result.isExpired()) return super.refresh(httpClient, result);
+    public XblTitleToken refresh(final HttpClient httpClient, final XblTitleToken xblTitleToken) throws Exception {
+        if (xblTitleToken.isExpired()) return super.refresh(httpClient, xblTitleToken);
 
-        return result;
+        return xblTitleToken;
     }
 
     @Override
@@ -95,12 +95,12 @@ public class StepXblTitleToken extends AbstractStep<StepInitialXblSession.Initia
     }
 
     @Override
-    public JsonObject toJson(final XblTitleToken result) {
+    public JsonObject toJson(final XblTitleToken xblTitleToken) {
         final JsonObject json = new JsonObject();
-        json.addProperty("expireTimeMs", result.expireTimeMs);
-        json.addProperty("token", result.token);
-        json.addProperty("titleId", result.titleId);
-        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(result.initialXblSession));
+        json.addProperty("expireTimeMs", xblTitleToken.expireTimeMs);
+        json.addProperty("token", xblTitleToken.token);
+        json.addProperty("titleId", xblTitleToken.titleId);
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(xblTitleToken.initialXblSession));
         return json;
     }
 

@@ -51,14 +51,14 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
             throw new IOException("No valid minecraft profile found: " + obj);
         }
 
-        final MCProfile result = new MCProfile(
+        final MCProfile mcProfile = new MCProfile(
                 UUID.fromString(obj.get("id").getAsString().replaceFirst("(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)", "$1-$2-$3-$4-$5")),
                 obj.get("name").getAsString(),
                 obj.get("skins").getAsJsonArray().get(0).getAsJsonObject().get("url").getAsString(),
                 mcToken
         );
-        MinecraftAuth.LOGGER.info("Got MC Profile, name: " + result.name + ", uuid: " + result.id);
-        return result;
+        MinecraftAuth.LOGGER.info("Got MC Profile, name: " + mcProfile.name + ", uuid: " + mcProfile.id);
+        return mcProfile;
     }
 
     @Override
@@ -73,12 +73,12 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
     }
 
     @Override
-    public JsonObject toJson(final MCProfile result) {
+    public JsonObject toJson(final MCProfile mcProfile) {
         final JsonObject json = new JsonObject();
-        json.addProperty("id", result.id.toString());
-        json.addProperty("name", result.name);
-        json.addProperty("skinUrl", result.skinUrl);
-        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(result.mcToken));
+        json.addProperty("id", mcProfile.id.toString());
+        json.addProperty("name", mcProfile.name);
+        json.addProperty("skinUrl", mcProfile.skinUrl);
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(mcProfile.mcToken));
         return json;
     }
 

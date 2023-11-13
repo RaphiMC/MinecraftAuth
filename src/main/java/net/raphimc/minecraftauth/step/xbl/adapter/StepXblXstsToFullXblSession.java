@@ -30,8 +30,8 @@ public class StepXblXstsToFullXblSession extends AbstractStep<StepXblXstsToken.X
     }
 
     @Override
-    public StepFullXblSession.FullXblSession applyStep(final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> prevResult) throws Exception {
-        return new FullXblSessionWrapper(prevResult);
+    public StepFullXblSession.FullXblSession applyStep(final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
+        return new FullXblSessionWrapper(xblXsts);
     }
 
     @Override
@@ -40,8 +40,8 @@ public class StepXblXstsToFullXblSession extends AbstractStep<StepXblXstsToken.X
     }
 
     @Override
-    public JsonObject toJson(final StepFullXblSession.FullXblSession result) {
-        final FullXblSessionWrapper fullXblSessionWrapper = (FullXblSessionWrapper) result;
+    public JsonObject toJson(final StepFullXblSession.FullXblSession fullXblSession) {
+        final FullXblSessionWrapper fullXblSessionWrapper = (FullXblSessionWrapper) fullXblSession;
 
         return this.prevStep.toJson(fullXblSessionWrapper.xblXsts);
     }

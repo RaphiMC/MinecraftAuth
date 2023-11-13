@@ -48,10 +48,10 @@ public class StepFullXblSession extends SameInputOptionalMergeStep<StepXblUserTo
     }
 
     @Override
-    protected JsonObject toRawJson(final FullXblSession result) {
+    protected JsonObject toRawJson(final FullXblSession fullXblSession) {
         final JsonObject json = new JsonObject();
-        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(result.xblUserToken));
-        if (this.prevStep2 != null) json.add(this.prevStep2.name, this.prevStep2.toJson(result.xblTitleToken));
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(fullXblSession.xblUserToken));
+        if (this.prevStep2 != null) json.add(this.prevStep2.name, this.prevStep2.toJson(fullXblSession.xblTitleToken));
         return json;
     }
 

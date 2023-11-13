@@ -76,21 +76,21 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
         final String response = httpClient.execute(httpPost, new XblResponseHandler());
         final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
 
-        final XblXstsToken result = new XblXstsToken(
+        final XblXstsToken xblXstsToken = new XblXstsToken(
                 Instant.parse(obj.get("NotAfter").getAsString()).toEpochMilli(),
                 obj.get("Token").getAsString(),
                 obj.getAsJsonObject("DisplayClaims").getAsJsonArray("xui").get(0).getAsJsonObject().get("uhs").getAsString(),
                 fullXblSession
         );
-        MinecraftAuth.LOGGER.info("Got XSTS Token, expires: " + Instant.ofEpochMilli(result.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
-        return result;
+        MinecraftAuth.LOGGER.info("Got XSTS Token, expires: " + Instant.ofEpochMilli(xblXstsToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        return xblXstsToken;
     }
 
     @Override
-    public StepXblXstsToken.XblXsts<?> refresh(final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> result) throws Exception {
-        if (result.isExpired()) return super.refresh(httpClient, result);
+    public StepXblXstsToken.XblXsts<?> refresh(final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
+        if (xblXsts.isExpired()) return super.refresh(httpClient, xblXsts);
 
-        return result;
+        return xblXsts;
     }
 
     @Override
@@ -105,8 +105,8 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
     }
 
     @Override
-    public JsonObject toJson(final XblXsts<?> result) {
-        final XblXstsToken xblXstsToken = (XblXstsToken) result;
+    public JsonObject toJson(final XblXsts<?> xblXsts) {
+        final XblXstsToken xblXstsToken = (XblXstsToken) xblXsts;
         final JsonObject json = new JsonObject();
         json.addProperty("expireTimeMs", xblXstsToken.expireTimeMs);
         json.addProperty("token", xblXstsToken.token);

@@ -47,10 +47,10 @@ public class StepFullBedrockSession extends SameInputOptionalMergeStep<StepMCCha
     }
 
     @Override
-    protected JsonObject toRawJson(final FullBedrockSession result) {
+    protected JsonObject toRawJson(final FullBedrockSession fullBedrockSession) {
         final JsonObject json = new JsonObject();
-        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(result.mcChain));
-        if (this.prevStep2 != null) json.add(this.prevStep2.name, this.prevStep2.toJson(result.playFabToken));
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(fullBedrockSession.mcChain));
+        if (this.prevStep2 != null) json.add(this.prevStep2.name, this.prevStep2.toJson(fullBedrockSession.playFabToken));
         return json;
     }
 

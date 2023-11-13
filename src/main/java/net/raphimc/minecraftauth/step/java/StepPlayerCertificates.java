@@ -69,7 +69,7 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
         );
         final RSAPublicKey publicKey = (RSAPublicKey) CryptUtil.RSA_KEYFACTORY.generatePublic(encodedPublicKey);
 
-        final PlayerCertificates result = new PlayerCertificates(
+        final PlayerCertificates playerCertificates = new PlayerCertificates(
                 Instant.parse(obj.get("expiresAt").getAsString()).toEpochMilli(),
                 publicKey,
                 privateKey,
@@ -77,15 +77,15 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
                 obj.has("publicKeySignature") ? Base64.getMimeDecoder().decode(obj.get("publicKeySignature").getAsString()) : new byte[0],
                 mcToken
         );
-        MinecraftAuth.LOGGER.info("Got player certificates, expires: " + Instant.ofEpochMilli(result.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
-        return result;
+        MinecraftAuth.LOGGER.info("Got player certificates, expires: " + Instant.ofEpochMilli(playerCertificates.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        return playerCertificates;
     }
 
     @Override
-    public PlayerCertificates refresh(final HttpClient httpClient, final PlayerCertificates result) throws Exception {
-        if (result.isExpired()) return super.refresh(httpClient, result);
+    public PlayerCertificates refresh(final HttpClient httpClient, final PlayerCertificates playerCertificates) throws Exception {
+        if (playerCertificates.isExpired()) return super.refresh(httpClient, playerCertificates);
 
-        return result;
+        return playerCertificates;
     }
 
     @Override
@@ -102,14 +102,14 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
     }
 
     @Override
-    public JsonObject toJson(final PlayerCertificates result) {
+    public JsonObject toJson(final PlayerCertificates playerCertificates) {
         final JsonObject json = new JsonObject();
-        json.addProperty("expireTimeMs", result.expireTimeMs);
-        json.addProperty("publicKey", Base64.getEncoder().encodeToString(result.publicKey.getEncoded()));
-        json.addProperty("privateKey", Base64.getEncoder().encodeToString(result.privateKey.getEncoded()));
-        json.addProperty("publicKeySignature", Base64.getEncoder().encodeToString(result.publicKeySignature));
-        json.addProperty("legacyPublicKeySignature", Base64.getEncoder().encodeToString(result.legacyPublicKeySignature));
-        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(result.mcToken));
+        json.addProperty("expireTimeMs", playerCertificates.expireTimeMs);
+        json.addProperty("publicKey", Base64.getEncoder().encodeToString(playerCertificates.publicKey.getEncoded()));
+        json.addProperty("privateKey", Base64.getEncoder().encodeToString(playerCertificates.privateKey.getEncoded()));
+        json.addProperty("publicKeySignature", Base64.getEncoder().encodeToString(playerCertificates.publicKeySignature));
+        json.addProperty("legacyPublicKeySignature", Base64.getEncoder().encodeToString(playerCertificates.legacyPublicKeySignature));
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(playerCertificates.mcToken));
         return json;
     }
 
