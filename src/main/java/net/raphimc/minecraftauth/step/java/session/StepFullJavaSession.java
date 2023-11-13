@@ -41,8 +41,8 @@ public class StepFullJavaSession extends SameInputOptionalMergeStep<StepMCProfil
 
     @Override
     protected FullJavaSession fromDeduplicatedJson(final JsonObject json) {
-        final StepMCProfile.MCProfile mcProfile = this.prevStep.fromJson(json.getAsJsonObject("mcProfile"));
-        final StepPlayerCertificates.PlayerCertificates playerCertificates = this.prevStep2.fromJson(json.getAsJsonObject("playerCertificates"));
+        final StepMCProfile.MCProfile mcProfile = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("mcProfile")) : null;
+        final StepPlayerCertificates.PlayerCertificates playerCertificates = this.prevStep2 != null ? this.prevStep2.fromJson(json.getAsJsonObject("playerCertificates")) : null;
         return new FullJavaSession(mcProfile, playerCertificates);
     }
 
