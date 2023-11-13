@@ -101,6 +101,18 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
         );
     }
 
+    @Override
+    public JsonObject toJson(final PlayerCertificates result) {
+        final JsonObject json = new JsonObject();
+        json.addProperty("expireTimeMs", result.expireTimeMs);
+        json.addProperty("publicKey", Base64.getEncoder().encodeToString(result.publicKey.getEncoded()));
+        json.addProperty("privateKey", Base64.getEncoder().encodeToString(result.privateKey.getEncoded()));
+        json.addProperty("publicKeySignature", Base64.getEncoder().encodeToString(result.publicKeySignature));
+        json.addProperty("legacyPublicKeySignature", Base64.getEncoder().encodeToString(result.legacyPublicKeySignature));
+        if (this.prevStep != null) json.add("mcToken", this.prevStep.toJson(result.mcToken));
+        return json;
+    }
+
     @Value
     @EqualsAndHashCode(callSuper = false)
     public static class PlayerCertificates extends AbstractStep.StepResult<StepMCToken.MCToken> {
@@ -115,18 +127,6 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
         @Override
         protected StepMCToken.MCToken prevResult() {
             return this.mcToken;
-        }
-
-        @Override
-        public JsonObject toJson() {
-            final JsonObject json = new JsonObject();
-            json.addProperty("expireTimeMs", this.expireTimeMs);
-            json.addProperty("publicKey", Base64.getEncoder().encodeToString(this.publicKey.getEncoded()));
-            json.addProperty("privateKey", Base64.getEncoder().encodeToString(this.privateKey.getEncoded()));
-            json.addProperty("publicKeySignature", Base64.getEncoder().encodeToString(this.publicKeySignature));
-            json.addProperty("legacyPublicKeySignature", Base64.getEncoder().encodeToString(this.legacyPublicKeySignature));
-            if (this.mcToken != null) json.add("mcToken", this.mcToken.toJson());
-            return json;
         }
 
         @Override

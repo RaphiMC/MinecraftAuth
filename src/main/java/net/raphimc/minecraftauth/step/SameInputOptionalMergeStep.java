@@ -17,23 +17,51 @@
  */
 package net.raphimc.minecraftauth.step;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.apache.http.client.HttpClient;
 
 import java.lang.reflect.ParameterizedType;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public abstract class SameInputOptionalMergeStep<I1 extends AbstractStep.StepResult<?>, I2 extends AbstractStep.StepResult<?>, I extends AbstractStep.StepResult<?>, O extends OptionalMergeStep.StepResult<?, ?>> extends OptionalMergeStep<I1, I2, O> {
+
+    private final List<AbstractStep<?, ?>> stepsUntilSameInput = new ArrayList<>();
+    private final int step1SameInputOffset;
 
     public SameInputOptionalMergeStep(final AbstractStep<I, I1> prevStep1, final AbstractStep<I, I2> prevStep2) {
         super(prevStep1, prevStep2);
 
-        if (this.prevStep2 != null && !((ParameterizedType) this.prevStep.getClass().getGenericSuperclass()).getActualTypeArguments()[0].equals(((ParameterizedType) this.prevStep2.getClass().getGenericSuperclass()).getActualTypeArguments()[0])) {
-            throw new IllegalStateException("Steps do not take the same input");
+        STEP2_CHECK:
+        if (this.prevStep2 != null) {
+            if (!((ParameterizedType) this.prevStep.getClass().getGenericSuperclass()).getActualTypeArguments()[0].equals(((ParameterizedType) this.prevStep2.getClass().getGenericSuperclass()).getActualTypeArguments()[0])) {
+                throw new IllegalStateException("Steps do not take the same input");
+            }
+
+            this.stepsUntilSameInput.add(this.prevStep2);
+            AbstractStep<?, ?> step2 = this.prevStep2;
+            while ((step2 = step2.prevStep) != null) {
+                this.stepsUntilSameInput.add(step2);
+                AbstractStep<?, ?> step1 = this.prevStep;
+                int steps1Offset = 0;
+                while ((step1 = step1.prevStep) != null) {
+                    steps1Offset++;
+                    if (step2 == step1) {
+                        Collections.reverse(this.stepsUntilSameInput);
+                        this.stepsUntilSameInput.remove(0);
+                        this.step1SameInputOffset = steps1Offset;
+                        break STEP2_CHECK;
+                    }
+                }
+            }
+
+            throw new IllegalStateException("Cannot find a common step");
+        } else {
+            this.step1SameInputOffset = 0;
         }
+
+        System.out.println(this.step1SameInputOffset + " " + this.stepsUntilSameInput.size() + " " + getClass().getSimpleName());
     }
 
     @Override
@@ -47,84 +75,34 @@ public abstract class SameInputOptionalMergeStep<I1 extends AbstractStep.StepRes
     public O getFromInput(final HttpClient httpClient, final Object input) throws Exception {
         final I1 prevResult1 = this.prevStep.getFromInput(httpClient, input);
 
-        if (this.prevStep2 != null) {
-            final List<AbstractStep<?, ?>> steps = new ArrayList<>();
-            steps.add(this.prevStep2);
-            AbstractStep<?, ?> step2 = this.prevStep2;
-            while ((step2 = step2.prevStep) != null) {
-                steps.add(step2);
-                AbstractStep<?, ?> step1 = this.prevStep;
-                AbstractStep.StepResult<?> result2 = prevResult1;
-                while ((step1 = step1.prevStep) != null) {
-                    result2 = result2.prevResult();
-                    if (step2 == step1) {
-                        Collections.reverse(steps);
-                        steps.remove(0);
-
-                        for (AbstractStep step : steps) {
-                            result2 = step.applyStep(httpClient, result2);
-                        }
-
-                        return this.applyStep(httpClient, prevResult1, (I2) result2);
-                    }
-                }
+        if (!this.stepsUntilSameInput.isEmpty()) {
+            AbstractStep.StepResult<?> result2 = prevResult1;
+            for (int i = 0; i < this.step1SameInputOffset; i++) {
+                result2 = result2.prevResult();
             }
 
+            for (AbstractStep step : this.stepsUntilSameInput) {
+                result2 = step.applyStep(httpClient, result2);
+            }
+
+            return this.applyStep(httpClient, prevResult1, (I2) result2);
         } else {
             return this.applyStep(httpClient, prevResult1, null);
         }
-
-        throw new IllegalStateException("Cannot find a common step");
     }
 
     @Override
     public O fromJson(final JsonObject json) {
-        if (json.has("shared")) {
-            final JsonObject shared = json.getAsJsonObject("shared");
-            json.remove("shared");
-            for (Map.Entry<String, JsonElement> entry : shared.entrySet()) {
-                json.asMap().values().stream()
-                        .filter(JsonElement::isJsonObject)
-                        .map(JsonElement::getAsJsonObject)
-                        .forEach(jsonObject -> jsonObject.add(entry.getKey(), entry.getValue()));
-            }
-        }
-
         return this.fromDeduplicatedJson(json);
+    }
+
+    @Override
+    public JsonObject toJson(final O result) {
+        return this.toRawJson(result);
     }
 
     protected abstract O fromDeduplicatedJson(final JsonObject json);
 
-    public abstract static class StepResult<P1 extends AbstractStep.StepResult<?>, P2 extends AbstractStep.StepResult<?>> extends OptionalMergeStep.StepResult<P1, P2> {
-
-        @Override
-        public JsonObject toJson() {
-            final JsonObject json = this._toJson();
-
-            final Map<String, JsonElement> shared = json.asMap().values().stream()
-                    .filter(JsonElement::isJsonObject)
-                    .map(JsonElement::getAsJsonObject)
-                    .map(JsonObject::entrySet)
-                    .flatMap(Set::stream)
-                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream()
-                    .filter(entry -> entry.getValue() > 1)
-                    .map(Map.Entry::getKey)
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-            json.asMap().values().stream()
-                    .filter(JsonElement::isJsonObject)
-                    .map(JsonElement::getAsJsonObject)
-                    .forEach(jsonObject -> jsonObject.entrySet().removeIf(entry -> shared.containsKey(entry.getKey())));
-
-            final JsonObject sharedObj = new JsonObject();
-            shared.forEach(sharedObj::add);
-            json.add("shared", sharedObj);
-
-            return json;
-        }
-
-        protected abstract JsonObject _toJson();
-
-    }
+    protected abstract JsonObject toRawJson(final O result);
 
 }

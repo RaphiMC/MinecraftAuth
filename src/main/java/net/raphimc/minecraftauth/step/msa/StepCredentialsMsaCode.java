@@ -116,11 +116,10 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
             return new MsaCredentials(json.get("email").getAsString(), json.get("password").getAsString());
         }
 
-        @Override
-        public JsonObject toJson() {
+        public static JsonObject toJson(final MsaCredentials msaCredentials) {
             final JsonObject json = new JsonObject();
-            json.addProperty("email", this.email);
-            json.addProperty("password", this.password);
+            json.addProperty("email", msaCredentials.email);
+            json.addProperty("password", msaCredentials.password);
             return json;
         }
 

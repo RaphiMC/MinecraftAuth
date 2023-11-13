@@ -68,6 +68,17 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
         );
     }
 
+    @Override
+    public JsonObject toJson(final MsaToken result) {
+        final JsonObject json = new JsonObject();
+        json.addProperty("userId", result.userId);
+        json.addProperty("expireTimeMs", result.expireTimeMs);
+        json.addProperty("accessToken", result.accessToken);
+        json.addProperty("refreshToken", result.refreshToken);
+        if (this.prevStep != null) json.add("msaCode", this.prevStep.toJson(result.msaCode));
+        return json;
+    }
+
     private MsaToken apply(final HttpClient httpClient, final String code, final String type, final MsaCodeStep.MsaCode prev_result) throws Exception {
         MinecraftAuth.LOGGER.info("Getting MSA Token...");
 
@@ -114,17 +125,6 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
         @Override
         protected MsaCodeStep.MsaCode prevResult() {
             return this.msaCode;
-        }
-
-        @Override
-        public JsonObject toJson() {
-            final JsonObject json = new JsonObject();
-            json.addProperty("userId", this.userId);
-            json.addProperty("expireTimeMs", this.expireTimeMs);
-            json.addProperty("accessToken", this.accessToken);
-            json.addProperty("refreshToken", this.refreshToken);
-            if (this.msaCode != null) json.add("msaCode", this.msaCode.toJson());
-            return json;
         }
 
         @Override

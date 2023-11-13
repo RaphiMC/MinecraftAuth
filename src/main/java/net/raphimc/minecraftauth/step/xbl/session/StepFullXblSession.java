@@ -18,9 +18,12 @@
 package net.raphimc.minecraftauth.step.xbl.session;
 
 import com.google.gson.JsonObject;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import lombok.experimental.NonFinal;
 import net.raphimc.minecraftauth.step.AbstractStep;
+import net.raphimc.minecraftauth.step.OptionalMergeStep;
 import net.raphimc.minecraftauth.step.SameInputOptionalMergeStep;
 import net.raphimc.minecraftauth.step.xbl.StepXblTitleToken;
 import net.raphimc.minecraftauth.step.xbl.StepXblUserToken;
@@ -38,18 +41,33 @@ public class StepFullXblSession extends SameInputOptionalMergeStep<StepXblUserTo
     }
 
     @Override
-    public FullXblSession fromDeduplicatedJson(final JsonObject json) {
-        final StepXblUserToken.XblUserToken xblUserToken = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("xblUserToken")) : null;
+    protected FullXblSession fromDeduplicatedJson(final JsonObject json) {
+        final StepXblUserToken.XblUserToken xblUserToken = this.prevStep.fromJson(json.getAsJsonObject("xblUserToken"));
         final StepXblTitleToken.XblTitleToken xblTitleToken = this.prevStep2 != null ? this.prevStep2.fromJson(json.getAsJsonObject("xblTitleToken")) : null;
         return new FullXblSession(xblUserToken, xblTitleToken);
     }
 
+    @Override
+    protected JsonObject toRawJson(final FullXblSession result) {
+        final JsonObject json = new JsonObject();
+        if (this.prevStep != null) json.add("xblUserToken", this.prevStep.toJson(result.xblUserToken));
+        if (this.prevStep2 != null) json.add("xblTitleToken", this.prevStep2.toJson(result.xblTitleToken));
+        return json;
+    }
+
     @Value
+    @NonFinal
+    @AllArgsConstructor
     @EqualsAndHashCode(callSuper = false)
-    public static class FullXblSession extends SameInputOptionalMergeStep.StepResult<StepXblUserToken.XblUserToken, StepXblTitleToken.XblTitleToken> {
+    public static class FullXblSession extends OptionalMergeStep.StepResult<StepXblUserToken.XblUserToken, StepXblTitleToken.XblTitleToken> {
 
         StepXblUserToken.XblUserToken xblUserToken;
         StepXblTitleToken.XblTitleToken xblTitleToken;
+
+        public FullXblSession(final FullXblSession fullXblSession) {
+            this.xblUserToken = fullXblSession.xblUserToken;
+            this.xblTitleToken = fullXblSession.xblTitleToken;
+        }
 
         @Override
         protected StepXblUserToken.XblUserToken prevResult() {
@@ -59,14 +77,6 @@ public class StepFullXblSession extends SameInputOptionalMergeStep<StepXblUserTo
         @Override
         protected StepXblTitleToken.XblTitleToken prevResult2() {
             return this.xblTitleToken;
-        }
-
-        @Override
-        protected JsonObject _toJson() {
-            final JsonObject json = new JsonObject();
-            if (this.xblUserToken != null) json.add("xblUserToken", this.xblUserToken.toJson());
-            if (this.xblTitleToken != null) json.add("xblTitleToken", this.xblTitleToken.toJson());
-            return json;
         }
 
     }

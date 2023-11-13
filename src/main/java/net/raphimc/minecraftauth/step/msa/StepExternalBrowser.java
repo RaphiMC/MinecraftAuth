@@ -78,6 +78,15 @@ public class StepExternalBrowser extends AbstractStep<StepExternalBrowser.Extern
         );
     }
 
+    @Override
+    public JsonObject toJson(final ExternalBrowser result) {
+        final JsonObject json = new JsonObject();
+        json.addProperty("authenticationUrl", result.authenticationUrl);
+        json.addProperty("redirectUri", result.redirectUri);
+        json.addProperty("port", result.port);
+        return json;
+    }
+
     private String getAuthenticationUrl(final int localPort) throws URISyntaxException {
         return new URIBuilder(AUTHORIZE_URL)
                 .setParameter("client_id", this.clientId)
@@ -99,15 +108,6 @@ public class StepExternalBrowser extends AbstractStep<StepExternalBrowser.Extern
         @Override
         protected StepResult<?> prevResult() {
             return null;
-        }
-
-        @Override
-        public JsonObject toJson() {
-            final JsonObject json = new JsonObject();
-            json.addProperty("authenticationUrl", this.authenticationUrl);
-            json.addProperty("redirectUri", this.redirectUri);
-            json.addProperty("port", this.port);
-            return json;
         }
 
     }

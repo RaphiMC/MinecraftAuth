@@ -21,6 +21,7 @@ import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.step.AbstractStep;
+import net.raphimc.minecraftauth.step.OptionalMergeStep;
 import net.raphimc.minecraftauth.step.SameInputOptionalMergeStep;
 import net.raphimc.minecraftauth.step.java.StepMCProfile;
 import net.raphimc.minecraftauth.step.java.StepMCToken;
@@ -39,15 +40,23 @@ public class StepFullJavaSession extends SameInputOptionalMergeStep<StepMCProfil
     }
 
     @Override
-    public FullJavaSession fromDeduplicatedJson(final JsonObject json) {
+    protected FullJavaSession fromDeduplicatedJson(final JsonObject json) {
         final StepMCProfile.MCProfile mcProfile = this.prevStep.fromJson(json.getAsJsonObject("mcProfile"));
         final StepPlayerCertificates.PlayerCertificates playerCertificates = this.prevStep2.fromJson(json.getAsJsonObject("playerCertificates"));
         return new FullJavaSession(mcProfile, playerCertificates);
     }
 
+    @Override
+    protected JsonObject toRawJson(final FullJavaSession result) {
+        final JsonObject json = new JsonObject();
+        if (this.prevStep != null) json.add("mcProfile", this.prevStep.toJson(result.mcProfile));
+        if (this.prevStep2 != null) json.add("playerCertificates", this.prevStep2.toJson(result.playerCertificates));
+        return json;
+    }
+
     @Value
     @EqualsAndHashCode(callSuper = false)
-    public static class FullJavaSession extends SameInputOptionalMergeStep.StepResult<StepMCProfile.MCProfile, StepPlayerCertificates.PlayerCertificates> {
+    public static class FullJavaSession extends OptionalMergeStep.StepResult<StepMCProfile.MCProfile, StepPlayerCertificates.PlayerCertificates> {
 
         StepMCProfile.MCProfile mcProfile;
         StepPlayerCertificates.PlayerCertificates playerCertificates;
@@ -60,14 +69,6 @@ public class StepFullJavaSession extends SameInputOptionalMergeStep<StepMCProfil
         @Override
         protected StepPlayerCertificates.PlayerCertificates prevResult2() {
             return this.playerCertificates;
-        }
-
-        @Override
-        protected JsonObject _toJson() {
-            final JsonObject json = new JsonObject();
-            if (this.mcProfile != null) json.add("mcProfile", this.mcProfile.toJson());
-            if (this.playerCertificates != null) json.add("playerCertificates", this.playerCertificates.toJson());
-            return json;
         }
 
     }

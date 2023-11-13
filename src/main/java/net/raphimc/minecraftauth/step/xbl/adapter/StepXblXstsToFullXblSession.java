@@ -31,12 +31,31 @@ public class StepXblXstsToFullXblSession extends AbstractStep<StepXblXstsToken.X
 
     @Override
     public StepFullXblSession.FullXblSession applyStep(final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> prevResult) throws Exception {
-        return prevResult.getFullXblSession();
+        return new FullXblSessionWrapper(prevResult);
     }
 
     @Override
     public StepFullXblSession.FullXblSession fromJson(final JsonObject json) {
-        return this.prevStep.fromJson(json).getFullXblSession();
+        return new FullXblSessionWrapper(this.prevStep.fromJson(json));
+    }
+
+    @Override
+    public JsonObject toJson(final StepFullXblSession.FullXblSession result) {
+        final FullXblSessionWrapper fullXblSessionWrapper = (FullXblSessionWrapper) result;
+
+        return this.prevStep.toJson(fullXblSessionWrapper.xblXsts);
+    }
+
+    private static class FullXblSessionWrapper extends StepFullXblSession.FullXblSession {
+
+        private final StepXblXstsToken.XblXsts<?> xblXsts;
+
+        public FullXblSessionWrapper(final StepXblXstsToken.XblXsts<?> xblXsts) {
+            super(xblXsts.getFullXblSession());
+
+            this.xblXsts = xblXsts;
+        }
+
     }
 
 }

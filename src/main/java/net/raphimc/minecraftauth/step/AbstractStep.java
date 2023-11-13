@@ -40,11 +40,11 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
 
     public abstract O fromJson(final JsonObject json);
 
+    public abstract JsonObject toJson(final O result);
+
     public abstract static class StepResult<P extends StepResult<?>> {
 
         protected abstract P prevResult();
-
-        public abstract JsonObject toJson();
 
         public boolean isExpired() {
             return true;
@@ -56,11 +56,6 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
 
         @Override
         protected StepResult<?> prevResult() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public JsonObject toJson() {
             throw new UnsupportedOperationException();
         }
 

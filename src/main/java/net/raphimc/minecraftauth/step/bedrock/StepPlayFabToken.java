@@ -109,6 +109,18 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
         );
     }
 
+    @Override
+    public JsonObject toJson(final PlayFabToken result) {
+        final JsonObject json = new JsonObject();
+        json.addProperty("expireTimeMs", result.expireTimeMs);
+        json.addProperty("entityToken", result.entityToken);
+        json.addProperty("entityId", result.entityId);
+        json.addProperty("sessionTicket", result.sessionTicket);
+        json.addProperty("playFabId", result.playFabId);
+        if (this.prevStep != null) json.add("xblXsts", this.prevStep.toJson(result.xblXsts));
+        return json;
+    }
+
     @Value
     @EqualsAndHashCode(callSuper = false)
     public static class PlayFabToken extends AbstractStep.StepResult<StepXblXstsToken.XblXsts<?>> {
@@ -123,18 +135,6 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
         @Override
         protected StepXblXstsToken.XblXsts<?> prevResult() {
             return this.xblXsts;
-        }
-
-        @Override
-        public JsonObject toJson() {
-            final JsonObject json = new JsonObject();
-            json.addProperty("expireTimeMs", this.expireTimeMs);
-            json.addProperty("entityToken", this.entityToken);
-            json.addProperty("entityId", this.entityId);
-            json.addProperty("sessionTicket", this.sessionTicket);
-            json.addProperty("playFabId", this.playFabId);
-            if (this.xblXsts != null) json.add("xblXsts", this.xblXsts.toJson());
-            return json;
         }
 
         @Override

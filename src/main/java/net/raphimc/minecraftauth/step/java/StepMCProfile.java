@@ -72,6 +72,16 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
         );
     }
 
+    @Override
+    public JsonObject toJson(final MCProfile result) {
+        final JsonObject json = new JsonObject();
+        json.addProperty("id", result.id.toString());
+        json.addProperty("name", result.name);
+        json.addProperty("skinUrl", result.skinUrl);
+        if (this.prevStep != null) json.add("mcToken", this.prevStep.toJson(result.mcToken));
+        return json;
+    }
+
     @Value
     @EqualsAndHashCode(callSuper = false)
     public static class MCProfile extends AbstractStep.StepResult<StepMCToken.MCToken> {
@@ -84,16 +94,6 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
         @Override
         protected StepMCToken.MCToken prevResult() {
             return this.mcToken;
-        }
-
-        @Override
-        public JsonObject toJson() {
-            final JsonObject json = new JsonObject();
-            json.addProperty("id", this.id.toString());
-            json.addProperty("name", this.name);
-            json.addProperty("skinUrl", this.skinUrl);
-            if (this.mcToken != null) json.add("mcToken", this.mcToken.toJson());
-            return json;
         }
 
     }

@@ -90,6 +90,17 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
         );
     }
 
+    @Override
+    public JsonObject toJson(final MsaDeviceCode result) {
+        final JsonObject json = new JsonObject();
+        json.addProperty("expireTimeMs", result.expireTimeMs);
+        json.addProperty("intervalMs", result.intervalMs);
+        json.addProperty("deviceCode", result.deviceCode);
+        json.addProperty("userCode", result.userCode);
+        json.addProperty("verificationUrl", result.verificationUri);
+        return json;
+    }
+
     @Value
     @EqualsAndHashCode(callSuper = false)
     public static class MsaDeviceCode extends AbstractStep.StepResult<AbstractStep.StepResult<?>> {
@@ -103,17 +114,6 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
         @Override
         protected StepResult<?> prevResult() {
             return null;
-        }
-
-        @Override
-        public JsonObject toJson() {
-            final JsonObject json = new JsonObject();
-            json.addProperty("expireTimeMs", this.expireTimeMs);
-            json.addProperty("intervalMs", this.intervalMs);
-            json.addProperty("deviceCode", this.deviceCode);
-            json.addProperty("userCode", this.userCode);
-            json.addProperty("verificationUri", this.verificationUri);
-            return json;
         }
 
         @Override

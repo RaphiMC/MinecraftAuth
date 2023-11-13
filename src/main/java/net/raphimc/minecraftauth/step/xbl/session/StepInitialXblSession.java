@@ -38,10 +38,18 @@ public class StepInitialXblSession extends OptionalMergeStep<StepMsaToken.MsaTok
     }
 
     @Override
-    public InitialXblSession fromJson(JsonObject json) {
+    public InitialXblSession fromJson(final JsonObject json) {
         final StepMsaToken.MsaToken msaToken = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("msaToken")) : null;
         final StepXblDeviceToken.XblDeviceToken xblDeviceToken = this.prevStep2 != null ? this.prevStep2.fromJson(json.getAsJsonObject("xblDeviceToken")) : null;
         return new InitialXblSession(msaToken, xblDeviceToken);
+    }
+
+    @Override
+    public JsonObject toJson(final InitialXblSession result) {
+        final JsonObject json = new JsonObject();
+        if (this.prevStep != null) json.add("msaToken", this.prevStep.toJson(result.msaToken));
+        if (this.prevStep2 != null) json.add("xblDeviceToken", this.prevStep2.toJson(result.xblDeviceToken));
+        return json;
     }
 
     @Value
@@ -59,14 +67,6 @@ public class StepInitialXblSession extends OptionalMergeStep<StepMsaToken.MsaTok
         @Override
         protected StepXblDeviceToken.XblDeviceToken prevResult2() {
             return this.xblDeviceToken;
-        }
-
-        @Override
-        public JsonObject toJson() {
-            final JsonObject json = new JsonObject();
-            if (this.msaToken != null) json.add("msaToken", this.msaToken.toJson());
-            if (this.xblDeviceToken != null) json.add("xblDeviceToken", this.xblDeviceToken.toJson());
-            return json;
         }
 
     }

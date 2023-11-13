@@ -126,6 +126,20 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         );
     }
 
+    @Override
+    public JsonObject toJson(final MCChain result) {
+        final JsonObject json = new JsonObject();
+        json.addProperty("publicKey", Base64.getEncoder().encodeToString(result.publicKey.getEncoded()));
+        json.addProperty("privateKey", Base64.getEncoder().encodeToString(result.privateKey.getEncoded()));
+        json.addProperty("mojangJwt", result.mojangJwt);
+        json.addProperty("identityJwt", result.identityJwt);
+        json.addProperty("xuid", result.xuid);
+        json.addProperty("id", result.id.toString());
+        json.addProperty("displayName", result.displayName);
+        if (this.prevStep != null) json.add("xblXsts", this.prevStep.toJson(result.xblXsts));
+        return json;
+    }
+
     @Value
     @EqualsAndHashCode(callSuper = false)
     public static class MCChain extends AbstractStep.StepResult<StepXblXstsToken.XblXsts<?>> {
@@ -142,20 +156,6 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         @Override
         protected StepXblXstsToken.XblXsts<?> prevResult() {
             return this.xblXsts;
-        }
-
-        @Override
-        public JsonObject toJson() {
-            final JsonObject json = new JsonObject();
-            json.addProperty("publicKey", Base64.getEncoder().encodeToString(this.publicKey.getEncoded()));
-            json.addProperty("privateKey", Base64.getEncoder().encodeToString(this.privateKey.getEncoded()));
-            json.addProperty("mojangJwt", this.mojangJwt);
-            json.addProperty("identityJwt", this.identityJwt);
-            json.addProperty("xuid", this.xuid);
-            json.addProperty("id", this.id.toString());
-            json.addProperty("displayName", this.displayName);
-            if (this.xblXsts != null) json.add("xblXsts", this.xblXsts.toJson());
-            return json;
         }
 
     }

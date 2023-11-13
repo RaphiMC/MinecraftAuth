@@ -21,6 +21,7 @@ import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.step.AbstractStep;
+import net.raphimc.minecraftauth.step.OptionalMergeStep;
 import net.raphimc.minecraftauth.step.SameInputOptionalMergeStep;
 import net.raphimc.minecraftauth.step.bedrock.StepMCChain;
 import net.raphimc.minecraftauth.step.bedrock.StepPlayFabToken;
@@ -39,15 +40,23 @@ public class StepFullBedrockSession extends SameInputOptionalMergeStep<StepMCCha
     }
 
     @Override
-    public FullBedrockSession fromDeduplicatedJson(final JsonObject json) {
+    protected FullBedrockSession fromDeduplicatedJson(final JsonObject json) {
         final StepMCChain.MCChain mcChain = this.prevStep.fromJson(json.getAsJsonObject("mcChain"));
         final StepPlayFabToken.PlayFabToken playFabToken = this.prevStep2.fromJson(json.getAsJsonObject("playFabToken"));
         return new FullBedrockSession(mcChain, playFabToken);
     }
 
+    @Override
+    protected JsonObject toRawJson(final FullBedrockSession result) {
+        final JsonObject json = new JsonObject();
+        if (this.prevStep != null) json.add("mcChain", this.prevStep.toJson(result.mcChain));
+        if (this.prevStep2 != null) json.add("playFabToken", this.prevStep2.toJson(result.playFabToken));
+        return json;
+    }
+
     @Value
     @EqualsAndHashCode(callSuper = false)
-    public static class FullBedrockSession extends SameInputOptionalMergeStep.StepResult<StepMCChain.MCChain, StepPlayFabToken.PlayFabToken> {
+    public static class FullBedrockSession extends OptionalMergeStep.StepResult<StepMCChain.MCChain, StepPlayFabToken.PlayFabToken> {
 
         StepMCChain.MCChain mcChain;
         StepPlayFabToken.PlayFabToken playFabToken;
@@ -60,14 +69,6 @@ public class StepFullBedrockSession extends SameInputOptionalMergeStep<StepMCCha
         @Override
         protected StepPlayFabToken.PlayFabToken prevResult2() {
             return this.playFabToken;
-        }
-
-        @Override
-        protected JsonObject _toJson() {
-            final JsonObject json = new JsonObject();
-            if (this.mcChain != null) json.add("mcChain", this.mcChain.toJson());
-            if (this.playFabToken != null) json.add("playFabToken", this.playFabToken.toJson());
-            return json;
         }
 
     }

@@ -81,6 +81,16 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         );
     }
 
+    @Override
+    public JsonObject toJson(final MCToken result) {
+        final JsonObject json = new JsonObject();
+        json.addProperty("accessToken", result.accessToken);
+        json.addProperty("tokenType", result.tokenType);
+        json.addProperty("expireTimeMs", result.expireTimeMs);
+        if (this.prevStep != null) json.add("xblXsts", this.prevStep.toJson(result.xblXsts));
+        return json;
+    }
+
     @Value
     @EqualsAndHashCode(callSuper = false)
     public static class MCToken extends AbstractStep.StepResult<StepXblXstsToken.XblXsts<?>> {
@@ -93,16 +103,6 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         @Override
         protected StepXblXstsToken.XblXsts<?> prevResult() {
             return this.xblXsts;
-        }
-
-        @Override
-        public JsonObject toJson() {
-            final JsonObject json = new JsonObject();
-            json.addProperty("accessToken", this.accessToken);
-            json.addProperty("tokenType", this.tokenType);
-            json.addProperty("expireTimeMs", this.expireTimeMs);
-            if (this.xblXsts != null) json.add("xblXsts", this.xblXsts.toJson());
-            return json;
         }
 
         @Override

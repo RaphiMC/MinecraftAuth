@@ -44,7 +44,22 @@ public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends 
 
     @Override
     public MsaCode fromJson(JsonObject json) {
-        return new MsaCode(json.get("code").getAsString(), json.get("clientId").getAsString(), json.get("scope").getAsString(), json.get("clientSecret") != null && !json.get("clientSecret").isJsonNull() ? json.get("clientSecret").getAsString() : null, null);
+        return new MsaCode(
+                json.get("code").getAsString(),
+                json.get("clientId").getAsString(),
+                json.get("scope").getAsString(),
+                json.get("clientSecret") != null && !json.get("clientSecret").isJsonNull() ? json.get("clientSecret").getAsString() : null,
+                null);
+    }
+
+    @Override
+    public JsonObject toJson(final MsaCode result) {
+        final JsonObject json = new JsonObject();
+        json.addProperty("code", result.code);
+        json.addProperty("clientId", result.clientId);
+        json.addProperty("scope", result.scope);
+        json.addProperty("clientSecret", result.clientSecret);
+        return json;
     }
 
     @Value
@@ -60,16 +75,6 @@ public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends 
         @Override
         protected StepResult<?> prevResult() {
             return null;
-        }
-
-        @Override
-        public JsonObject toJson() {
-            final JsonObject json = new JsonObject();
-            json.addProperty("code", this.code);
-            json.addProperty("clientId", this.clientId);
-            json.addProperty("scope", this.scope);
-            json.addProperty("clientSecret", this.clientSecret);
-            return json;
         }
 
     }

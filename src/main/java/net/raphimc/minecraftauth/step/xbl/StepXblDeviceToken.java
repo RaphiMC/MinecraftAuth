@@ -112,6 +112,18 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
         );
     }
 
+    @Override
+    public JsonObject toJson(final XblDeviceToken result) {
+        final JsonObject json = new JsonObject();
+        json.addProperty("publicKey", Base64.getEncoder().encodeToString(result.publicKey.getEncoded()));
+        json.addProperty("privateKey", Base64.getEncoder().encodeToString(result.privateKey.getEncoded()));
+        json.addProperty("id", result.id.toString());
+        json.addProperty("expireTimeMs", result.expireTimeMs);
+        json.addProperty("token", result.token);
+        json.addProperty("deviceId", result.deviceId);
+        return json;
+    }
+
     @Value
     @EqualsAndHashCode(callSuper = false)
     public static class XblDeviceToken extends AbstractStep.StepResult<AbstractStep.StepResult<?>> {
@@ -126,18 +138,6 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
         @Override
         protected StepResult<?> prevResult() {
             return null;
-        }
-
-        @Override
-        public JsonObject toJson() {
-            final JsonObject json = new JsonObject();
-            json.addProperty("publicKey", Base64.getEncoder().encodeToString(this.publicKey.getEncoded()));
-            json.addProperty("privateKey", Base64.getEncoder().encodeToString(this.privateKey.getEncoded()));
-            json.addProperty("id", this.id.toString());
-            json.addProperty("expireTimeMs", this.expireTimeMs);
-            json.addProperty("token", this.token);
-            json.addProperty("deviceId", this.deviceId);
-            return json;
         }
 
         @Override

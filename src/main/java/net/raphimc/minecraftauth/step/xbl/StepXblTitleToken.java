@@ -94,6 +94,16 @@ public class StepXblTitleToken extends AbstractStep<StepInitialXblSession.Initia
         );
     }
 
+    @Override
+    public JsonObject toJson(final XblTitleToken result) {
+        final JsonObject json = new JsonObject();
+        json.addProperty("expireTimeMs", result.expireTimeMs);
+        json.addProperty("token", result.token);
+        json.addProperty("titleId", result.titleId);
+        if (this.prevStep != null) json.add("initialXblSession", this.prevStep.toJson(result.initialXblSession));
+        return json;
+    }
+
     @Value
     @EqualsAndHashCode(callSuper = false)
     public static class XblTitleToken extends AbstractStep.StepResult<StepInitialXblSession.InitialXblSession> {
@@ -106,16 +116,6 @@ public class StepXblTitleToken extends AbstractStep<StepInitialXblSession.Initia
         @Override
         protected StepInitialXblSession.InitialXblSession prevResult() {
             return this.initialXblSession;
-        }
-
-        @Override
-        public JsonObject toJson() {
-            final JsonObject json = new JsonObject();
-            json.addProperty("expireTimeMs", this.expireTimeMs);
-            json.addProperty("token", this.token);
-            json.addProperty("titleId", this.titleId);
-            if (this.initialXblSession != null) json.add("initialXblSession", this.initialXblSession.toJson());
-            return json;
         }
 
         @Override
