@@ -49,28 +49,28 @@ public class MinecraftAuth {
             .deviceCode()
             .withDeviceToken("Win32")
             .sisuTitleAuthentication(MicrosoftConstants.JAVA_XSTS_RELYING_PARTY)
-            .buildMinecraftJavaProfileStep();
+            .buildMinecraftJavaProfileStep(true);
 
     public static final AbstractStep<?, StepFullJavaSession.FullJavaSession> JAVA_CREDENTIALS_LOGIN = builder()
             .withClientId(MicrosoftConstants.JAVA_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
             .credentials()
             .withDeviceToken("Win32")
             .sisuTitleAuthentication(MicrosoftConstants.JAVA_XSTS_RELYING_PARTY)
-            .buildMinecraftJavaProfileStep();
+            .buildMinecraftJavaProfileStep(true);
 
     public static final AbstractStep<?, StepFullBedrockSession.FullBedrockSession> BEDROCK_DEVICE_CODE_LOGIN = builder()
             .withClientId(MicrosoftConstants.BEDROCK_ANDROID_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
             .deviceCode()
             .withDeviceToken("Android")
             .sisuTitleAuthentication(MicrosoftConstants.BEDROCK_XSTS_RELYING_PARTY)
-            .buildMinecraftBedrockChainStep();
+            .buildMinecraftBedrockChainStep(true);
 
     public static final AbstractStep<?, StepFullBedrockSession.FullBedrockSession> BEDROCK_CREDENTIALS_LOGIN = builder()
             .withClientId(MicrosoftConstants.BEDROCK_ANDROID_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
             .credentials()
             .withDeviceToken("Android")
             .sisuTitleAuthentication(MicrosoftConstants.BEDROCK_XSTS_RELYING_PARTY)
-            .buildMinecraftBedrockChainStep();
+            .buildMinecraftBedrockChainStep(true);
 
     public static MsaTokenBuilder builder() {
         return new MsaTokenBuilder();
@@ -270,14 +270,15 @@ public class MinecraftAuth {
             this.xblXstsTokenStep = parent.build();
         }
 
-        public SameInputOptionalMergeStep<StepMCProfile.MCProfile, StepPlayerCertificates.PlayerCertificates, StepMCToken.MCToken, StepFullJavaSession.FullJavaSession> buildMinecraftJavaProfileStep() {
+        public SameInputOptionalMergeStep<StepMCProfile.MCProfile, StepPlayerCertificates.PlayerCertificates, StepMCToken.MCToken, StepFullJavaSession.FullJavaSession> buildMinecraftJavaProfileStep(final boolean playerCertificates) {
             final StepMCToken mcTokenStep = new StepMCToken(this.xblXstsTokenStep);
-            return new StepFullJavaSession(new StepMCProfile(mcTokenStep), new StepPlayerCertificates(mcTokenStep));
+            final StepPlayerCertificates playerCertificatesStep = playerCertificates ? new StepPlayerCertificates(mcTokenStep) : null;
+            return new StepFullJavaSession(new StepMCProfile(mcTokenStep), playerCertificatesStep);
         }
 
-        public SameInputOptionalMergeStep<StepMCChain.MCChain, StepPlayFabToken.PlayFabToken, StepXblXstsToken.XblXsts<?>, StepFullBedrockSession.FullBedrockSession> buildMinecraftBedrockChainStep() {
+        public SameInputOptionalMergeStep<StepMCChain.MCChain, StepPlayFabToken.PlayFabToken, StepXblXstsToken.XblXsts<?>, StepFullBedrockSession.FullBedrockSession> buildMinecraftBedrockChainStep(final boolean playFabToken) {
             final StepPlayFabToken playFabTokenStep = new StepPlayFabToken(new StepXblXstsToken(new StepXblXstsToFullXblSession(this.xblXstsTokenStep), MicrosoftConstants.BEDROCK_PLAY_FAB_XSTS_RELYING_PARTY));
-            return new StepFullBedrockSession(new StepMCChain(this.xblXstsTokenStep), playFabTokenStep);
+            return new StepFullBedrockSession(new StepMCChain(this.xblXstsTokenStep), playFabToken ? playFabTokenStep : null);
         }
 
     }

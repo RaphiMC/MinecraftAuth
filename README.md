@@ -15,10 +15,10 @@ If you just want the latest jar file you can download it from [GitHub Actions](h
 MinecraftAuth provides most of its functionality through the ``MinecraftAuth`` class.
 It contains predefined login flows for Minecraft: Java Edition and Minecraft: Bedrock Edition using the official client ids and scopes.
 
-To change the client id or the scope of the application you can use the ``MinecraftAuth.builder()`` method.
+To customize/configure a login flow yourself (for example to change the client id or the scope of the application) you can use the ``MinecraftAuth.builder()`` method.
 For examples, you can look at the predefined login flows in the ``MinecraftAuth`` class.
 
-Here is an example of how to manage a Minecraft: Java Edition account, but it works the same for Minecraft: Bedrock Edition.
+Here is an example of how to manage a Minecraft: Java Edition account (For Minecraft: Bedrock Edition you can use pretty much the same code, but replace ``Java`` with ``Bedrock``):
 ### Log in using credentials
 ```java
 try (CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
