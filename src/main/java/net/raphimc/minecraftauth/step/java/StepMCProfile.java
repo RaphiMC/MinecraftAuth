@@ -35,7 +35,7 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
     public static final String MINECRAFT_PROFILE_URL = "https://api.minecraftservices.com/minecraft/profile";
 
     public StepMCProfile(final AbstractStep<?, StepMCToken.MCToken> prevStep) {
-        super(prevStep);
+        super("mcProfile", prevStep);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
 
     @Override
     public MCProfile fromJson(final JsonObject json) {
-        final StepMCToken.MCToken mcToken = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("mcToken")) : null;
+        final StepMCToken.MCToken mcToken = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         return new MCProfile(
                 UUID.fromString(json.get("id").getAsString()),
                 json.get("name").getAsString(),
@@ -78,7 +78,7 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
         json.addProperty("id", result.id.toString());
         json.addProperty("name", result.name);
         json.addProperty("skinUrl", result.skinUrl);
-        if (this.prevStep != null) json.add("mcToken", this.prevStep.toJson(result.mcToken));
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(result.mcToken));
         return json;
     }
 

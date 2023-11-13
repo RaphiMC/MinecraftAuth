@@ -43,7 +43,7 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
     public static final String PLAYER_CERTIFICATES_URL = "https://api.minecraftservices.com/player/certificates";
 
     public StepPlayerCertificates(final AbstractStep<?, StepMCToken.MCToken> prevStep) {
-        super(prevStep);
+        super("playerCertificates", prevStep);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
 
     @Override
     public PlayerCertificates fromJson(final JsonObject json) {
-        final StepMCToken.MCToken mcToken = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("mcToken")) : null;
+        final StepMCToken.MCToken mcToken = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         return new PlayerCertificates(
                 json.get("expireTimeMs").getAsLong(),
                 CryptUtil.publicKeyFromBase64(json.get("publicKey").getAsString()),
@@ -109,7 +109,7 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
         json.addProperty("privateKey", Base64.getEncoder().encodeToString(result.privateKey.getEncoded()));
         json.addProperty("publicKeySignature", Base64.getEncoder().encodeToString(result.publicKeySignature));
         json.addProperty("legacyPublicKeySignature", Base64.getEncoder().encodeToString(result.legacyPublicKeySignature));
-        if (this.prevStep != null) json.add("mcToken", this.prevStep.toJson(result.mcToken));
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(result.mcToken));
         return json;
     }
 

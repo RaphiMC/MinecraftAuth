@@ -32,7 +32,7 @@ import org.apache.http.client.HttpClient;
 public class StepFullXblSession extends SameInputOptionalMergeStep<StepXblUserToken.XblUserToken, StepXblTitleToken.XblTitleToken, StepInitialXblSession.InitialXblSession, StepFullXblSession.FullXblSession> {
 
     public StepFullXblSession(final AbstractStep<StepInitialXblSession.InitialXblSession, StepXblUserToken.XblUserToken> prevStep1, final AbstractStep<StepInitialXblSession.InitialXblSession, StepXblTitleToken.XblTitleToken> prevStep2) {
-        super(prevStep1, prevStep2);
+        super("fullXblSession", prevStep1, prevStep2);
     }
 
     @Override
@@ -42,16 +42,16 @@ public class StepFullXblSession extends SameInputOptionalMergeStep<StepXblUserTo
 
     @Override
     protected FullXblSession fromDeduplicatedJson(final JsonObject json) {
-        final StepXblUserToken.XblUserToken xblUserToken = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("xblUserToken")) : null;
-        final StepXblTitleToken.XblTitleToken xblTitleToken = this.prevStep2 != null ? this.prevStep2.fromJson(json.getAsJsonObject("xblTitleToken")) : null;
+        final StepXblUserToken.XblUserToken xblUserToken = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
+        final StepXblTitleToken.XblTitleToken xblTitleToken = this.prevStep2 != null ? this.prevStep2.fromJson(json.getAsJsonObject(this.prevStep2.name)) : null;
         return new FullXblSession(xblUserToken, xblTitleToken);
     }
 
     @Override
     protected JsonObject toRawJson(final FullXblSession result) {
         final JsonObject json = new JsonObject();
-        if (this.prevStep != null) json.add("xblUserToken", this.prevStep.toJson(result.xblUserToken));
-        if (this.prevStep2 != null) json.add("xblTitleToken", this.prevStep2.toJson(result.xblTitleToken));
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(result.xblUserToken));
+        if (this.prevStep2 != null) json.add(this.prevStep2.name, this.prevStep2.toJson(result.xblTitleToken));
         return json;
     }
 

@@ -27,11 +27,11 @@ import java.util.List;
 
 public abstract class SameInputOptionalMergeStep<I1 extends AbstractStep.StepResult<?>, I2 extends AbstractStep.StepResult<?>, I extends AbstractStep.StepResult<?>, O extends OptionalMergeStep.StepResult<?, ?>> extends OptionalMergeStep<I1, I2, O> {
 
-    private final List<AbstractStep<?, ?>> stepsUntilSameInput = new ArrayList<>();
-    private final int step1SameInputOffset;
+    private final List<AbstractStep<?, ?>> steps1UntilSameInput = new ArrayList<>();
+    private final List<AbstractStep<?, ?>> steps2UntilSameInput = new ArrayList<>();
 
-    public SameInputOptionalMergeStep(final AbstractStep<I, I1> prevStep1, final AbstractStep<I, I2> prevStep2) {
-        super(prevStep1, prevStep2);
+    public SameInputOptionalMergeStep(final String name, final AbstractStep<I, I1> prevStep1, final AbstractStep<I, I2> prevStep2) {
+        super(name, prevStep1, prevStep2);
 
         STEP2_CHECK:
         if (this.prevStep2 != null) {
@@ -39,29 +39,26 @@ public abstract class SameInputOptionalMergeStep<I1 extends AbstractStep.StepRes
                 throw new IllegalStateException("Steps do not take the same input");
             }
 
-            this.stepsUntilSameInput.add(this.prevStep2);
+            this.steps2UntilSameInput.add(this.prevStep2);
             AbstractStep<?, ?> step2 = this.prevStep2;
             while ((step2 = step2.prevStep) != null) {
-                this.stepsUntilSameInput.add(step2);
+                this.steps2UntilSameInput.add(step2);
+                this.steps1UntilSameInput.clear();
+                this.steps1UntilSameInput.add(this.prevStep);
+
                 AbstractStep<?, ?> step1 = this.prevStep;
-                int steps1Offset = 0;
                 while ((step1 = step1.prevStep) != null) {
-                    steps1Offset++;
+                    this.steps1UntilSameInput.add(step1);
                     if (step2 == step1) {
-                        Collections.reverse(this.stepsUntilSameInput);
-                        this.stepsUntilSameInput.remove(0);
-                        this.step1SameInputOffset = steps1Offset;
+                        Collections.reverse(this.steps2UntilSameInput);
+                        Collections.reverse(this.steps1UntilSameInput);
                         break STEP2_CHECK;
                     }
                 }
             }
 
             throw new IllegalStateException("Cannot find a common step");
-        } else {
-            this.step1SameInputOffset = 0;
         }
-
-        System.out.println(this.step1SameInputOffset + " " + this.stepsUntilSameInput.size() + " " + getClass().getSimpleName());
     }
 
     @Override
@@ -75,13 +72,14 @@ public abstract class SameInputOptionalMergeStep<I1 extends AbstractStep.StepRes
     public O getFromInput(final HttpClient httpClient, final Object input) throws Exception {
         final I1 prevResult1 = this.prevStep.getFromInput(httpClient, input);
 
-        if (!this.stepsUntilSameInput.isEmpty()) {
+        if (!this.steps2UntilSameInput.isEmpty()) {
             AbstractStep.StepResult<?> result2 = prevResult1;
-            for (int i = 0; i < this.step1SameInputOffset; i++) {
+            for (int i = 0; i < this.steps1UntilSameInput.size() - 1; i++) {
                 result2 = result2.prevResult();
             }
 
-            for (AbstractStep step : this.stepsUntilSameInput) {
+            for (int i = 1; i < this.steps2UntilSameInput.size(); i++) {
+                final AbstractStep step = this.steps2UntilSameInput.get(i);
                 result2 = step.applyStep(httpClient, result2);
             }
 
@@ -92,13 +90,49 @@ public abstract class SameInputOptionalMergeStep<I1 extends AbstractStep.StepRes
     }
 
     @Override
-    public O fromJson(final JsonObject json) {
-        return this.fromDeduplicatedJson(json);
+    public final JsonObject toJson(final O result) {
+        final JsonObject json = this.toRawJson(result);
+
+        if (!this.steps2UntilSameInput.isEmpty()) {
+            JsonObject resultJson = json;
+            for (int i = this.steps2UntilSameInput.size() - 1; i >= 1; i--) {
+                final AbstractStep<?, ?> step = this.steps2UntilSameInput.get(i);
+                if (i == 1) {
+                    resultJson.remove(step.name);
+                    break;
+                }
+
+                resultJson = resultJson.getAsJsonObject(step.name);
+            }
+        }
+
+        return json;
     }
 
     @Override
-    public JsonObject toJson(final O result) {
-        return this.toRawJson(result);
+    public final O fromJson(final JsonObject json) {
+        if (!this.steps2UntilSameInput.isEmpty()) {
+            String targetName = null;
+            JsonObject step2Json = json;
+            for (int i = this.steps2UntilSameInput.size() - 1; i >= 1; i--) {
+                final AbstractStep<?, ?> step = this.steps2UntilSameInput.get(i);
+                if (i == 1) {
+                    targetName = step.name;
+                    break;
+                }
+
+                step2Json = step2Json.getAsJsonObject(step.name);
+            }
+
+            JsonObject step1Json = json;
+            for (int i = this.steps1UntilSameInput.size() - 1; i >= 0; i--) {
+                final AbstractStep<?, ?> step = this.steps1UntilSameInput.get(i);
+                step1Json = step1Json.getAsJsonObject(step.name);
+            }
+            step2Json.add(targetName, step1Json);
+        }
+
+        return this.fromDeduplicatedJson(json);
     }
 
     protected abstract O fromDeduplicatedJson(final JsonObject json);

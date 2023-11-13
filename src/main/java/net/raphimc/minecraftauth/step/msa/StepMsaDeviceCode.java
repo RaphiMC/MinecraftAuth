@@ -45,7 +45,7 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
     private final String scope;
 
     public StepMsaDeviceCode(final String clientId, final String scope) {
-        super(null);
+        super("msaDeviceCode", null);
 
         this.clientId = clientId;
         this.scope = scope;

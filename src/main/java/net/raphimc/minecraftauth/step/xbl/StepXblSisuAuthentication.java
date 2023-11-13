@@ -42,7 +42,7 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
     private final String relyingParty;
 
     public StepXblSisuAuthentication(final AbstractStep<?, StepInitialXblSession.InitialXblSession> prevStep, final String relyingParty) {
-        super(prevStep);
+        super("xblSisuAuthentication", prevStep);
 
         this.relyingParty = relyingParty;
     }
@@ -101,7 +101,7 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
 
     @Override
     public StepXblSisuAuthentication.XblSisuTokens fromJson(final JsonObject json) {
-        final StepInitialXblSession.InitialXblSession initialXblSession = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("initialXblSession")) : null;
+        final StepInitialXblSession.InitialXblSession initialXblSession = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         return new StepXblSisuAuthentication.XblSisuTokens(
                 XblSisuTokens.SisuTitleToken.fromJson(json.getAsJsonObject("titleToken")),
                 XblSisuTokens.SisuUserToken.fromJson(json.getAsJsonObject("userToken")),
@@ -117,7 +117,7 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
         json.add("titleToken", XblSisuTokens.SisuTitleToken.toJson(xblSisuTokens.titleToken));
         json.add("userToken", XblSisuTokens.SisuUserToken.toJson(xblSisuTokens.userToken));
         json.add("xstsToken", XblSisuTokens.SisuXstsToken.toJson(xblSisuTokens.xstsToken));
-        if (this.prevStep != null) json.add("initialXblSession", this.prevStep.toJson(xblSisuTokens.initialXblSession));
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(xblSisuTokens.initialXblSession));
         return json;
     }
 

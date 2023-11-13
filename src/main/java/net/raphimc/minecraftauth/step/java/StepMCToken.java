@@ -38,7 +38,7 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     public static final String MINECRAFT_LOGIN_URL = "https://api.minecraftservices.com/authentication/login_with_xbox";
 
     public StepMCToken(final AbstractStep<?, StepXblXstsToken.XblXsts<?>> prevStep) {
-        super(prevStep);
+        super("mcToken", prevStep);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
 
     @Override
     public MCToken fromJson(final JsonObject json) {
-        final StepXblXstsToken.XblXsts<?> xblXsts = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("xblXsts")) : null;
+        final StepXblXstsToken.XblXsts<?> xblXsts = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         return new MCToken(
                 json.get("accessToken").getAsString(),
                 json.get("tokenType").getAsString(),
@@ -87,7 +87,7 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         json.addProperty("accessToken", result.accessToken);
         json.addProperty("tokenType", result.tokenType);
         json.addProperty("expireTimeMs", result.expireTimeMs);
-        if (this.prevStep != null) json.add("xblXsts", this.prevStep.toJson(result.xblXsts));
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(result.xblXsts));
         return json;
     }
 

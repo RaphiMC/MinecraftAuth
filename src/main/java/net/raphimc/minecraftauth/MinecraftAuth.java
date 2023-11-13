@@ -271,8 +271,8 @@ public class MinecraftAuth {
         }
 
         public SameInputOptionalMergeStep<StepMCProfile.MCProfile, StepPlayerCertificates.PlayerCertificates, StepMCToken.MCToken, StepFullJavaSession.FullJavaSession> buildMinecraftJavaProfileStep() {
-            final StepMCToken mctokenStep = new StepMCToken(this.xblXstsTokenStep);
-            return new StepFullJavaSession(new StepMCProfile(mctokenStep), new StepPlayerCertificates(mctokenStep));
+            final StepMCToken mcTokenStep = new StepMCToken(this.xblXstsTokenStep);
+            return new StepFullJavaSession(new StepMCProfile(mcTokenStep), new StepPlayerCertificates(mcTokenStep));
         }
 
         public SameInputOptionalMergeStep<StepMCChain.MCChain, StepPlayFabToken.PlayFabToken, StepXblXstsToken.XblXsts<?>, StepFullBedrockSession.FullBedrockSession> buildMinecraftBedrockChainStep() {

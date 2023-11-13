@@ -44,7 +44,7 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
     private final String relyingParty;
 
     public StepXblXstsToken(final AbstractStep<?, StepFullXblSession.FullXblSession> prevStep, final String relyingParty) {
-        super(prevStep);
+        super("xblXstsToken", prevStep);
 
         this.relyingParty = relyingParty;
     }
@@ -95,7 +95,7 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
 
     @Override
     public XblXstsToken fromJson(final JsonObject json) {
-        final StepFullXblSession.FullXblSession fullXblSession = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("fullXblSession")) : null;
+        final StepFullXblSession.FullXblSession fullXblSession = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         return new XblXstsToken(
                 json.get("expireTimeMs").getAsLong(),
                 json.get("token").getAsString(),
@@ -111,7 +111,7 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
         json.addProperty("expireTimeMs", xblXstsToken.expireTimeMs);
         json.addProperty("token", xblXstsToken.token);
         json.addProperty("userHash", xblXstsToken.userHash);
-        if (this.prevStep != null) json.add("fullXblSession", this.prevStep.toJson(xblXstsToken.fullXblSession));
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(xblXstsToken.fullXblSession));
         return json;
     }
 

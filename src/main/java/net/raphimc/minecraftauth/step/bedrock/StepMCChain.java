@@ -53,7 +53,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     private static final int CLOCK_SKEW = 60;
 
     public StepMCChain(final AbstractStep<?, StepXblXstsToken.XblXsts<?>> prevStep) {
-        super(prevStep);
+        super("mcChain", prevStep);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
 
     @Override
     public MCChain fromJson(final JsonObject json) {
-        final StepXblXstsToken.XblXsts<?> xblXsts = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("xblXsts")) : null;
+        final StepXblXstsToken.XblXsts<?> xblXsts = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         return new MCChain(
                 CryptUtil.publicKeyFromBase64(json.get("publicKey").getAsString()),
                 CryptUtil.privateKeyFromBase64(json.get("privateKey").getAsString()),
@@ -136,7 +136,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         json.addProperty("xuid", result.xuid);
         json.addProperty("id", result.id.toString());
         json.addProperty("displayName", result.displayName);
-        if (this.prevStep != null) json.add("xblXsts", this.prevStep.toJson(result.xblXsts));
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(result.xblXsts));
         return json;
     }
 

@@ -31,7 +31,7 @@ import org.apache.http.client.HttpClient;
 public class StepFullBedrockSession extends SameInputOptionalMergeStep<StepMCChain.MCChain, StepPlayFabToken.PlayFabToken, StepXblXstsToken.XblXsts<?>, StepFullBedrockSession.FullBedrockSession> {
 
     public StepFullBedrockSession(final AbstractStep<StepXblXstsToken.XblXsts<?>, StepMCChain.MCChain> prevStep1, final AbstractStep<StepXblXstsToken.XblXsts<?>, StepPlayFabToken.PlayFabToken> prevStep2) {
-        super(prevStep1, prevStep2);
+        super("fullBedrockSession", prevStep1, prevStep2);
     }
 
     @Override
@@ -41,16 +41,16 @@ public class StepFullBedrockSession extends SameInputOptionalMergeStep<StepMCCha
 
     @Override
     protected FullBedrockSession fromDeduplicatedJson(final JsonObject json) {
-        final StepMCChain.MCChain mcChain = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("mcChain")) : null;
-        final StepPlayFabToken.PlayFabToken playFabToken = this.prevStep2 != null ? this.prevStep2.fromJson(json.getAsJsonObject("playFabToken")) : null;
+        final StepMCChain.MCChain mcChain = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
+        final StepPlayFabToken.PlayFabToken playFabToken = this.prevStep2 != null ? this.prevStep2.fromJson(json.getAsJsonObject(this.prevStep2.name)) : null;
         return new FullBedrockSession(mcChain, playFabToken);
     }
 
     @Override
     protected JsonObject toRawJson(final FullBedrockSession result) {
         final JsonObject json = new JsonObject();
-        if (this.prevStep != null) json.add("mcChain", this.prevStep.toJson(result.mcChain));
-        if (this.prevStep2 != null) json.add("playFabToken", this.prevStep2.toJson(result.playFabToken));
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(result.mcChain));
+        if (this.prevStep2 != null) json.add(this.prevStep2.name, this.prevStep2.toJson(result.playFabToken));
         return json;
     }
 

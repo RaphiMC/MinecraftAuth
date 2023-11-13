@@ -39,7 +39,7 @@ public class StepXblUserToken extends AbstractStep<StepInitialXblSession.Initial
     public static final String XBL_USER_URL = "https://user.auth.xboxlive.com/user/authenticate";
 
     public StepXblUserToken(final AbstractStep<?, StepInitialXblSession.InitialXblSession> prevStep) {
-        super(prevStep);
+        super("xblUserToken", prevStep);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class StepXblUserToken extends AbstractStep<StepInitialXblSession.Initial
 
     @Override
     public XblUserToken fromJson(final JsonObject json) {
-        final StepInitialXblSession.InitialXblSession initialXblSession = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("initialXblSession")) : null;
+        final StepInitialXblSession.InitialXblSession initialXblSession = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         return new XblUserToken(
                 json.get("expireTimeMs").getAsLong(),
                 json.get("token").getAsString(),
@@ -101,7 +101,7 @@ public class StepXblUserToken extends AbstractStep<StepInitialXblSession.Initial
         json.addProperty("expireTimeMs", result.expireTimeMs);
         json.addProperty("token", result.token);
         json.addProperty("userHash", result.userHash);
-        if (this.prevStep != null) json.add("initialXblSession", this.prevStep.toJson(result.initialXblSession));
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(result.initialXblSession));
         return json;
     }
 

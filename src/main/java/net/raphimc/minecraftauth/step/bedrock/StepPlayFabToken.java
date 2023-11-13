@@ -39,7 +39,7 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
     public static final String PLAY_FAB_URL = "https://" + MicrosoftConstants.BEDROCK_PLAY_FAB_TITLE_ID.toLowerCase() + ".playfabapi.com/Client/LoginWithXbox";
 
     public StepPlayFabToken(final AbstractStep<?, StepXblXstsToken.XblXsts<?>> prevStep) {
-        super(prevStep);
+        super("playFabToken", prevStep);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
 
     @Override
     public PlayFabToken fromJson(final JsonObject json) {
-        final StepXblXstsToken.XblXsts<?> xblXsts = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("xblXsts")) : null;
+        final StepXblXstsToken.XblXsts<?> xblXsts = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         return new PlayFabToken(
                 json.get("expireTimeMs").getAsLong(),
                 json.get("entityToken").getAsString(),
@@ -117,7 +117,7 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
         json.addProperty("entityId", result.entityId);
         json.addProperty("sessionTicket", result.sessionTicket);
         json.addProperty("playFabId", result.playFabId);
-        if (this.prevStep != null) json.add("xblXsts", this.prevStep.toJson(result.xblXsts));
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(result.xblXsts));
         return json;
     }
 

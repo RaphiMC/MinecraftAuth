@@ -23,8 +23,8 @@ public abstract class OptionalMergeStep<I1 extends AbstractStep.StepResult<?>, I
 
     protected final AbstractStep<?, I2> prevStep2;
 
-    public OptionalMergeStep(final AbstractStep<?, I1> prevStep1, final AbstractStep<?, I2> prevStep2) {
-        super(prevStep1);
+    public OptionalMergeStep(final String name, final AbstractStep<?, I1> prevStep1, final AbstractStep<?, I2> prevStep2) {
+        super(name, prevStep1);
 
         this.prevStep2 = prevStep2;
     }

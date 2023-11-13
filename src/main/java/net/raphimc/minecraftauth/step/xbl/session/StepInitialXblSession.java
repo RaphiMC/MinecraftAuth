@@ -29,7 +29,7 @@ import org.apache.http.client.HttpClient;
 public class StepInitialXblSession extends OptionalMergeStep<StepMsaToken.MsaToken, StepXblDeviceToken.XblDeviceToken, StepInitialXblSession.InitialXblSession> {
 
     public StepInitialXblSession(final AbstractStep<?, StepMsaToken.MsaToken> prevStep1, final AbstractStep<?, StepXblDeviceToken.XblDeviceToken> prevStep2) {
-        super(prevStep1, prevStep2);
+        super("initialXblSession", prevStep1, prevStep2);
     }
 
     @Override
@@ -39,16 +39,16 @@ public class StepInitialXblSession extends OptionalMergeStep<StepMsaToken.MsaTok
 
     @Override
     public InitialXblSession fromJson(final JsonObject json) {
-        final StepMsaToken.MsaToken msaToken = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("msaToken")) : null;
-        final StepXblDeviceToken.XblDeviceToken xblDeviceToken = this.prevStep2 != null ? this.prevStep2.fromJson(json.getAsJsonObject("xblDeviceToken")) : null;
+        final StepMsaToken.MsaToken msaToken = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
+        final StepXblDeviceToken.XblDeviceToken xblDeviceToken = this.prevStep2 != null ? this.prevStep2.fromJson(json.getAsJsonObject(this.prevStep2.name)) : null;
         return new InitialXblSession(msaToken, xblDeviceToken);
     }
 
     @Override
     public JsonObject toJson(final InitialXblSession result) {
         final JsonObject json = new JsonObject();
-        if (this.prevStep != null) json.add("msaToken", this.prevStep.toJson(result.msaToken));
-        if (this.prevStep2 != null) json.add("xblDeviceToken", this.prevStep2.toJson(result.xblDeviceToken));
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(result.msaToken));
+        if (this.prevStep2 != null) json.add(this.prevStep2.name, this.prevStep2.toJson(result.xblDeviceToken));
         return json;
     }
 

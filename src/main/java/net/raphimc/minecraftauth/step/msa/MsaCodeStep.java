@@ -30,7 +30,7 @@ public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends 
     protected final String clientSecret;
 
     public MsaCodeStep(final AbstractStep<?, I> prevStep, final String clientId, final String scope, final String clientSecret) {
-        super(prevStep);
+        super("msaCode", prevStep);
 
         this.clientId = clientId;
         this.scope = scope;

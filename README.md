@@ -48,10 +48,9 @@ try (CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
 ```
 ### Save the token chain to a json object
 ```java
-JsonObject serializedSession = javaSession.toJson();
+JsonObject serializedSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.toJson(javaSession);
 ```
 ### Load the token chain from a json object
-When loading the token chain it is important to use the same login flow as when the token chain was created.
 ```java
 StepFullJavaSession.FullJavaSession loadedSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.fromJson(serializedSession);
 ```

@@ -22,9 +22,11 @@ import org.apache.http.client.HttpClient;
 
 public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O extends AbstractStep.StepResult<?>> {
 
+    public final String name;
     protected final AbstractStep<?, I> prevStep;
 
-    public AbstractStep(final AbstractStep<?, I> prevStep) {
+    public AbstractStep(final String name, final AbstractStep<?, I> prevStep) {
+        this.name = name;
         this.prevStep = prevStep;
     }
 

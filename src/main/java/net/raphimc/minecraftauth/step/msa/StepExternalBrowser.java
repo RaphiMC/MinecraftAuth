@@ -38,7 +38,7 @@ public class StepExternalBrowser extends AbstractStep<StepExternalBrowser.Extern
     private final String redirectUri;
 
     public StepExternalBrowser(final String clientId, final String scope, final String redirectUri) {
-        super(null);
+        super("externalBrowser", null);
 
         this.clientId = clientId;
         this.scope = scope;

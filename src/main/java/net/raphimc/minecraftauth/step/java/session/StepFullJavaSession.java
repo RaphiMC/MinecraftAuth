@@ -31,7 +31,7 @@ import org.apache.http.client.HttpClient;
 public class StepFullJavaSession extends SameInputOptionalMergeStep<StepMCProfile.MCProfile, StepPlayerCertificates.PlayerCertificates, StepMCToken.MCToken, StepFullJavaSession.FullJavaSession> {
 
     public StepFullJavaSession(final AbstractStep<StepMCToken.MCToken, StepMCProfile.MCProfile> prevStep1, final AbstractStep<StepMCToken.MCToken, StepPlayerCertificates.PlayerCertificates> prevStep2) {
-        super(prevStep1, prevStep2);
+        super("fullJavaSession", prevStep1, prevStep2);
     }
 
     @Override
@@ -41,16 +41,16 @@ public class StepFullJavaSession extends SameInputOptionalMergeStep<StepMCProfil
 
     @Override
     protected FullJavaSession fromDeduplicatedJson(final JsonObject json) {
-        final StepMCProfile.MCProfile mcProfile = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("mcProfile")) : null;
-        final StepPlayerCertificates.PlayerCertificates playerCertificates = this.prevStep2 != null ? this.prevStep2.fromJson(json.getAsJsonObject("playerCertificates")) : null;
+        final StepMCProfile.MCProfile mcProfile = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
+        final StepPlayerCertificates.PlayerCertificates playerCertificates = this.prevStep2 != null ? this.prevStep2.fromJson(json.getAsJsonObject(this.prevStep2.name)) : null;
         return new FullJavaSession(mcProfile, playerCertificates);
     }
 
     @Override
     protected JsonObject toRawJson(final FullJavaSession result) {
         final JsonObject json = new JsonObject();
-        if (this.prevStep != null) json.add("mcProfile", this.prevStep.toJson(result.mcProfile));
-        if (this.prevStep2 != null) json.add("playerCertificates", this.prevStep2.toJson(result.playerCertificates));
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(result.mcProfile));
+        if (this.prevStep2 != null) json.add(this.prevStep2.name, this.prevStep2.toJson(result.playerCertificates));
         return json;
     }
 

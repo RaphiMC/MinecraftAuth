@@ -26,7 +26,7 @@ import org.apache.http.client.HttpClient;
 public class StepXblXstsToFullXblSession extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepFullXblSession.FullXblSession> {
 
     public StepXblXstsToFullXblSession(final AbstractStep<?, StepXblXstsToken.XblXsts<?>> prevStep) {
-        super(prevStep);
+        super(prevStep.name, prevStep);
     }
 
     @Override

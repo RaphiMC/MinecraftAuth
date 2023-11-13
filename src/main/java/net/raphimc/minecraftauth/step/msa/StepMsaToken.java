@@ -41,7 +41,7 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
     public static final String TOKEN_URL = "https://login.live.com/oauth20_token.srf";
 
     public StepMsaToken(AbstractStep<?, MsaCodeStep.MsaCode> prevStep) {
-        super(prevStep);
+        super("msaToken", prevStep);
     }
 
     @Override
