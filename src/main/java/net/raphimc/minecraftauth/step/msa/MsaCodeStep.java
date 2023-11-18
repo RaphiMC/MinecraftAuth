@@ -64,18 +64,13 @@ public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends 
 
     @Value
     @EqualsAndHashCode(callSuper = false)
-    public static class MsaCode extends AbstractStep.StepResult<AbstractStep.StepResult<?>> {
+    public static class MsaCode extends AbstractStep.FirstStepResult {
 
         String code;
         String clientId;
         String scope;
         String clientSecret;
         String redirectUri;
-
-        @Override
-        protected StepResult<?> prevResult() {
-            return null;
-        }
 
     }
 

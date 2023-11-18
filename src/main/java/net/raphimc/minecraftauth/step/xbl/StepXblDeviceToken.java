@@ -94,13 +94,6 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
     }
 
     @Override
-    public XblDeviceToken refresh(final HttpClient httpClient, final XblDeviceToken xblDeviceToken) throws Exception {
-        if (xblDeviceToken.isExpired()) return this.applyStep(httpClient, null);
-
-        return xblDeviceToken;
-    }
-
-    @Override
     public XblDeviceToken fromJson(final JsonObject json) {
         return new XblDeviceToken(
                 CryptUtil.publicKeyFromBase64(json.get("publicKey").getAsString()),

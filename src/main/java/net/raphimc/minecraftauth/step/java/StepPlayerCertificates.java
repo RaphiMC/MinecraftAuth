@@ -82,13 +82,6 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
     }
 
     @Override
-    public PlayerCertificates refresh(final HttpClient httpClient, final PlayerCertificates playerCertificates) throws Exception {
-        if (playerCertificates.isExpired()) return super.refresh(httpClient, playerCertificates);
-
-        return playerCertificates;
-    }
-
-    @Override
     public PlayerCertificates fromJson(final JsonObject json) {
         final StepMCToken.MCToken mcToken = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         return new PlayerCertificates(

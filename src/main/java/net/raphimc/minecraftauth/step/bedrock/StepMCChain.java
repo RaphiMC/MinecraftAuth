@@ -52,8 +52,8 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     private static final ECPublicKey MOJANG_PUBLIC_KEY = CryptUtil.publicKeyFromBase64(MOJANG_PUBLIC_KEY_BASE64);
     private static final int CLOCK_SKEW = 60;
 
-    public StepMCChain(final AbstractStep<?, StepXblXstsToken.XblXsts<?>> prevStep) {
-        super("mcChain", prevStep);
+    public StepMCChain(final AbstractStep<?, ? extends StepXblXstsToken.XblXsts<?>> prevStep) {
+        super("mcChain", (AbstractStep<?, StepXblXstsToken.XblXsts<?>>) prevStep);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
 
         final HttpPost httpPost = new HttpPost(MINECRAFT_LOGIN_URL);
         httpPost.setEntity(new StringEntity(postData.toString(), ContentType.APPLICATION_JSON));
-        httpPost.addHeader("Authorization", "XBL3.0 x=" + xblXsts.getUserHash() + ";" + xblXsts.getToken());
+        httpPost.addHeader("Authorization", "XBL3.0 x=" + xblXsts.getServiceToken());
         final String response = httpClient.execute(httpPost, new BasicResponseHandler());
         final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
         final JsonArray chain = obj.get("chain").getAsJsonArray();
@@ -101,13 +101,6 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
                 xblXsts
         );
         MinecraftAuth.LOGGER.info("Got MC Chain, name: " + mcChain.displayName + ", uuid: " + mcChain.id + ", xuid: " + mcChain.xuid);
-        return mcChain;
-    }
-
-    @Override
-    public MCChain refresh(final HttpClient httpClient, final MCChain mcChain) throws Exception {
-        if (mcChain.isExpired()) return super.refresh(httpClient, mcChain);
-
         return mcChain;
     }
 

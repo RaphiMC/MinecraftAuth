@@ -35,7 +35,7 @@ import org.apache.http.entity.StringEntity;
 import java.time.Instant;
 import java.time.ZoneId;
 
-public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSession.InitialXblSession, StepXblXstsToken.XblXsts<?>> {
+public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSession.InitialXblSession, StepXblSisuAuthentication.XblSisuTokens> {
 
     public static final String XBL_SISU_URL = "https://sisu.xboxlive.com/authorize";
 
@@ -92,13 +92,6 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
     }
 
     @Override
-    public StepXblXstsToken.XblXsts<?> refresh(final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
-        if (xblXsts.isExpired()) return super.refresh(httpClient, xblXsts);
-
-        return xblXsts;
-    }
-
-    @Override
     public StepXblSisuAuthentication.XblSisuTokens fromJson(final JsonObject json) {
         final StepInitialXblSession.InitialXblSession initialXblSession = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         return new StepXblSisuAuthentication.XblSisuTokens(
@@ -110,8 +103,7 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
     }
 
     @Override
-    public JsonObject toJson(final StepXblXstsToken.XblXsts<?> xblXsts) {
-        final XblSisuTokens xblSisuTokens = (XblSisuTokens) xblXsts;
+    public JsonObject toJson(final StepXblSisuAuthentication.XblSisuTokens xblSisuTokens) {
         final JsonObject json = new JsonObject();
         json.add("titleToken", XblSisuTokens.SisuTitleToken.toJson(xblSisuTokens.titleToken));
         json.add("userToken", XblSisuTokens.SisuUserToken.toJson(xblSisuTokens.userToken));

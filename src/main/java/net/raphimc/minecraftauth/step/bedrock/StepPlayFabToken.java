@@ -38,8 +38,8 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
 
     public static final String PLAY_FAB_URL = "https://" + MicrosoftConstants.BEDROCK_PLAY_FAB_TITLE_ID.toLowerCase() + ".playfabapi.com/Client/LoginWithXbox";
 
-    public StepPlayFabToken(final AbstractStep<?, StepXblXstsToken.XblXsts<?>> prevStep) {
-        super("playFabToken", prevStep);
+    public StepPlayFabToken(final AbstractStep<?, ? extends StepXblXstsToken.XblXsts<?>> prevStep) {
+        super("playFabToken", (AbstractStep<?, StepXblXstsToken.XblXsts<?>>) prevStep);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
         postData.add("InfoRequestParameters", infoRequestParameters);
         postData.add("PlayerSecret", null);
         postData.addProperty("TitleId", MicrosoftConstants.BEDROCK_PLAY_FAB_TITLE_ID);
-        postData.addProperty("XboxToken", "XBL3.0 x=" + xblXsts.getUserHash() + ";" + xblXsts.getToken());
+        postData.addProperty("XboxToken", "XBL3.0 x=" + xblXsts.getServiceToken());
 
         final HttpPost httpPost = new HttpPost(PLAY_FAB_URL);
         httpPost.setEntity(new StringEntity(postData.toString(), ContentType.APPLICATION_JSON));
@@ -86,13 +86,6 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
                 xblXsts
         );
         MinecraftAuth.LOGGER.info("Got PlayFab Token, expires: " + Instant.ofEpochMilli(playFabToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
-        return playFabToken;
-    }
-
-    @Override
-    public PlayFabToken refresh(final HttpClient httpClient, final PlayFabToken playFabToken) throws Exception {
-        if (playFabToken.isExpired()) return super.refresh(httpClient, playFabToken);
-
         return playFabToken;
     }
 

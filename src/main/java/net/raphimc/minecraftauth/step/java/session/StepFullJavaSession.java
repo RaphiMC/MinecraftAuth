@@ -21,16 +21,15 @@ import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.step.AbstractStep;
-import net.raphimc.minecraftauth.step.OptionalMergeStep;
-import net.raphimc.minecraftauth.step.SameInputOptionalMergeStep;
+import net.raphimc.minecraftauth.step.BiMergeStep;
+import net.raphimc.minecraftauth.step.SameInputBiMergeStep;
 import net.raphimc.minecraftauth.step.java.StepMCProfile;
-import net.raphimc.minecraftauth.step.java.StepMCToken;
 import net.raphimc.minecraftauth.step.java.StepPlayerCertificates;
 import org.apache.http.client.HttpClient;
 
-public class StepFullJavaSession extends SameInputOptionalMergeStep<StepMCProfile.MCProfile, StepPlayerCertificates.PlayerCertificates, StepMCToken.MCToken, StepFullJavaSession.FullJavaSession> {
+public class StepFullJavaSession extends SameInputBiMergeStep<StepMCProfile.MCProfile, StepPlayerCertificates.PlayerCertificates, StepFullJavaSession.FullJavaSession> {
 
-    public StepFullJavaSession(final AbstractStep<StepMCToken.MCToken, StepMCProfile.MCProfile> prevStep1, final AbstractStep<StepMCToken.MCToken, StepPlayerCertificates.PlayerCertificates> prevStep2) {
+    public StepFullJavaSession(final AbstractStep<?, StepMCProfile.MCProfile> prevStep1, final AbstractStep<?, StepPlayerCertificates.PlayerCertificates> prevStep2) {
         super("fullJavaSession", prevStep1, prevStep2);
     }
 
@@ -40,14 +39,14 @@ public class StepFullJavaSession extends SameInputOptionalMergeStep<StepMCProfil
     }
 
     @Override
-    protected FullJavaSession fromDeduplicatedJson(final JsonObject json) {
+    public FullJavaSession fromRawJson(final JsonObject json) {
         final StepMCProfile.MCProfile mcProfile = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         final StepPlayerCertificates.PlayerCertificates playerCertificates = this.prevStep2 != null ? this.prevStep2.fromJson(json.getAsJsonObject(this.prevStep2.name)) : null;
         return new FullJavaSession(mcProfile, playerCertificates);
     }
 
     @Override
-    protected JsonObject toRawJson(final FullJavaSession fullJavaSession) {
+    public JsonObject toRawJson(final FullJavaSession fullJavaSession) {
         final JsonObject json = new JsonObject();
         if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(fullJavaSession.mcProfile));
         if (this.prevStep2 != null) json.add(this.prevStep2.name, this.prevStep2.toJson(fullJavaSession.playerCertificates));
@@ -56,7 +55,7 @@ public class StepFullJavaSession extends SameInputOptionalMergeStep<StepMCProfil
 
     @Value
     @EqualsAndHashCode(callSuper = false)
-    public static class FullJavaSession extends OptionalMergeStep.StepResult<StepMCProfile.MCProfile, StepPlayerCertificates.PlayerCertificates> {
+    public static class FullJavaSession extends BiMergeStep.StepResult<StepMCProfile.MCProfile, StepPlayerCertificates.PlayerCertificates> {
 
         StepMCProfile.MCProfile mcProfile;
         StepPlayerCertificates.PlayerCertificates playerCertificates;

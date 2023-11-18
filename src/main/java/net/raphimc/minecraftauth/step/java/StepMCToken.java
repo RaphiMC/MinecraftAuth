@@ -37,8 +37,8 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
 
     public static final String MINECRAFT_LOGIN_URL = "https://api.minecraftservices.com/authentication/login_with_xbox";
 
-    public StepMCToken(final AbstractStep<?, StepXblXstsToken.XblXsts<?>> prevStep) {
-        super("mcToken", prevStep);
+    public StepMCToken(final AbstractStep<?, ? extends StepXblXstsToken.XblXsts<?>> prevStep) {
+        super("mcToken", (AbstractStep<?, StepXblXstsToken.XblXsts<?>>) prevStep);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         MinecraftAuth.LOGGER.info("Authenticating with Minecraft Services...");
 
         final JsonObject postData = new JsonObject();
-        postData.addProperty("identityToken", "XBL3.0 x=" + xblXsts.getUserHash() + ";" + xblXsts.getToken());
+        postData.addProperty("identityToken", "XBL3.0 x=" + xblXsts.getServiceToken());
 
         final HttpPost httpPost = new HttpPost(MINECRAFT_LOGIN_URL);
         httpPost.setEntity(new StringEntity(postData.toString(), ContentType.APPLICATION_JSON));
@@ -60,13 +60,6 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
                 xblXsts
         );
         MinecraftAuth.LOGGER.info("Got MC Token, expires: " + Instant.ofEpochMilli(mcToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
-        return mcToken;
-    }
-
-    @Override
-    public MCToken refresh(final HttpClient httpClient, final MCToken mcToken) throws Exception {
-        if (mcToken.isExpired()) return super.refresh(httpClient, mcToken);
-
         return mcToken;
     }
 

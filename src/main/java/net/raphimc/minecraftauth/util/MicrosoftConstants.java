@@ -51,6 +51,7 @@ public class MicrosoftConstants {
     public static final String JAVA_XSTS_RELYING_PARTY = "rp://api.minecraftservices.com/";
     public static final String BEDROCK_XSTS_RELYING_PARTY = "https://multiplayer.minecraft.net/";
     public static final String BEDROCK_PLAY_FAB_XSTS_RELYING_PARTY = "https://b980a380.minecraft.playfabapi.com/";
+    public static final String BEDROCK_REALMS_XSTS_RELYING_PARTY = "https://pocket.realms.minecraft.net/";
 
     public static final Map<Long, String> XBOX_LIVE_ERRORS = new HashMap<>();
 

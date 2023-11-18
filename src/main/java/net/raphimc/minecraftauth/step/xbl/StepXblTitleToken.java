@@ -77,13 +77,6 @@ public class StepXblTitleToken extends AbstractStep<StepInitialXblSession.Initia
     }
 
     @Override
-    public XblTitleToken refresh(final HttpClient httpClient, final XblTitleToken xblTitleToken) throws Exception {
-        if (xblTitleToken.isExpired()) return super.refresh(httpClient, xblTitleToken);
-
-        return xblTitleToken;
-    }
-
-    @Override
     public XblTitleToken fromJson(final JsonObject json) {
         final StepInitialXblSession.InitialXblSession initialXblSession = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         return new XblTitleToken(

@@ -98,17 +98,10 @@ public class StepExternalBrowser extends AbstractStep<StepExternalBrowser.Extern
 
     @Value
     @EqualsAndHashCode(callSuper = false)
-    public static class ExternalBrowser extends AbstractStep.StepResult<AbstractStep.StepResult<?>> {
-
+    public static class ExternalBrowser extends AbstractStep.FirstStepResult {
         String authenticationUrl;
         String redirectUri;
         int port;
-
-        @Override
-        protected StepResult<?> prevResult() {
-            return null;
-        }
-
     }
 
     @Value

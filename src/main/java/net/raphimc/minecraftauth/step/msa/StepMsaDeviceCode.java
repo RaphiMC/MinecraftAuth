@@ -103,18 +103,13 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
 
     @Value
     @EqualsAndHashCode(callSuper = false)
-    public static class MsaDeviceCode extends AbstractStep.StepResult<AbstractStep.StepResult<?>> {
+    public static class MsaDeviceCode extends AbstractStep.FirstStepResult {
 
         long expireTimeMs;
         long intervalMs;
         String deviceCode;
         String userCode;
         String verificationUri;
-
-        @Override
-        protected StepResult<?> prevResult() {
-            return null;
-        }
 
         @Override
         public boolean isExpired() {

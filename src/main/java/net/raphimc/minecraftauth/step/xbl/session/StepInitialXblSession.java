@@ -21,12 +21,12 @@ import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.step.AbstractStep;
-import net.raphimc.minecraftauth.step.OptionalMergeStep;
+import net.raphimc.minecraftauth.step.BiMergeStep;
 import net.raphimc.minecraftauth.step.msa.StepMsaToken;
 import net.raphimc.minecraftauth.step.xbl.StepXblDeviceToken;
 import org.apache.http.client.HttpClient;
 
-public class StepInitialXblSession extends OptionalMergeStep<StepMsaToken.MsaToken, StepXblDeviceToken.XblDeviceToken, StepInitialXblSession.InitialXblSession> {
+public class StepInitialXblSession extends BiMergeStep<StepMsaToken.MsaToken, StepXblDeviceToken.XblDeviceToken, StepInitialXblSession.InitialXblSession> {
 
     public StepInitialXblSession(final AbstractStep<?, StepMsaToken.MsaToken> prevStep1, final AbstractStep<?, StepXblDeviceToken.XblDeviceToken> prevStep2) {
         super("initialXblSession", prevStep1, prevStep2);
@@ -54,7 +54,7 @@ public class StepInitialXblSession extends OptionalMergeStep<StepMsaToken.MsaTok
 
     @Value
     @EqualsAndHashCode(callSuper = false)
-    public static class InitialXblSession extends OptionalMergeStep.StepResult<StepMsaToken.MsaToken, StepXblDeviceToken.XblDeviceToken> {
+    public static class InitialXblSession extends BiMergeStep.StepResult<StepMsaToken.MsaToken, StepXblDeviceToken.XblDeviceToken> {
 
         StepMsaToken.MsaToken msaToken;
         StepXblDeviceToken.XblDeviceToken xblDeviceToken;

@@ -37,14 +37,18 @@ import org.apache.http.entity.StringEntity;
 import java.time.Instant;
 import java.time.ZoneId;
 
-public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSession, StepXblXstsToken.XblXsts<?>> {
+public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSession, StepXblXstsToken.XblXstsToken> {
 
     public static final String XBL_XSTS_URL = "https://xsts.auth.xboxlive.com/xsts/authorize";
 
     private final String relyingParty;
 
     public StepXblXstsToken(final AbstractStep<?, StepFullXblSession.FullXblSession> prevStep, final String relyingParty) {
-        super("xblXstsToken", prevStep);
+        this("xblXstsToken", prevStep, relyingParty);
+    }
+
+    public StepXblXstsToken(final String name, final AbstractStep<?, StepFullXblSession.FullXblSession> prevStep, final String relyingParty) {
+        super(name, prevStep);
 
         this.relyingParty = relyingParty;
     }
@@ -87,13 +91,6 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
     }
 
     @Override
-    public StepXblXstsToken.XblXsts<?> refresh(final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
-        if (xblXsts.isExpired()) return super.refresh(httpClient, xblXsts);
-
-        return xblXsts;
-    }
-
-    @Override
     public XblXstsToken fromJson(final JsonObject json) {
         final StepFullXblSession.FullXblSession fullXblSession = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         return new XblXstsToken(
@@ -105,8 +102,7 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
     }
 
     @Override
-    public JsonObject toJson(final XblXsts<?> xblXsts) {
-        final XblXstsToken xblXstsToken = (XblXstsToken) xblXsts;
+    public JsonObject toJson(final StepXblXstsToken.XblXstsToken xblXstsToken) {
         final JsonObject json = new JsonObject();
         json.addProperty("expireTimeMs", xblXstsToken.expireTimeMs);
         json.addProperty("token", xblXstsToken.token);
@@ -143,6 +139,10 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
         public abstract String getToken();
 
         public abstract String getUserHash();
+
+        public String getServiceToken() {
+            return this.getUserHash() + ';' + this.getToken();
+        }
 
         public abstract StepFullXblSession.FullXblSession getFullXblSession();
 

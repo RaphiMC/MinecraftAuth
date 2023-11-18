@@ -18,8 +18,9 @@
 package net.raphimc.minecraftauth;
 
 import net.raphimc.minecraftauth.step.AbstractStep;
-import net.raphimc.minecraftauth.step.OptionalMergeStep;
-import net.raphimc.minecraftauth.step.SameInputOptionalMergeStep;
+import net.raphimc.minecraftauth.step.BiMergeStep;
+import net.raphimc.minecraftauth.step.SameInputBiMergeStep;
+import net.raphimc.minecraftauth.step.SameInputTriMergeStep;
 import net.raphimc.minecraftauth.step.bedrock.StepMCChain;
 import net.raphimc.minecraftauth.step.bedrock.StepPlayFabToken;
 import net.raphimc.minecraftauth.step.bedrock.session.StepFullBedrockSession;
@@ -63,14 +64,14 @@ public class MinecraftAuth {
             .deviceCode()
             .withDeviceToken("Android")
             .sisuTitleAuthentication(MicrosoftConstants.BEDROCK_XSTS_RELYING_PARTY)
-            .buildMinecraftBedrockChainStep(true);
+            .buildMinecraftBedrockChainStep(true, false);
 
     public static final AbstractStep<?, StepFullBedrockSession.FullBedrockSession> BEDROCK_CREDENTIALS_LOGIN = builder()
             .withClientId(MicrosoftConstants.BEDROCK_ANDROID_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
             .credentials()
             .withDeviceToken("Android")
             .sisuTitleAuthentication(MicrosoftConstants.BEDROCK_XSTS_RELYING_PARTY)
-            .buildMinecraftBedrockChainStep(true);
+            .buildMinecraftBedrockChainStep(true, false);
 
     public static MsaTokenBuilder builder() {
         return new MsaTokenBuilder();
@@ -205,7 +206,7 @@ public class MinecraftAuth {
     public static class InitialXblSessionBuilder {
 
         private final AbstractStep<MsaCodeStep.MsaCode, StepMsaToken.MsaToken> msaTokenStep;
-        private OptionalMergeStep<StepMsaToken.MsaToken, StepXblDeviceToken.XblDeviceToken, StepInitialXblSession.InitialXblSession> initialXblSessionStep;
+        private BiMergeStep<StepMsaToken.MsaToken, StepXblDeviceToken.XblDeviceToken, StepInitialXblSession.InitialXblSession> initialXblSessionStep;
 
         private InitialXblSessionBuilder(final MsaTokenBuilder parent) {
             this.msaTokenStep = parent.build();
@@ -223,7 +224,7 @@ public class MinecraftAuth {
             return new XblXstsTokenBuilder(this);
         }
 
-        public OptionalMergeStep<StepMsaToken.MsaToken, StepXblDeviceToken.XblDeviceToken, StepInitialXblSession.InitialXblSession> build() {
+        public BiMergeStep<StepMsaToken.MsaToken, StepXblDeviceToken.XblDeviceToken, StepInitialXblSession.InitialXblSession> build() {
             return this.initialXblSessionStep;
         }
 
@@ -231,8 +232,8 @@ public class MinecraftAuth {
 
     public static class XblXstsTokenBuilder {
 
-        private final OptionalMergeStep<StepMsaToken.MsaToken, StepXblDeviceToken.XblDeviceToken, StepInitialXblSession.InitialXblSession> initialXblSessionStep;
-        private AbstractStep<?, StepXblXstsToken.XblXsts<?>> xblXstsTokenStep;
+        private final BiMergeStep<StepMsaToken.MsaToken, StepXblDeviceToken.XblDeviceToken, StepInitialXblSession.InitialXblSession> initialXblSessionStep;
+        private AbstractStep<?, ? extends StepXblXstsToken.XblXsts<?>> xblXstsTokenStep;
 
         private XblXstsTokenBuilder(final InitialXblSessionBuilder parent) {
             this.initialXblSessionStep = parent.build();
@@ -256,7 +257,7 @@ public class MinecraftAuth {
             return new MinecraftBuilder(this);
         }
 
-        public AbstractStep<?, StepXblXstsToken.XblXsts<?>> build() {
+        public AbstractStep<?, ? extends StepXblXstsToken.XblXsts<?>> build() {
             return this.xblXstsTokenStep;
         }
 
@@ -264,21 +265,22 @@ public class MinecraftAuth {
 
     public static class MinecraftBuilder {
 
-        private final AbstractStep<?, StepXblXstsToken.XblXsts<?>> xblXstsTokenStep;
+        private final AbstractStep<?, ? extends StepXblXstsToken.XblXsts<?>> xblXstsTokenStep;
 
         private MinecraftBuilder(final XblXstsTokenBuilder parent) {
             this.xblXstsTokenStep = parent.build();
         }
 
-        public SameInputOptionalMergeStep<StepMCProfile.MCProfile, StepPlayerCertificates.PlayerCertificates, StepMCToken.MCToken, StepFullJavaSession.FullJavaSession> buildMinecraftJavaProfileStep(final boolean playerCertificates) {
+        public SameInputBiMergeStep<StepMCProfile.MCProfile, StepPlayerCertificates.PlayerCertificates, StepFullJavaSession.FullJavaSession> buildMinecraftJavaProfileStep(final boolean playerCertificates) {
             final StepMCToken mcTokenStep = new StepMCToken(this.xblXstsTokenStep);
             final StepPlayerCertificates playerCertificatesStep = playerCertificates ? new StepPlayerCertificates(mcTokenStep) : null;
             return new StepFullJavaSession(new StepMCProfile(mcTokenStep), playerCertificatesStep);
         }
 
-        public SameInputOptionalMergeStep<StepMCChain.MCChain, StepPlayFabToken.PlayFabToken, StepXblXstsToken.XblXsts<?>, StepFullBedrockSession.FullBedrockSession> buildMinecraftBedrockChainStep(final boolean playFabToken) {
+        public SameInputTriMergeStep<StepMCChain.MCChain, StepPlayFabToken.PlayFabToken, StepXblXstsToken.XblXsts<?>, StepFullBedrockSession.FullBedrockSession> buildMinecraftBedrockChainStep(final boolean playFabToken, final boolean realmsXsts) {
             final StepPlayFabToken playFabTokenStep = new StepPlayFabToken(new StepXblXstsToken(new StepXblXstsToFullXblSession(this.xblXstsTokenStep), MicrosoftConstants.BEDROCK_PLAY_FAB_XSTS_RELYING_PARTY));
-            return new StepFullBedrockSession(new StepMCChain(this.xblXstsTokenStep), playFabToken ? playFabTokenStep : null);
+            final StepXblXstsToken realmsXstsStep = new StepXblXstsToken("realmsXsts", new StepXblXstsToFullXblSession(this.xblXstsTokenStep), MicrosoftConstants.BEDROCK_REALMS_XSTS_RELYING_PARTY);
+            return new StepFullBedrockSession(new StepMCChain(this.xblXstsTokenStep), playFabToken ? playFabTokenStep : null, realmsXsts ? realmsXstsStep : null);
         }
 
     }

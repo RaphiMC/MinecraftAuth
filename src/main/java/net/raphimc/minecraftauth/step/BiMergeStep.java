@@ -19,18 +19,18 @@ package net.raphimc.minecraftauth.step;
 
 import org.apache.http.client.HttpClient;
 
-public abstract class OptionalMergeStep<I1 extends AbstractStep.StepResult<?>, I2 extends AbstractStep.StepResult<?>, O extends OptionalMergeStep.StepResult<?, ?>> extends AbstractStep<I1, O> {
+public abstract class BiMergeStep<I1 extends AbstractStep.StepResult<?>, I2 extends AbstractStep.StepResult<?>, O extends BiMergeStep.StepResult<I1, I2>> extends AbstractStep<I1, O> {
 
     protected final AbstractStep<?, I2> prevStep2;
 
-    public OptionalMergeStep(final String name, final AbstractStep<?, I1> prevStep1, final AbstractStep<?, I2> prevStep2) {
+    public BiMergeStep(final String name, final AbstractStep<?, I1> prevStep1, final AbstractStep<?, I2> prevStep2) {
         super(name, prevStep1);
 
         this.prevStep2 = prevStep2;
     }
 
     @Override
-    public O applyStep(HttpClient httpClient, I1 prevResult) throws Exception {
+    public O applyStep(final HttpClient httpClient, final I1 prevResult) throws Exception {
         return this.applyStep(httpClient, prevResult, null);
     }
 
@@ -38,13 +38,17 @@ public abstract class OptionalMergeStep<I1 extends AbstractStep.StepResult<?>, I
 
     @Override
     public O refresh(final HttpClient httpClient, final O result) throws Exception {
-        final I1 prevResult1 = this.prevStep.refresh(httpClient, (I1) result.prevResult());
-        final I2 prevResult2 = this.prevStep2 != null ? this.prevStep2.refresh(httpClient, (I2) result.prevResult2()) : null;
+        if (!result.isExpired()) {
+            return result;
+        }
+
+        final I1 prevResult1 = this.prevStep.refresh(httpClient, result.prevResult());
+        final I2 prevResult2 = this.prevStep2 != null ? this.prevStep2.refresh(httpClient, result.prevResult2()) : null;
         return this.applyStep(httpClient, prevResult1, prevResult2);
     }
 
     @Override
-    public O getFromInput(HttpClient httpClient, Object input) throws Exception {
+    public O getFromInput(final HttpClient httpClient, final Object input) throws Exception {
         final I1 prevResult1 = this.prevStep.getFromInput(httpClient, input);
         final I2 prevResult2 = this.prevStep2 != null ? this.prevStep2.getFromInput(httpClient, input) : null;
         return this.applyStep(httpClient, prevResult1, prevResult2);

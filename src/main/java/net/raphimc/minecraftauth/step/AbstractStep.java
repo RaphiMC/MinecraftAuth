@@ -33,6 +33,10 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
     public abstract O applyStep(final HttpClient httpClient, final I prevResult) throws Exception;
 
     public O refresh(final HttpClient httpClient, final O result) throws Exception {
+        if (!result.isExpired()) {
+            return result;
+        }
+
         return this.applyStep(httpClient, this.prevStep != null ? this.prevStep.refresh(httpClient, (I) result.prevResult()) : null);
     }
 
@@ -50,6 +54,15 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
 
         public boolean isExpired() {
             return true;
+        }
+
+    }
+
+    public abstract static class FirstStepResult extends StepResult<StepResult<?>> {
+
+        @Override
+        protected StepResult<?> prevResult() {
+            return null;
         }
 
     }
