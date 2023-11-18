@@ -86,8 +86,8 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
         final StepMCToken.MCToken mcToken = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         return new PlayerCertificates(
                 json.get("expireTimeMs").getAsLong(),
-                CryptUtil.publicKeyFromBase64(json.get("publicKey").getAsString()),
-                CryptUtil.privateKeyFromBase64(json.get("privateKey").getAsString()),
+                CryptUtil.publicKeyRsaFromBase64(json.get("publicKey").getAsString()),
+                CryptUtil.privateKeyRsaFromBase64(json.get("privateKey").getAsString()),
                 Base64.getDecoder().decode(json.get("publicKeySignature").getAsString()),
                 Base64.getDecoder().decode(json.get("legacyPublicKeySignature").getAsString()),
                 mcToken

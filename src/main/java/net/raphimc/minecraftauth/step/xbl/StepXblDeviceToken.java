@@ -96,8 +96,8 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
     @Override
     public XblDeviceToken fromJson(final JsonObject json) {
         return new XblDeviceToken(
-                CryptUtil.publicKeyFromBase64(json.get("publicKey").getAsString()),
-                CryptUtil.privateKeyFromBase64(json.get("privateKey").getAsString()),
+                CryptUtil.publicKeyEcFromBase64(json.get("publicKey").getAsString()),
+                CryptUtil.privateKeyEcFromBase64(json.get("privateKey").getAsString()),
                 UUID.fromString(json.get("id").getAsString()),
                 json.get("expireTimeMs").getAsLong(),
                 json.get("token").getAsString(),

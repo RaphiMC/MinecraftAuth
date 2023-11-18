@@ -49,7 +49,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     public static final String MINECRAFT_LOGIN_URL = "https://multiplayer.minecraft.net/authentication";
 
     private static final String MOJANG_PUBLIC_KEY_BASE64 = "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAECRXueJeTDqNRRgJi/vlRufByu/2G0i2Ebt6YMar5QX/R0DIIyrJMcUpruK4QveTfJSTp3Shlq4Gk34cD/4GUWwkv0DVuzeuB+tXija7HBxii03NHDbPAD0AKnLr2wdAp";
-    private static final ECPublicKey MOJANG_PUBLIC_KEY = CryptUtil.publicKeyFromBase64(MOJANG_PUBLIC_KEY_BASE64);
+    private static final ECPublicKey MOJANG_PUBLIC_KEY = CryptUtil.publicKeyEcFromBase64(MOJANG_PUBLIC_KEY_BASE64);
     private static final int CLOCK_SKEW = 60;
 
     public StepMCChain(final AbstractStep<?, ? extends StepXblXstsToken.XblXsts<?>> prevStep) {
@@ -78,7 +78,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         if (chain.size() != 2) throw new IllegalStateException("Invalid chain size");
 
         final Jws<Claims> mojangJwt = Jwts.parser().clockSkewSeconds(CLOCK_SKEW).verifyWith(MOJANG_PUBLIC_KEY).build().parseSignedClaims(chain.get(0).getAsString());
-        final ECPublicKey mojangJwtPublicKey = CryptUtil.publicKeyFromBase64(mojangJwt.getPayload().get("identityPublicKey", String.class));
+        final ECPublicKey mojangJwtPublicKey = CryptUtil.publicKeyEcFromBase64(mojangJwt.getPayload().get("identityPublicKey", String.class));
         final Jws<Claims> identityJwt = Jwts.parser().clockSkewSeconds(CLOCK_SKEW).verifyWith(mojangJwtPublicKey).build().parseSignedClaims(chain.get(1).getAsString());
 
         final Map<String, Object> extraData = identityJwt.getPayload().get("extraData", Map.class);
@@ -108,8 +108,8 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     public MCChain fromJson(final JsonObject json) {
         final StepXblXstsToken.XblXsts<?> xblXsts = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         return new MCChain(
-                CryptUtil.publicKeyFromBase64(json.get("publicKey").getAsString()),
-                CryptUtil.privateKeyFromBase64(json.get("privateKey").getAsString()),
+                CryptUtil.publicKeyEcFromBase64(json.get("publicKey").getAsString()),
+                CryptUtil.privateKeyEcFromBase64(json.get("privateKey").getAsString()),
                 json.get("mojangJwt").getAsString(),
                 json.get("identityJwt").getAsString(),
                 json.get("xuid").getAsString(),

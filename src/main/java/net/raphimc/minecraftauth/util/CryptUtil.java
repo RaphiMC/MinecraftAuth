@@ -57,7 +57,7 @@ public class CryptUtil {
         }
     }
 
-    public static <T extends PublicKey> T publicKeyFromBase64(final String base64) {
+    public static <T extends PublicKey> T publicKeyEcFromBase64(final String base64) {
         try {
             return (T) EC_KEYFACTORY.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(base64)));
         } catch (InvalidKeySpecException e) {
@@ -65,9 +65,25 @@ public class CryptUtil {
         }
     }
 
-    public static <T extends PrivateKey> T privateKeyFromBase64(final String base64) {
+    public static <T extends PrivateKey> T privateKeyEcFromBase64(final String base64) {
         try {
             return (T) EC_KEYFACTORY.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(base64)));
+        } catch (InvalidKeySpecException e) {
+            throw new RuntimeException("Could not decode base64 private key", e);
+        }
+    }
+
+    public static <T extends PublicKey> T publicKeyRsaFromBase64(final String base64) {
+        try {
+            return (T) RSA_KEYFACTORY.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(base64)));
+        } catch (InvalidKeySpecException e) {
+            throw new RuntimeException("Could not decode base64 public key", e);
+        }
+    }
+
+    public static <T extends PrivateKey> T privateKeyRsaFromBase64(final String base64) {
+        try {
+            return (T) RSA_KEYFACTORY.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(base64)));
         } catch (InvalidKeySpecException e) {
             throw new RuntimeException("Could not decode base64 private key", e);
         }
