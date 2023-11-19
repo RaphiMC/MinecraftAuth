@@ -78,9 +78,9 @@ public interface SameInputStep<I1 extends AbstractStep.StepResult<?>, O extends 
     default void removeDuplicateStepResultsFromJson(final JsonObject json, final List<AbstractStep<?, ?>> steps2UntilSameInput) {
         if (!steps2UntilSameInput.isEmpty()) {
             JsonObject resultJson = json;
-            for (int i = steps2UntilSameInput.size() - 1; i >= 1; i--) {
+            for (int i = steps2UntilSameInput.size() - 1; i >= 0; i--) {
                 final AbstractStep<?, ?> step = steps2UntilSameInput.get(i);
-                if (i == 1) {
+                if (i == 0) {
                     resultJson.remove(step.name);
                     break;
                 }
@@ -94,9 +94,9 @@ public interface SameInputStep<I1 extends AbstractStep.StepResult<?>, O extends 
         if (!steps2UntilSameInput.isEmpty()) {
             String targetName = null;
             JsonObject step2Json = json;
-            for (int i = steps2UntilSameInput.size() - 1; i >= 1; i--) {
+            for (int i = steps2UntilSameInput.size() - 1; i >= 0; i--) {
                 final AbstractStep<?, ?> step = steps2UntilSameInput.get(i);
-                if (i == 1) {
+                if (i == 0) {
                     targetName = step.name;
                     break;
                 }

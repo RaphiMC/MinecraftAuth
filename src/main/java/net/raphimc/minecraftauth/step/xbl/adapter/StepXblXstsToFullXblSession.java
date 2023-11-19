@@ -26,7 +26,7 @@ import org.apache.http.client.HttpClient;
 public class StepXblXstsToFullXblSession extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepFullXblSession.FullXblSession> {
 
     public StepXblXstsToFullXblSession(final AbstractStep<?, ? extends StepXblXstsToken.XblXsts<?>> prevStep) {
-        super(prevStep.name, (AbstractStep<?, StepXblXstsToken.XblXsts<?>>) prevStep);
+        super("xblXstsToFullXblSession", (AbstractStep<?, StepXblXstsToken.XblXsts<?>>) prevStep);
     }
 
     @Override
@@ -42,13 +42,15 @@ public class StepXblXstsToFullXblSession extends AbstractStep<StepXblXstsToken.X
 
     @Override
     public StepFullXblSession.FullXblSession fromJson(final JsonObject json) {
-        return new FullXblSessionWrapper(this.prevStep.fromJson(json));
+        return new FullXblSessionWrapper(this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)));
     }
 
     @Override
     public JsonObject toJson(final StepFullXblSession.FullXblSession fullXblSession) {
         final FullXblSessionWrapper fullXblSessionWrapper = (FullXblSessionWrapper) fullXblSession;
-        return this.prevStep.toJson(fullXblSessionWrapper.xblXsts);
+        final JsonObject json = new JsonObject();
+        json.add(this.prevStep.name, this.prevStep.toJson(fullXblSessionWrapper.xblXsts));
+        return json;
     }
 
     private static class FullXblSessionWrapper extends StepFullXblSession.FullXblSession {
