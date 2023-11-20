@@ -29,6 +29,7 @@ import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
 import net.raphimc.minecraftauth.util.CryptUtil;
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
@@ -71,7 +72,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
 
         final HttpPost httpPost = new HttpPost(MINECRAFT_LOGIN_URL);
         httpPost.setEntity(new StringEntity(postData.toString(), ContentType.APPLICATION_JSON));
-        httpPost.addHeader("Authorization", "XBL3.0 x=" + xblXsts.getServiceToken());
+        httpPost.addHeader(HttpHeaders.AUTHORIZATION, "XBL3.0 x=" + xblXsts.getServiceToken());
         final String response = httpClient.execute(httpPost, new BasicResponseHandler());
         final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
         final JsonArray chain = obj.get("chain").getAsJsonArray();

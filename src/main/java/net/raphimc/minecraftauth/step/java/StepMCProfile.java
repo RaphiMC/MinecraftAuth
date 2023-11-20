@@ -23,6 +23,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
+import net.raphimc.minecraftauth.util.UuidUtil;
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
@@ -43,7 +45,7 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
         MinecraftAuth.LOGGER.info("Getting profile...");
 
         final HttpGet httpGet = new HttpGet(MINECRAFT_PROFILE_URL);
-        httpGet.addHeader("Authorization", mcToken.getTokenType() + " " + mcToken.getAccessToken());
+        httpGet.addHeader(HttpHeaders.AUTHORIZATION, mcToken.getTokenType() + " " + mcToken.getAccessToken());
         final String response = httpClient.execute(httpGet, new BasicResponseHandler());
         final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
 
@@ -52,7 +54,7 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
         }
 
         final MCProfile mcProfile = new MCProfile(
-                UUID.fromString(obj.get("id").getAsString().replaceFirst("(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)", "$1-$2-$3-$4-$5")),
+                UuidUtil.fromLenientString(obj.get("id").getAsString()),
                 obj.get("name").getAsString(),
                 obj.get("skins").getAsJsonArray().get(0).getAsJsonObject().get("url").getAsString(),
                 mcToken

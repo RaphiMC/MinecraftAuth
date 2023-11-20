@@ -24,6 +24,7 @@ import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.CryptUtil;
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
@@ -52,7 +53,7 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
 
         final HttpPost httpPost = new HttpPost(PLAYER_CERTIFICATES_URL);
         httpPost.setEntity(new StringEntity("", ContentType.APPLICATION_JSON));
-        httpPost.addHeader("Authorization", "Bearer " + mcToken.getAccessToken());
+        httpPost.addHeader(HttpHeaders.AUTHORIZATION, mcToken.getTokenType() + " " + mcToken.getAccessToken());
         final String response = httpClient.execute(httpPost, new BasicResponseHandler());
         final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
         final JsonObject keyPair = obj.getAsJsonObject("keyPair");

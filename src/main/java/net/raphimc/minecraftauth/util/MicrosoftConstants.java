@@ -24,12 +24,11 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.StandardHttpRequestRetryHandler;
 import org.apache.http.message.BasicHeader;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MicrosoftConstants {
 
@@ -53,19 +52,6 @@ public class MicrosoftConstants {
     public static final String BEDROCK_PLAY_FAB_XSTS_RELYING_PARTY = "https://b980a380.minecraft.playfabapi.com/";
     public static final String BEDROCK_REALMS_XSTS_RELYING_PARTY = "https://pocket.realms.minecraft.net/";
 
-    public static final Map<Long, String> XBOX_LIVE_ERRORS = new HashMap<>();
-
-    static {
-        XBOX_LIVE_ERRORS.put(2148916227L, "Your account was banned by Xbox for violating one or more Community Standards for Xbox and is unable to be used.");
-        XBOX_LIVE_ERRORS.put(2148916229L, "Your account is currently restricted and your guardian has not given you permission to play online. Login to https://account.microsoft.com/family/ and have your guardian change your permissions.");
-        XBOX_LIVE_ERRORS.put(2148916233L, "Your account currently does not have an Xbox profile. Please create one at https://signup.live.com/signup");
-        XBOX_LIVE_ERRORS.put(2148916234L, "Your account has not accepted Xbox's Terms of Service. Please login and accept them.");
-        XBOX_LIVE_ERRORS.put(2148916235L, "Your account resides in a region that Xbox has not authorized use from. Xbox has blocked your attempt at logging in.");
-        XBOX_LIVE_ERRORS.put(2148916236L, "Your account requires proof of age. Please login to https://login.live.com/login.srf and provide proof of age.");
-        XBOX_LIVE_ERRORS.put(2148916237L, "Your account has reached the its limit for playtime. Your account has been blocked from logging in.");
-        XBOX_LIVE_ERRORS.put(2148916238L, "The account date of birth is under 18 years and cannot proceed unless the account is added to a family by an adult.");
-    }
-
     public static CloseableHttpClient createHttpClient() {
         final int timeout = 5;
         final RequestConfig requestConfig = RequestConfig.custom()
@@ -79,6 +65,7 @@ public class MicrosoftConstants {
         return HttpClientBuilder.create()
                 .setDefaultRequestConfig(requestConfig)
                 .setDefaultHeaders(headers)
+                .setRetryHandler(new StandardHttpRequestRetryHandler())
                 .build();
     }
 
