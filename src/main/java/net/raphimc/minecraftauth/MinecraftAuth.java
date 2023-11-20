@@ -19,8 +19,6 @@ package net.raphimc.minecraftauth;
 
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.BiMergeStep;
-import net.raphimc.minecraftauth.step.SameInputBiMergeStep;
-import net.raphimc.minecraftauth.step.SameInputTriMergeStep;
 import net.raphimc.minecraftauth.step.bedrock.StepMCChain;
 import net.raphimc.minecraftauth.step.bedrock.StepPlayFabToken;
 import net.raphimc.minecraftauth.step.bedrock.session.StepFullBedrockSession;
@@ -271,13 +269,13 @@ public class MinecraftAuth {
             this.xblXstsTokenStep = parent.build();
         }
 
-        public SameInputBiMergeStep<StepMCProfile.MCProfile, StepPlayerCertificates.PlayerCertificates, StepFullJavaSession.FullJavaSession> buildMinecraftJavaProfileStep(final boolean playerCertificates) {
+        public StepFullJavaSession buildMinecraftJavaProfileStep(final boolean playerCertificates) {
             final StepMCToken mcTokenStep = new StepMCToken(this.xblXstsTokenStep);
             final StepPlayerCertificates playerCertificatesStep = playerCertificates ? new StepPlayerCertificates(mcTokenStep) : null;
             return new StepFullJavaSession(new StepMCProfile(mcTokenStep), playerCertificatesStep);
         }
 
-        public SameInputTriMergeStep<StepMCChain.MCChain, StepPlayFabToken.PlayFabToken, StepXblXstsToken.XblXsts<?>, StepFullBedrockSession.FullBedrockSession> buildMinecraftBedrockChainStep(final boolean playFabToken, final boolean realmsXsts) {
+        public StepFullBedrockSession buildMinecraftBedrockChainStep(final boolean playFabToken, final boolean realmsXsts) {
             final StepPlayFabToken playFabTokenStep = new StepPlayFabToken(new StepXblXstsToken(new StepXblXstsToFullXblSession(this.xblXstsTokenStep), MicrosoftConstants.BEDROCK_PLAY_FAB_XSTS_RELYING_PARTY));
             final StepXblXstsToken realmsXstsStep = new StepXblXstsToken("realmsXsts", new StepXblXstsToFullXblSession(this.xblXstsTokenStep), MicrosoftConstants.BEDROCK_REALMS_XSTS_RELYING_PARTY);
             return new StepFullBedrockSession(new StepMCChain(this.xblXstsTokenStep), playFabToken ? playFabTokenStep : null, realmsXsts ? realmsXstsStep : null);
