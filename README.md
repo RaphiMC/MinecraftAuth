@@ -1,7 +1,13 @@
 # MinecraftAuth
-Simple and easy to use Minecraft microsoft authentication library (Java and Bedrock).  
-The library features logging in via device code or credentials, refreshing and validating token chains.  
-It also supports serializing/deserializing the whole token chain to and from a json tree to be saved and loaded later.
+Simple and easy to use Minecraft microsoft authentication library (Java and Bedrock).
+
+## Features
+- Full support for Minecraft: Java Edition and Minecraft: Bedrock Edition
+- Login using device code, credentials or a local webserver
+- Refreshing and validating token chains
+- Serializing and deserializing token chains to and from json
+- Customizable login flows (Client ID, scopes, ...)
+- Basic implementation of the Minecraft Realms API (Allows listing and joining realms)
 
 ## Releases
 ### Gradle/Maven
@@ -63,6 +69,51 @@ try (CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
     StepFullJavaSession.FullJavaSession readyToUseSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.refresh(httpClient, loadedSession);
 }
 ```
+### Minecraft Realms API
+MinecraftAuth provides a basic implementation of the Minecraft Realms API. It supports listing and joining the realms of an user.  
+The Realms API requires you to provide the latest supported client version of your application.
+You should hardcode this value instead of loading it from the Internet, as the Realms API will not work if your application can't handle the specified version.
+#### Java Edition
+```java
+JavaRealmsService javaRealmsService = new JavaRealmsService(httpClient, "latestSupportedClientVersionHere", javaSession.getMcProfile());
+boolean isAvailable = javaRealmsService.isAvailable().join();
+if (!isAvailable) {
+    System.out.println("The client version does not support Realms");
+} else {
+    System.out.println("Your client supports Realms");
+    List<RealmsWorld> realmsWorlds = javaRealmsService.getWorlds().join();
+    System.out.println("Realms worlds: " + realmsWorlds);
+    try {
+        System.out.println("Connect to: " + javaRealmsService.joinWorld(realmsWorlds.get(0)).join());
+    } catch (CompletionException e) {
+        if (e.getCause() instanceof RealmsResponseException) {
+            RealmsResponseException exception = (RealmsResponseException) e.getCause();
+            if (exception.getRealmsErrorCode() == RealmsResponseException.TOS_NOT_ACCEPTED) {
+                // The Java Edition Realms API requires users to accept the Minecraft Realms Terms of Service (https://aka.ms/MinecraftRealmsTerms)
+                // You should display the terms to the user and ask them to accept them:
+                javaRealmsService.acceptTos().join();
+                // If they accept, then you can try to join the world again
+            }
+        }
+    }
+}
+```
+#### Bedrock Edition
+**If you need Minecraft: Bedrock Edition Realms support, you have to make a custom auth flow with the realms boolean set to true when calling the buildMinecraftBedrockChainStep() method.**
+```java
+BedrockRealmsService bedrockRealmsService = new BedrockRealmsService(httpClient, "latestSupportedClientVersionHere", bedrockSession.getRealmsXsts());
+boolean isAvailable = bedrockRealmsService.isAvailable().join();
+if (!isAvailable) {
+    System.out.println("The client version does not support Realms");
+} else {
+    System.out.println("Your client supports Realms");
+    List<RealmsWorld> realmsWorlds = bedrockRealmsService.getWorlds().join();
+    System.out.println("Realms worlds: " + realmsWorlds);
+    System.out.println("Connect to: " + bedrockRealmsService.joinWorld(realmsWorlds.get(0)).join());
+}
+```
+[Here is an example implementation](https://github.com/ViaVersion/ViaProxy/blob/09e685fad9ee1b804a3b01a7eb308a444a48855f/src/main/java/net/raphimc/viaproxy/ui/impl/RealmsTab.java) which is using the Realms API of both Minecraft editions.
+
 ### Logging
 MinecraftAuth by default uses SLF4J for logging.
 You can however easily redirect the log messages to your own code by setting ``MinecraftAuth.LOGGER`` to your own ``ILogger``.
