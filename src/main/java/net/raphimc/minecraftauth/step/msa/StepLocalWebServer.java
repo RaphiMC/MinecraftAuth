@@ -29,7 +29,7 @@ import java.net.ServerSocket;
 import java.net.URISyntaxException;
 import java.util.function.Consumer;
 
-public class StepExternalBrowser extends AbstractStep<StepExternalBrowser.ExternalBrowserCallback, StepExternalBrowser.ExternalBrowser> {
+public class StepLocalWebServer extends AbstractStep<StepLocalWebServer.LocalWebServerCallback, StepLocalWebServer.LocalWebServer> {
 
     public static final String AUTHORIZE_URL = "https://login.live.com/oauth20_authorize.srf";
 
@@ -37,8 +37,8 @@ public class StepExternalBrowser extends AbstractStep<StepExternalBrowser.Extern
     private final String scope;
     private final String redirectUri;
 
-    public StepExternalBrowser(final String clientId, final String scope, final String redirectUri) {
-        super("externalBrowser", null);
+    public StepLocalWebServer(final String clientId, final String scope, final String redirectUri) {
+        super("localWebServer", null);
 
         this.clientId = clientId;
         this.scope = scope;
@@ -50,27 +50,27 @@ public class StepExternalBrowser extends AbstractStep<StepExternalBrowser.Extern
     }
 
     @Override
-    public StepExternalBrowser.ExternalBrowser applyStep(final HttpClient httpClient, final StepExternalBrowser.ExternalBrowserCallback externalBrowserCallback) throws Exception {
-        MinecraftAuth.LOGGER.info("Creating URL for MSA login via external browser...");
+    public LocalWebServer applyStep(final HttpClient httpClient, final LocalWebServerCallback localWebServerCallback) throws Exception {
+        MinecraftAuth.LOGGER.info("Creating URL for MSA login via local webserver...");
 
-        if (externalBrowserCallback == null) throw new IllegalStateException("Missing StepExternalBrowser.ExternalBrowserCallback input");
+        if (localWebServerCallback == null) throw new IllegalStateException("Missing StepLocalWebServer.LocalWebServerCallback input");
 
         try (final ServerSocket localServer = new ServerSocket(0)) {
             final int localPort = localServer.getLocalPort();
 
-            final ExternalBrowser externalBrowser = new ExternalBrowser(
+            final LocalWebServer localWebServer = new LocalWebServer(
                     this.getAuthenticationUrl(localPort),
                     this.redirectUri + ":" + localPort,
                     localPort);
-            MinecraftAuth.LOGGER.info("Created external browser MSA authentication URL: " + externalBrowser.authenticationUrl);
-            externalBrowserCallback.callback.accept(externalBrowser);
-            return externalBrowser;
+            MinecraftAuth.LOGGER.info("Created local webserver MSA authentication URL: " + localWebServer.authenticationUrl);
+            localWebServerCallback.callback.accept(localWebServer);
+            return localWebServer;
         }
     }
 
     @Override
-    public ExternalBrowser fromJson(final JsonObject json) {
-        return new ExternalBrowser(
+    public LocalWebServer fromJson(final JsonObject json) {
+        return new LocalWebServer(
                 json.get("authenticationUrl").getAsString(),
                 json.get("redirectUri").getAsString(),
                 json.get("port").getAsInt()
@@ -78,11 +78,11 @@ public class StepExternalBrowser extends AbstractStep<StepExternalBrowser.Extern
     }
 
     @Override
-    public JsonObject toJson(final ExternalBrowser externalBrowser) {
+    public JsonObject toJson(final LocalWebServer localWebServer) {
         final JsonObject json = new JsonObject();
-        json.addProperty("authenticationUrl", externalBrowser.authenticationUrl);
-        json.addProperty("redirectUri", externalBrowser.redirectUri);
-        json.addProperty("port", externalBrowser.port);
+        json.addProperty("authenticationUrl", localWebServer.authenticationUrl);
+        json.addProperty("redirectUri", localWebServer.redirectUri);
+        json.addProperty("port", localWebServer.port);
         return json;
     }
 
@@ -98,7 +98,7 @@ public class StepExternalBrowser extends AbstractStep<StepExternalBrowser.Extern
 
     @Value
     @EqualsAndHashCode(callSuper = false)
-    public static class ExternalBrowser extends AbstractStep.FirstStepResult {
+    public static class LocalWebServer extends AbstractStep.FirstStepResult {
         String authenticationUrl;
         String redirectUri;
         int port;
@@ -106,8 +106,8 @@ public class StepExternalBrowser extends AbstractStep<StepExternalBrowser.Extern
 
     @Value
     @EqualsAndHashCode(callSuper = false)
-    public static class ExternalBrowserCallback extends AbstractStep.InitialInput {
-        Consumer<ExternalBrowser> callback;
+    public static class LocalWebServerCallback extends AbstractStep.InitialInput {
+        Consumer<LocalWebServer> callback;
     }
 
 }

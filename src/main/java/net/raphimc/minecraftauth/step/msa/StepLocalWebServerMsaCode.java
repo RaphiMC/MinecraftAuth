@@ -29,25 +29,25 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class StepExternalBrowserMsaCode extends MsaCodeStep<StepExternalBrowser.ExternalBrowser> {
+public class StepLocalWebServerMsaCode extends MsaCodeStep<StepLocalWebServer.LocalWebServer> {
 
     private final int timeout;
 
-    public StepExternalBrowserMsaCode(final AbstractStep<?, StepExternalBrowser.ExternalBrowser> prevStep, final String clientId, final String scope, final int timeout) {
+    public StepLocalWebServerMsaCode(final AbstractStep<?, StepLocalWebServer.LocalWebServer> prevStep, final String clientId, final String scope, final int timeout) {
         this(prevStep, clientId, scope, null, timeout);
     }
 
-    public StepExternalBrowserMsaCode(final AbstractStep<?, StepExternalBrowser.ExternalBrowser> prevStep, final String clientId, final String scope, final String clientSecret, final int timeout) {
+    public StepLocalWebServerMsaCode(final AbstractStep<?, StepLocalWebServer.LocalWebServer> prevStep, final String clientId, final String scope, final String clientSecret, final int timeout) {
         super(prevStep, clientId, scope, clientSecret);
 
         this.timeout = timeout;
     }
 
     @Override
-    public MsaCode applyStep(final HttpClient httpClient, final StepExternalBrowser.ExternalBrowser externalBrowser) throws Exception {
-        MinecraftAuth.LOGGER.info("Waiting for MSA login via external browser...");
+    public MsaCode applyStep(final HttpClient httpClient, final StepLocalWebServer.LocalWebServer localWebServer) throws Exception {
+        MinecraftAuth.LOGGER.info("Waiting for MSA login via local webserver...");
 
-        try (final ServerSocket localServer = new ServerSocket(externalBrowser.getPort())) {
+        try (final ServerSocket localServer = new ServerSocket(localWebServer.getPort())) {
             localServer.setSoTimeout(this.timeout);
             try {
                 try (final Socket client = localServer.accept()) {
@@ -58,7 +58,7 @@ public class StepExternalBrowserMsaCode extends MsaCodeStep<StepExternalBrowser.
 
                     final Matcher m = Pattern.compile("code=([^&\\s]+)").matcher(get);
                     if (m.find()) {
-                        final MsaCode msaCode = new MsaCode(m.group(1), this.clientId, this.scope, this.clientSecret, externalBrowser.getRedirectUri());
+                        final MsaCode msaCode = new MsaCode(m.group(1), this.clientId, this.scope, this.clientSecret, localWebServer.getRedirectUri());
                         MinecraftAuth.LOGGER.info("Got MSA Code");
                         return msaCode;
                     }

@@ -122,7 +122,7 @@ public class MinecraftAuth {
         }
 
         /**
-         * Sets the timeout of the device code or external browser auth flow
+         * Sets the timeout of the device code or local webserver auth flow
          *
          * @param timeout The timeout in seconds
          * @return The builder
@@ -134,7 +134,7 @@ public class MinecraftAuth {
         }
 
         /**
-         * Sets the redirect uri to use for the external browser or credentials auth flow
+         * Sets the redirect uri to use for the local webserver or credentials auth flow
          *
          * @param redirectUri The redirect uri
          * @return The builder
@@ -159,16 +159,16 @@ public class MinecraftAuth {
 
         /**
          * Generates a URL to open in the browser to get an MSA token. The browser redirects to a localhost URL with the token as a parameter when the user logged in.
-         * Needs instance of {@link net.raphimc.minecraftauth.step.msa.StepExternalBrowser.ExternalBrowserCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, Object)}.
+         * Needs instance of {@link StepLocalWebServer.LocalWebServerCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, Object)}.
          *
          * @return The builder
          */
-        public InitialXblSessionBuilder externalBrowser() {
+        public InitialXblSessionBuilder localWebServer() {
             if (this.redirectUri == null) {
                 this.redirectUri = "http://localhost";
             }
 
-            this.msaCodeStep = new StepExternalBrowserMsaCode(new StepExternalBrowser(this.clientId, this.scope, this.redirectUri), this.clientId, this.scope, this.clientSecret, this.timeout * 1000);
+            this.msaCodeStep = new StepLocalWebServerMsaCode(new StepLocalWebServer(this.clientId, this.scope, this.redirectUri), this.clientId, this.scope, this.clientSecret, this.timeout * 1000);
 
             return new InitialXblSessionBuilder(this);
         }
