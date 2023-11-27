@@ -40,7 +40,7 @@ public class RealmsWorld {
     public static RealmsWorld fromJson(final JsonObject json) {
         return new RealmsWorld(
                 json.get("id").getAsLong(),
-                json.get("owner").getAsString(),
+                JsonUtil.getStringOr(json, "owner", ""),
                 json.get("ownerUUID").getAsString(),
                 json.get("name").getAsString(),
                 json.get("motd").getAsString(),

@@ -26,7 +26,9 @@ import net.raphimc.minecraftauth.service.realms.model.RealmsWorld;
 import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.AbstractHttpMessage;
 
 import java.util.concurrent.CompletableFuture;
@@ -35,6 +37,8 @@ import java.util.function.Supplier;
 public class BedrockRealmsService extends AbstractRealmsService {
 
     public static final String JOIN_WORLD_URL = "https://pocket.realms.minecraft.net/worlds/$ID/join";
+    public static final String ACCEPT_INVITE_URL = "https://pocket.realms.minecraft.net/invites/v1/link/accept/$CODE";
+    public static final String DELETE_INVITE_URL = "https://pocket.realms.minecraft.net/invites/$ID";
 
     private final StepXblXstsToken.XblXsts<?> realmsXsts;
     private final String clientVersion;
@@ -61,6 +65,35 @@ public class BedrockRealmsService extends AbstractRealmsService {
                     } catch (RetryException e) {
                         Thread.sleep(e.getRetryAfterSeconds() * 1000L);
                     }
+                }
+            }
+        });
+    }
+
+    public CompletableFuture<RealmsWorld> acceptInvite(final String realmCode) {
+        return CompletableFuture.supplyAsync(new Supplier<RealmsWorld>() {
+            @Override
+            @SneakyThrows
+            public RealmsWorld get() {
+                final HttpPost httpPost = new HttpPost(ACCEPT_INVITE_URL.replace("$CODE", realmCode));
+                BedrockRealmsService.this.addRequestHeaders(httpPost);
+                final String response = BedrockRealmsService.this.httpClient.execute(httpPost, new RealmsResponseHandler());
+                final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
+                return RealmsWorld.fromJson(obj);
+            }
+        });
+    }
+
+    public CompletableFuture<Void> leaveInvitedRealm(final RealmsWorld realmsWorld) {
+        return CompletableFuture.runAsync(new Runnable() {
+            @Override
+            @SneakyThrows
+            public void run() {
+                final HttpDelete httpDelete = new HttpDelete(DELETE_INVITE_URL.replace("$ID", String.valueOf(realmsWorld.getId())));
+                BedrockRealmsService.this.addRequestHeaders(httpDelete);
+                final String response = BedrockRealmsService.this.httpClient.execute(httpDelete, new RealmsResponseHandler());
+                if (response != null) {
+                    throw new IllegalStateException("Failed to delete invite: " + response);
                 }
             }
         });

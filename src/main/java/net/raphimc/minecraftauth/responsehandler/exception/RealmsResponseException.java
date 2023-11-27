@@ -28,7 +28,7 @@ public class RealmsResponseException extends HttpResponseException {
     private final int realmsErrorCode;
 
     public RealmsResponseException(final int statusCode, final int realmsErrorCode, final String reasonPhrase) {
-        super(statusCode, reasonPhrase + ", java realms error code: " + realmsErrorCode);
+        super(statusCode, reasonPhrase + ", realms error code: " + realmsErrorCode);
 
         this.realmsErrorCode = realmsErrorCode;
     }
