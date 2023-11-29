@@ -18,11 +18,11 @@
 package net.raphimc.minecraftauth.step.java;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
+import net.raphimc.minecraftauth.util.JsonUtil;
 import net.raphimc.minecraftauth.util.UuidUtil;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
@@ -47,7 +47,7 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
         final HttpGet httpGet = new HttpGet(MINECRAFT_PROFILE_URL);
         httpGet.addHeader(HttpHeaders.AUTHORIZATION, mcToken.getTokenType() + " " + mcToken.getAccessToken());
         final String response = httpClient.execute(httpGet, new BasicResponseHandler());
-        final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
+        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
 
         if (obj.has("error")) {
             throw new IOException("No valid minecraft profile found: " + obj);

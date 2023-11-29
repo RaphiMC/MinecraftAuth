@@ -18,12 +18,12 @@
 package net.raphimc.minecraftauth.service.realms;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import lombok.SneakyThrows;
 import net.raphimc.minecraftauth.responsehandler.RealmsResponseHandler;
 import net.raphimc.minecraftauth.responsehandler.exception.RetryException;
 import net.raphimc.minecraftauth.service.realms.model.RealmsWorld;
 import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
+import net.raphimc.minecraftauth.util.JsonUtil;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
@@ -60,7 +60,7 @@ public class BedrockRealmsService extends AbstractRealmsService {
                 while (true) {
                     try {
                         final String response = BedrockRealmsService.this.httpClient.execute(httpGet, new RealmsResponseHandler());
-                        final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
+                        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
                         return obj.get("address").getAsString();
                     } catch (RetryException e) {
                         Thread.sleep(e.getRetryAfterSeconds() * 1000L);
@@ -78,7 +78,7 @@ public class BedrockRealmsService extends AbstractRealmsService {
                 final HttpPost httpPost = new HttpPost(ACCEPT_INVITE_URL.replace("$CODE", realmCode));
                 BedrockRealmsService.this.addRequestHeaders(httpPost);
                 final String response = BedrockRealmsService.this.httpClient.execute(httpPost, new RealmsResponseHandler());
-                final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
+                final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
                 return RealmsWorld.fromJson(obj);
             }
         });

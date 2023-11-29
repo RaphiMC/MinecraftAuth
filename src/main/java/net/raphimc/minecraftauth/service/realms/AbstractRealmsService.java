@@ -19,10 +19,10 @@ package net.raphimc.minecraftauth.service.realms;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import lombok.SneakyThrows;
 import net.raphimc.minecraftauth.responsehandler.RealmsResponseHandler;
 import net.raphimc.minecraftauth.service.realms.model.RealmsWorld;
+import net.raphimc.minecraftauth.util.JsonUtil;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -73,7 +73,7 @@ public abstract class AbstractRealmsService {
                 final HttpGet httpGet = new HttpGet(WORLDS_URL.replace("$HOST", AbstractRealmsService.this.host));
                 AbstractRealmsService.this.addRequestHeaders(httpGet);
                 final String response = AbstractRealmsService.this.httpClient.execute(httpGet, new RealmsResponseHandler(), AbstractRealmsService.this.context);
-                final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
+                final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
 
                 final List<RealmsWorld> realmsWorlds = new ArrayList<>();
                 for (JsonElement server : obj.getAsJsonArray("servers")) {

@@ -18,13 +18,13 @@
 package net.raphimc.minecraftauth.step.xbl;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.XblResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.CryptUtil;
+import net.raphimc.minecraftauth.util.JsonUtil;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
@@ -79,7 +79,7 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
         httpPost.addHeader("x-xbl-contract-version", "1");
         httpPost.addHeader(CryptUtil.getSignatureHeader(httpPost, privateKey));
         final String response = httpClient.execute(httpPost, new XblResponseHandler());
-        final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
+        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
 
         final XblDeviceToken xblDeviceToken = new XblDeviceToken(
                 publicKey,

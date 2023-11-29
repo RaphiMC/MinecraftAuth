@@ -18,12 +18,12 @@
 package net.raphimc.minecraftauth.step.java;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.CryptUtil;
+import net.raphimc.minecraftauth.util.JsonUtil;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -55,7 +55,7 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
         httpPost.setEntity(new StringEntity("", ContentType.APPLICATION_JSON));
         httpPost.addHeader(HttpHeaders.AUTHORIZATION, mcToken.getTokenType() + " " + mcToken.getAccessToken());
         final String response = httpClient.execute(httpPost, new BasicResponseHandler());
-        final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
+        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
         final JsonObject keyPair = obj.getAsJsonObject("keyPair");
 
         final PKCS8EncodedKeySpec encodedPrivateKey = new PKCS8EncodedKeySpec(Base64.getMimeDecoder().decode(keyPair.get("privateKey").getAsString()

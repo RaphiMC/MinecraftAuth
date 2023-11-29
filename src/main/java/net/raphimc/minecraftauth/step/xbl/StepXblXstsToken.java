@@ -19,7 +19,6 @@ package net.raphimc.minecraftauth.step.xbl;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
@@ -29,6 +28,7 @@ import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.session.StepFullXblSession;
 import net.raphimc.minecraftauth.step.xbl.session.StepInitialXblSession;
 import net.raphimc.minecraftauth.util.CryptUtil;
+import net.raphimc.minecraftauth.util.JsonUtil;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
@@ -78,7 +78,7 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
             httpPost.addHeader(CryptUtil.getSignatureHeader(httpPost, fullXblSession.getXblTitleToken().getInitialXblSession().getXblDeviceToken().getPrivateKey()));
         }
         final String response = httpClient.execute(httpPost, new XblResponseHandler());
-        final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
+        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
 
         final XblXstsToken xblXstsToken = new XblXstsToken(
                 Instant.parse(obj.get("NotAfter").getAsString()).toEpochMilli(),

@@ -18,7 +18,7 @@
 package net.raphimc.minecraftauth.responsehandler;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import net.raphimc.minecraftauth.util.JsonUtil;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -38,7 +38,7 @@ public class MsaResponseHandler implements ResponseHandler<String> {
         final String body = entity == null ? null : EntityUtils.toString(entity);
         if (statusLine.getStatusCode() >= 300) {
             if (body != null && ContentType.getOrDefault(entity).getMimeType().equals(ContentType.APPLICATION_JSON.getMimeType())) {
-                final JsonObject obj = (JsonObject) JsonParser.parseString(body);
+                final JsonObject obj = (JsonObject) JsonUtil.parseString(body);
                 if (obj.has("error") && obj.has("error_description")) {
                     throw new HttpResponseException(statusLine.getStatusCode(), obj.get("error").getAsString() + ": " + obj.get("error_description").getAsString());
                 }

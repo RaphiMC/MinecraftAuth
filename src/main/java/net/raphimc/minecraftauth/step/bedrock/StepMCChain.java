@@ -19,7 +19,6 @@ package net.raphimc.minecraftauth.step.bedrock;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -29,6 +28,7 @@ import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
 import net.raphimc.minecraftauth.util.CryptUtil;
+import net.raphimc.minecraftauth.util.JsonUtil;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -74,7 +74,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         httpPost.setEntity(new StringEntity(postData.toString(), ContentType.APPLICATION_JSON));
         httpPost.addHeader(HttpHeaders.AUTHORIZATION, "XBL3.0 x=" + xblXsts.getServiceToken());
         final String response = httpClient.execute(httpPost, new BasicResponseHandler());
-        final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
+        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
         final JsonArray chain = obj.get("chain").getAsJsonArray();
         if (chain.size() != 2) throw new IllegalStateException("Invalid chain size");
 

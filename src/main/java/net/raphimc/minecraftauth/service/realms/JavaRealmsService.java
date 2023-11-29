@@ -18,12 +18,12 @@
 package net.raphimc.minecraftauth.service.realms;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import lombok.SneakyThrows;
 import net.raphimc.minecraftauth.responsehandler.RealmsResponseHandler;
 import net.raphimc.minecraftauth.responsehandler.exception.RetryException;
 import net.raphimc.minecraftauth.service.realms.model.RealmsWorld;
 import net.raphimc.minecraftauth.step.java.StepMCProfile;
+import net.raphimc.minecraftauth.util.JsonUtil;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -65,7 +65,7 @@ public class JavaRealmsService extends AbstractRealmsService {
                 while (true) {
                     try {
                         final String response = JavaRealmsService.this.httpClient.execute(httpGet, new RealmsResponseHandler(), JavaRealmsService.this.context);
-                        final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
+                        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
                         return obj.get("address").getAsString();
                     } catch (RetryException e) {
                         Thread.sleep(e.getRetryAfterSeconds() * 1000L);

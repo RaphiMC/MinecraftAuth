@@ -17,10 +17,17 @@
  */
 package net.raphimc.minecraftauth.util;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class JsonUtil {
+
+    private static final Gson GSON = new Gson();
+
+    public static JsonElement parseString(final String json) {
+        return GSON.fromJson(json, JsonElement.class);
+    }
 
     public static String getStringOr(final JsonObject obj, final String key, final String defaultValue) {
         final JsonElement element = obj.get(key);

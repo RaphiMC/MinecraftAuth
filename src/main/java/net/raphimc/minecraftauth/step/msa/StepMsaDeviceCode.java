@@ -18,12 +18,12 @@
 package net.raphimc.minecraftauth.step.msa;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MsaResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
+import net.raphimc.minecraftauth.util.JsonUtil;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -65,7 +65,7 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
         final HttpPost httpPost = new HttpPost(CONNECT_URL);
         httpPost.setEntity(new UrlEncodedFormEntity(postData, StandardCharsets.UTF_8));
         final String response = httpClient.execute(httpPost, new MsaResponseHandler());
-        final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
+        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
 
         final MsaDeviceCode msaDeviceCode = new MsaDeviceCode(
                 System.currentTimeMillis() + obj.get("expires_in").getAsLong() * 1000,

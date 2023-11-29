@@ -18,9 +18,9 @@
 package net.raphimc.minecraftauth.responsehandler;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import net.raphimc.minecraftauth.responsehandler.exception.RealmsResponseException;
 import net.raphimc.minecraftauth.responsehandler.exception.RetryException;
+import net.raphimc.minecraftauth.util.JsonUtil;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -47,7 +47,7 @@ public class RealmsResponseHandler implements ResponseHandler<String> {
             }
 
             if (body != null && ContentType.getOrDefault(entity).getMimeType().equals(ContentType.APPLICATION_JSON.getMimeType())) {
-                final JsonObject obj = (JsonObject) JsonParser.parseString(body);
+                final JsonObject obj = (JsonObject) JsonUtil.parseString(body);
                 if (obj.has("errorCode") && obj.has("errorMsg")) {
                     throw new RealmsResponseException(statusLine.getStatusCode(), obj.get("errorCode").getAsInt(), obj.get("errorMsg").getAsString());
                 }

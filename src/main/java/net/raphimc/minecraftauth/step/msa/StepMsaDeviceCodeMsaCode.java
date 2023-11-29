@@ -18,10 +18,10 @@
 package net.raphimc.minecraftauth.step.msa;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MsaResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
+import net.raphimc.minecraftauth.util.JsonUtil;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -66,7 +66,7 @@ public class StepMsaDeviceCodeMsaCode extends MsaCodeStep<StepMsaDeviceCode.MsaD
             httpPost.setEntity(new UrlEncodedFormEntity(postData, StandardCharsets.UTF_8));
             try {
                 final String response = httpClient.execute(httpPost, new MsaResponseHandler());
-                final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
+                final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
 
                 final MsaCode msaCode = new MsaCode(obj.get("refresh_token").getAsString(), this.clientId, this.scope, this.clientSecret, null);
                 MinecraftAuth.LOGGER.info("Got MSA Code");

@@ -18,13 +18,13 @@
 package net.raphimc.minecraftauth.step.bedrock;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.PlayFabResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
+import net.raphimc.minecraftauth.util.JsonUtil;
 import net.raphimc.minecraftauth.util.MicrosoftConstants;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -73,7 +73,7 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
         final HttpPost httpPost = new HttpPost(PLAY_FAB_URL);
         httpPost.setEntity(new StringEntity(postData.toString(), ContentType.APPLICATION_JSON));
         final String response = httpClient.execute(httpPost, new PlayFabResponseHandler());
-        final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
+        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
         final JsonObject data = obj.getAsJsonObject("data");
         final JsonObject entityToken = data.getAsJsonObject("EntityToken");
 
