@@ -36,7 +36,9 @@ public class XblResponseHandler implements ResponseHandler<String> {
         if (statusLine.getStatusCode() >= 300) {
             EntityUtils.consumeQuietly(entity);
             if (response.containsHeader("X-Err")) {
-                throw new XblResponseException(statusLine.getStatusCode(), Long.parseLong(response.getFirstHeader("X-Err").getValue()), statusLine.getReasonPhrase());
+                final long xblErrorCode = Long.parseLong(response.getFirstHeader("X-Err").getValue());
+                final String errorReason = XblResponseException.ERROR_CODES.getOrDefault(xblErrorCode, statusLine.getReasonPhrase());
+                throw new XblResponseException(statusLine.getStatusCode(), xblErrorCode, errorReason);
             }
             throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
         }
