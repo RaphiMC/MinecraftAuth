@@ -25,16 +25,7 @@ To customize/configure a login flow yourself (for example to change the client i
 For examples, you can look at the predefined login flows in the ``MinecraftAuth`` class.
 
 Here is an example of how to manage a Minecraft: Java Edition account (For Minecraft: Bedrock Edition you can use pretty much the same code, but replace ``Java`` with ``Bedrock``):
-### Log in using credentials
-```java
-try (CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-    StepFullJavaSession.FullJavaSession javaSession = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(httpClient, new StepCredentialsMsaCode.MsaCredentials("email@test.com", "P4ssw0rd"));
-    System.out.println("Username: " + javaSession.getMcProfile().getName());
-    System.out.println("Access token: " + javaSession.getMcProfile().getMcToken().getAccessToken());
-    System.out.println("Player certificates: " + javaSession.getPlayerCertificates());
-}
-```
-### Log in using device code
+### Log in using device code (Recommended)
 The device code auth flow blocks the thread until the user has logged in and throws an exception if the process times out.
 The timeout is 120 seconds by default.
 ```java
@@ -47,6 +38,16 @@ try (CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
         // There is also a method to generate a direct URL without needing the user to enter a code
         System.out.println("Go to " + msaDeviceCode.getDirectVerificationUri());
     }));
+    System.out.println("Username: " + javaSession.getMcProfile().getName());
+    System.out.println("Access token: " + javaSession.getMcProfile().getMcToken().getAccessToken());
+    System.out.println("Player certificates: " + javaSession.getPlayerCertificates());
+}
+```
+### Log in using credentials
+The credentials auth flow does not handle 2FA and will throw an exception if the user has 2FA enabled. You should consider using the device code auth flow instead if you want to support 2FA.
+```java
+try (CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
+    StepFullJavaSession.FullJavaSession javaSession = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(httpClient, new StepCredentialsMsaCode.MsaCredentials("email@test.com", "P4ssw0rd"));
     System.out.println("Username: " + javaSession.getMcProfile().getName());
     System.out.println("Access token: " + javaSession.getMcProfile().getMcToken().getAccessToken());
     System.out.println("Player certificates: " + javaSession.getPlayerCertificates());
