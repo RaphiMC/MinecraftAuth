@@ -61,7 +61,6 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
     public MsaToken fromJson(final JsonObject json) {
         final MsaCodeStep.MsaCode msaCode = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("msaCode")) : null;
         return new MsaToken(
-                json.get("userId").getAsString(),
                 json.get("expireTimeMs").getAsLong(),
                 json.get("accessToken").getAsString(),
                 json.get("refreshToken").getAsString(),
@@ -72,7 +71,6 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
     @Override
     public JsonObject toJson(final MsaToken msaToken) {
         final JsonObject json = new JsonObject();
-        json.addProperty("userId", msaToken.userId);
         json.addProperty("expireTimeMs", msaToken.expireTimeMs);
         json.addProperty("accessToken", msaToken.accessToken);
         json.addProperty("refreshToken", msaToken.refreshToken);
@@ -103,7 +101,6 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
         final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
 
         final MsaToken msaToken = new MsaToken(
-                obj.get("user_id").getAsString(),
                 System.currentTimeMillis() + obj.get("expires_in").getAsLong() * 1000,
                 obj.get("access_token").getAsString(),
                 obj.get("refresh_token").getAsString(),
@@ -117,7 +114,6 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
     @EqualsAndHashCode(callSuper = false)
     public static class MsaToken extends AbstractStep.StepResult<MsaCodeStep.MsaCode> {
 
-        String userId;
         long expireTimeMs;
         String accessToken;
         String refreshToken;
