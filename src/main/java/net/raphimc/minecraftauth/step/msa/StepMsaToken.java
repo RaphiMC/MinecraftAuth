@@ -40,6 +40,7 @@ import java.util.List;
 public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken.MsaToken> {
 
     public static final String TOKEN_URL = "https://login.live.com/oauth20_token.srf";
+    // public static final String TOKEN_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
 
     public StepMsaToken(final AbstractStep<?, MsaCodeStep.MsaCode> prevStep) {
         super("msaToken", prevStep);

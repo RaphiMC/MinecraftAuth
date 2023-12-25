@@ -32,6 +32,7 @@ import java.util.function.Consumer;
 public class StepLocalWebServer extends AbstractStep<StepLocalWebServer.LocalWebServerCallback, StepLocalWebServer.LocalWebServer> {
 
     public static final String AUTHORIZE_URL = "https://login.live.com/oauth20_authorize.srf";
+    // public static final String AUTHORIZE_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize";
 
     private final String clientId;
     private final String scope;

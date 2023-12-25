@@ -40,6 +40,7 @@ import java.util.function.Consumer;
 public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceCodeCallback, StepMsaDeviceCode.MsaDeviceCode> {
 
     public static final String CONNECT_URL = "https://login.live.com/oauth20_connect.srf";
+    // public static final String CONNECT_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode";
 
     private final String clientId;
     private final String scope;

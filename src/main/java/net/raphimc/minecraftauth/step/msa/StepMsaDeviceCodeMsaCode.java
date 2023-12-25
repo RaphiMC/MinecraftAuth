@@ -38,6 +38,7 @@ import java.util.concurrent.TimeoutException;
 public class StepMsaDeviceCodeMsaCode extends MsaCodeStep<StepMsaDeviceCode.MsaDeviceCode> {
 
     public static final String TOKEN_URL = "https://login.live.com/oauth20_token.srf";
+    // public static final String TOKEN_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
 
     private final int timeout;
 

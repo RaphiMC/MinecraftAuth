@@ -45,6 +45,7 @@ import java.util.List;
 public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.MsaCredentials> {
 
     public static final String AUTHORIZE_URL = "https://login.live.com/oauth20_authorize.srf";
+    // public static final String AUTHORIZE_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize";
 
     private final String redirectUri;
 
