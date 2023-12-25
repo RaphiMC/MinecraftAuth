@@ -39,12 +39,12 @@ public class XblResponseException extends HttpResponseException {
         ERROR_CODES.put(2148916238L, "The account date of birth is under 18 years and cannot proceed unless the account is added to a family by an adult.");
     }
 
-    private final long xblErrorCode;
+    private final long errorCode;
 
-    public XblResponseException(final int statusCode, final long xblErrorCode, final String reasonPhrase) {
-        super(statusCode, reasonPhrase + ", xbox live error code: " + xblErrorCode);
+    public XblResponseException(final int statusCode, final long errorCode, final String reasonPhrase) {
+        super(statusCode, reasonPhrase + ", xbox live error code: " + errorCode);
 
-        this.xblErrorCode = xblErrorCode;
+        this.errorCode = errorCode;
     }
 
 }

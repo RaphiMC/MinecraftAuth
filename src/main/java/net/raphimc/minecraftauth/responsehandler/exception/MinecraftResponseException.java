@@ -21,16 +21,14 @@ import lombok.Getter;
 import org.apache.http.client.HttpResponseException;
 
 @Getter
-public class RealmsResponseException extends HttpResponseException {
+public class MinecraftResponseException extends HttpResponseException {
 
-    public static final int TOS_NOT_ACCEPTED = 6002;
+    private final String error;
 
-    private final int errorCode;
+    public MinecraftResponseException(final int statusCode, final String error, final String reasonPhrase) {
+        super(statusCode, reasonPhrase + ", minecraft error: " + error);
 
-    public RealmsResponseException(final int statusCode, final int errorCode, final String reasonPhrase) {
-        super(statusCode, reasonPhrase + ", realms error code: " + errorCode);
-
-        this.errorCode = errorCode;
+        this.error = error;
     }
 
 }

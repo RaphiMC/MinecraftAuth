@@ -89,7 +89,7 @@ if (!isAvailable) {
     } catch (CompletionException e) {
         if (e.getCause() instanceof RealmsResponseException) {
             RealmsResponseException exception = (RealmsResponseException) e.getCause();
-            if (exception.getRealmsErrorCode() == RealmsResponseException.TOS_NOT_ACCEPTED) {
+            if (exception.getErrorCode() == RealmsResponseException.TOS_NOT_ACCEPTED) {
                 // The Java Edition Realms API requires users to accept the Minecraft Realms Terms of Service (https://aka.ms/MinecraftRealmsTerms)
                 // You should display the terms to the user and ask them to accept them:
                 javaRealmsService.acceptTos().join();

@@ -18,6 +18,7 @@
 package net.raphimc.minecraftauth.responsehandler;
 
 import com.google.gson.JsonObject;
+import net.raphimc.minecraftauth.responsehandler.exception.PlayFabResponseException;
 import net.raphimc.minecraftauth.util.JsonUtil;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -40,7 +41,7 @@ public class PlayFabResponseHandler implements ResponseHandler<String> {
             if (body != null && ContentType.getOrDefault(entity).getMimeType().equals(ContentType.APPLICATION_JSON.getMimeType())) {
                 final JsonObject obj = (JsonObject) JsonUtil.parseString(body);
                 if (obj.has("error") && obj.has("errorMessage")) {
-                    throw new HttpResponseException(statusLine.getStatusCode(), obj.get("error").getAsString() + ": " + obj.get("errorMessage").getAsString());
+                    throw new PlayFabResponseException(statusLine.getStatusCode(), obj.get("error").getAsString(), obj.get("errorMessage").getAsString());
                 }
             }
             throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
