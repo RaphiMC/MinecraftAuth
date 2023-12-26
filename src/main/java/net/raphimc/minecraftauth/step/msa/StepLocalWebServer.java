@@ -86,9 +86,10 @@ public class StepLocalWebServer extends AbstractStep<StepLocalWebServer.LocalWeb
         return new URIBuilder(this.applicationDetails.getOAuthEnvironment().getAuthorizeUrl())
                 .setParameter("client_id", this.applicationDetails.getClientId())
                 .setParameter("redirect_uri", this.applicationDetails.getRedirectUri() + ":" + localPort)
-                .setParameter("response_type", "code")
-                .setParameter("prompt", "select_account")
                 .setParameter("scope", this.applicationDetails.getScope())
+                .setParameter("response_type", "code")
+                .setParameter("response_mode", "query")
+                .setParameter("prompt", "select_account")
                 .build().toString();
     }
 

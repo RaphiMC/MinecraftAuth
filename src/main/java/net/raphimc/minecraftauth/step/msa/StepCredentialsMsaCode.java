@@ -100,8 +100,9 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
         return new URIBuilder(this.applicationDetails.getOAuthEnvironment().getAuthorizeUrl())
                 .setParameter("client_id", this.applicationDetails.getClientId())
                 .setParameter("redirect_uri", this.applicationDetails.getRedirectUri())
-                .setParameter("response_type", "code")
                 .setParameter("scope", this.applicationDetails.getScope())
+                .setParameter("response_type", "code")
+                .setParameter("response_mode", "query")
                 .build();
     }
 
