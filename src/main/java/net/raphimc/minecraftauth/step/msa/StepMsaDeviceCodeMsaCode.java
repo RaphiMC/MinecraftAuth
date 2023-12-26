@@ -20,12 +20,12 @@ package net.raphimc.minecraftauth.step.msa;
 import com.google.gson.JsonObject;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MsaResponseHandler;
+import net.raphimc.minecraftauth.responsehandler.exception.MsaResponseException;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.JsonUtil;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
@@ -72,8 +72,8 @@ public class StepMsaDeviceCodeMsaCode extends MsaCodeStep<StepMsaDeviceCode.MsaD
                 final MsaCode msaCode = new MsaCode(obj.get("refresh_token").getAsString(), this.clientId, this.scope, this.clientSecret, null);
                 MinecraftAuth.LOGGER.info("Got MSA Code");
                 return msaCode;
-            } catch (HttpResponseException e) {
-                if (e.getStatusCode() == HttpStatus.SC_BAD_REQUEST && e.getReasonPhrase().startsWith("authorization_pending")) {
+            } catch (MsaResponseException e) {
+                if (e.getStatusCode() == HttpStatus.SC_BAD_REQUEST && e.getError().equals("authorization_pending")) {
                     Thread.sleep(msaDeviceCode.getIntervalMs());
                     continue;
                 }
