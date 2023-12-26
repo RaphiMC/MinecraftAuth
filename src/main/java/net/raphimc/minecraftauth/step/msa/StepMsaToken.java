@@ -24,7 +24,6 @@ import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MsaResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.JsonUtil;
-import net.raphimc.minecraftauth.util.UuidUtil;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -48,12 +47,14 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
 
     @Override
     public MsaToken applyStep(final HttpClient httpClient, final MsaCodeStep.MsaCode msaCode) throws Exception {
-        return this.apply(httpClient, msaCode.getCode(), msaCode.getRedirectUri() != null ? "authorization_code" : "refresh_token", msaCode);
+        return this.apply(httpClient, msaCode.getCode(), msaCode.getApplicationDetails().getRedirectUri() != null ? "authorization_code" : "refresh_token", msaCode);
     }
 
     @Override
     public MsaToken refresh(final HttpClient httpClient, final MsaToken msaToken) throws Exception {
-        if (msaToken.isExpired()) return this.apply(httpClient, msaToken.getRefreshToken(), "refresh_token", msaToken.getMsaCode());
+        if (msaToken.isExpired()) {
+            return this.apply(httpClient, msaToken.getRefreshToken(), "refresh_token", msaToken.getMsaCode());
+        }
 
         return msaToken;
     }
@@ -80,20 +81,21 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
     }
 
     private MsaToken apply(final HttpClient httpClient, final String code, final String type, final MsaCodeStep.MsaCode msaCode) throws Exception {
+        final MsaCodeStep.ApplicationDetails applicationDetails = msaCode.getApplicationDetails();
         MinecraftAuth.LOGGER.info("Getting MSA Token...");
 
         final List<NameValuePair> postData = new ArrayList<>();
-        postData.add(new BasicNameValuePair("client_id", msaCode.getClientId()));
-        postData.add(new BasicNameValuePair("scope", msaCode.getScope()));
+        postData.add(new BasicNameValuePair("client_id", applicationDetails.getClientId()));
+        postData.add(new BasicNameValuePair("scope", applicationDetails.getScope()));
         postData.add(new BasicNameValuePair("grant_type", type));
         if (type.equals("refresh_token")) {
             postData.add(new BasicNameValuePair("refresh_token", code));
         } else {
             postData.add(new BasicNameValuePair("code", code));
-            postData.add(new BasicNameValuePair("redirect_uri", msaCode.getRedirectUri()));
+            postData.add(new BasicNameValuePair("redirect_uri", applicationDetails.getRedirectUri()));
         }
-        if (msaCode.getClientSecret() != null) {
-            postData.add(new BasicNameValuePair("client_secret", msaCode.getClientSecret()));
+        if (applicationDetails.getClientSecret() != null) {
+            postData.add(new BasicNameValuePair("client_secret", applicationDetails.getClientSecret()));
         }
 
         final HttpPost httpPost = new HttpPost(TOKEN_URL);
@@ -128,10 +130,6 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
         @Override
         public boolean isExpired() {
             return this.expireTimeMs <= System.currentTimeMillis();
-        }
-
-        public boolean isTitleClientId() {
-            return !UuidUtil.isDashedUuid(this.msaCode.getClientId());
         }
 
     }

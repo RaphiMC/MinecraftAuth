@@ -34,36 +34,35 @@ public class StepLocalWebServer extends AbstractStep<StepLocalWebServer.LocalWeb
     public static final String AUTHORIZE_URL = "https://login.live.com/oauth20_authorize.srf";
     // public static final String AUTHORIZE_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize";
 
-    private final String clientId;
-    private final String scope;
-    private final String redirectUri;
+    private final MsaCodeStep.ApplicationDetails applicationDetails;
 
-    public StepLocalWebServer(final String clientId, final String scope, final String redirectUri) {
+    public StepLocalWebServer(final MsaCodeStep.ApplicationDetails applicationDetails) {
         super("localWebServer", null);
 
-        this.clientId = clientId;
-        this.scope = scope;
-        this.redirectUri = redirectUri;
-
-        if (this.redirectUri.endsWith("/")) {
+        if (applicationDetails.getRedirectUri().endsWith("/")) {
             throw new IllegalArgumentException("Redirect URI must not end with a slash");
         }
+
+        this.applicationDetails = applicationDetails;
     }
 
     @Override
     public LocalWebServer applyStep(final HttpClient httpClient, final LocalWebServerCallback localWebServerCallback) throws Exception {
         MinecraftAuth.LOGGER.info("Creating URL for MSA login via local webserver...");
 
-        if (localWebServerCallback == null) throw new IllegalStateException("Missing StepLocalWebServer.LocalWebServerCallback input");
+        if (localWebServerCallback == null) {
+            throw new IllegalStateException("Missing StepLocalWebServer.LocalWebServerCallback input");
+        }
 
         try (final ServerSocket localServer = new ServerSocket(0)) {
             final int localPort = localServer.getLocalPort();
 
             final LocalWebServer localWebServer = new LocalWebServer(
                     this.getAuthenticationUrl(localPort),
-                    this.redirectUri + ":" + localPort,
-                    localPort);
-            MinecraftAuth.LOGGER.info("Created local webserver MSA authentication URL: " + localWebServer.authenticationUrl);
+                    localPort,
+                    this.applicationDetails
+            );
+            MinecraftAuth.LOGGER.info("Created local webserver MSA authentication URL: " + localWebServer.getAuthenticationUrl());
             localWebServerCallback.callback.accept(localWebServer);
             return localWebServer;
         }
@@ -73,8 +72,8 @@ public class StepLocalWebServer extends AbstractStep<StepLocalWebServer.LocalWeb
     public LocalWebServer fromJson(final JsonObject json) {
         return new LocalWebServer(
                 json.get("authenticationUrl").getAsString(),
-                json.get("redirectUri").getAsString(),
-                json.get("port").getAsInt()
+                json.get("port").getAsInt(),
+                this.applicationDetails
         );
     }
 
@@ -82,33 +81,47 @@ public class StepLocalWebServer extends AbstractStep<StepLocalWebServer.LocalWeb
     public JsonObject toJson(final LocalWebServer localWebServer) {
         final JsonObject json = new JsonObject();
         json.addProperty("authenticationUrl", localWebServer.authenticationUrl);
-        json.addProperty("redirectUri", localWebServer.redirectUri);
         json.addProperty("port", localWebServer.port);
         return json;
     }
 
     private String getAuthenticationUrl(final int localPort) throws URISyntaxException {
         return new URIBuilder(AUTHORIZE_URL)
-                .setParameter("client_id", this.clientId)
-                .setParameter("redirect_uri", this.redirectUri + ":" + localPort)
+                .setParameter("client_id", this.applicationDetails.getClientId())
+                .setParameter("redirect_uri", this.applicationDetails.getRedirectUri() + ":" + localPort)
                 .setParameter("response_type", "code")
                 .setParameter("prompt", "select_account")
-                .setParameter("scope", this.scope)
+                .setParameter("scope", this.applicationDetails.getScope())
                 .build().toString();
     }
 
     @Value
     @EqualsAndHashCode(callSuper = false)
-    public static class LocalWebServer extends AbstractStep.FirstStepResult {
+    public static class LocalWebServer extends AbstractStep.StepResult<MsaCodeStep.ApplicationDetails> {
+
         String authenticationUrl;
-        String redirectUri;
         int port;
+        MsaCodeStep.ApplicationDetails applicationDetails;
+
+        public LocalWebServer(final String authenticationUrl, final int port, final MsaCodeStep.ApplicationDetails applicationDetails) {
+            this.authenticationUrl = authenticationUrl;
+            this.port = port;
+            this.applicationDetails = applicationDetails.withRedirectUri(applicationDetails.getRedirectUri() + ":" + port);
+        }
+
+        @Override
+        protected MsaCodeStep.ApplicationDetails prevResult() {
+            return this.applicationDetails;
+        }
+
     }
 
     @Value
     @EqualsAndHashCode(callSuper = false)
     public static class LocalWebServerCallback extends AbstractStep.InitialInput {
+
         Consumer<LocalWebServer> callback;
+
     }
 
 }

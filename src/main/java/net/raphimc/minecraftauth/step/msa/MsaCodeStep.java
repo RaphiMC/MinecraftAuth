@@ -20,57 +20,68 @@ package net.raphimc.minecraftauth.step.msa;
 import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import lombok.With;
 import net.raphimc.minecraftauth.step.AbstractStep;
-import org.apache.http.client.HttpClient;
+import net.raphimc.minecraftauth.util.JsonUtil;
+import net.raphimc.minecraftauth.util.UuidUtil;
 
 public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends AbstractStep<I, MsaCodeStep.MsaCode> {
 
-    protected final String clientId;
-    protected final String scope;
-    protected final String clientSecret;
-
-    public MsaCodeStep(final AbstractStep<?, I> prevStep, final String clientId, final String scope, final String clientSecret) {
+    public MsaCodeStep(final AbstractStep<?, I> prevStep) {
         super("msaCode", prevStep);
-
-        this.clientId = clientId;
-        this.scope = scope;
-        this.clientSecret = clientSecret;
-    }
-
-    @Override
-    public MsaCode applyStep(final HttpClient httpClient, final I prevResult) throws Exception {
-        throw new UnsupportedOperationException();
     }
 
     @Override
     public MsaCode fromJson(final JsonObject json) {
         return new MsaCode(
                 json.get("code").getAsString(),
-                json.get("clientId").getAsString(),
-                json.get("scope").getAsString(),
-                json.get("clientSecret") != null && !json.get("clientSecret").isJsonNull() ? json.get("clientSecret").getAsString() : null,
-                null);
+                new ApplicationDetails(
+                        json.get("clientId").getAsString(),
+                        json.get("scope").getAsString(),
+                        JsonUtil.getStringOr(json, "clientSecret", null),
+                        JsonUtil.getStringOr(json, "redirectUri", null)
+                )
+        );
     }
 
     @Override
     public JsonObject toJson(final MsaCode msaCode) {
         final JsonObject json = new JsonObject();
         json.addProperty("code", msaCode.code);
-        json.addProperty("clientId", msaCode.clientId);
-        json.addProperty("scope", msaCode.scope);
-        json.addProperty("clientSecret", msaCode.clientSecret);
+        json.addProperty("clientId", msaCode.applicationDetails.clientId);
+        json.addProperty("scope", msaCode.applicationDetails.scope);
+        json.addProperty("clientSecret", msaCode.applicationDetails.clientSecret);
+        json.addProperty("redirectUri", msaCode.applicationDetails.redirectUri);
         return json;
     }
 
     @Value
+    @With
     @EqualsAndHashCode(callSuper = false)
-    public static class MsaCode extends AbstractStep.FirstStepResult {
+    public static class ApplicationDetails extends AbstractStep.FirstStepResult {
 
-        String code;
         String clientId;
         String scope;
         String clientSecret;
         String redirectUri;
+
+        public boolean isTitleClientId() {
+            return !UuidUtil.isDashedUuid(this.clientId);
+        }
+
+    }
+
+    @Value
+    @EqualsAndHashCode(callSuper = false)
+    public static class MsaCode extends AbstractStep.StepResult<ApplicationDetails> {
+
+        String code;
+        ApplicationDetails applicationDetails;
+
+        @Override
+        protected ApplicationDetails prevResult() {
+            return this.applicationDetails;
+        }
 
     }
 

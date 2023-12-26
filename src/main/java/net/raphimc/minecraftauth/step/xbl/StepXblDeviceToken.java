@@ -119,7 +119,7 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
 
     @Value
     @EqualsAndHashCode(callSuper = false)
-    public static class XblDeviceToken extends AbstractStep.StepResult<AbstractStep.StepResult<?>> {
+    public static class XblDeviceToken extends AbstractStep.FirstStepResult {
 
         ECPublicKey publicKey;
         ECPrivateKey privateKey;
@@ -127,11 +127,6 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
         long expireTimeMs;
         String token;
         String deviceId;
-
-        @Override
-        protected StepResult<?> prevResult() {
-            return null;
-        }
 
         @Override
         public boolean isExpired() {

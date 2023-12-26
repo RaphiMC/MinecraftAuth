@@ -76,7 +76,9 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         final String response = httpClient.execute(httpPost, new MinecraftResponseHandler());
         final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
         final JsonArray chain = obj.get("chain").getAsJsonArray();
-        if (chain.size() != 2) throw new IllegalStateException("Invalid chain size");
+        if (chain.size() != 2) {
+            throw new IllegalStateException("Invalid chain size");
+        }
 
         final Jws<Claims> mojangJwt = Jwts.parser().clockSkewSeconds(CLOCK_SKEW).verifyWith(MOJANG_PUBLIC_KEY).build().parseSignedClaims(chain.get(0).getAsString());
         final ECPublicKey mojangJwtPublicKey = CryptUtil.publicKeyEcFromBase64(mojangJwt.getPayload().get("identityPublicKey", String.class));

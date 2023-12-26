@@ -33,12 +33,8 @@ public class StepLocalWebServerMsaCode extends MsaCodeStep<StepLocalWebServer.Lo
 
     private final int timeout;
 
-    public StepLocalWebServerMsaCode(final AbstractStep<?, StepLocalWebServer.LocalWebServer> prevStep, final String clientId, final String scope, final int timeout) {
-        this(prevStep, clientId, scope, null, timeout);
-    }
-
-    public StepLocalWebServerMsaCode(final AbstractStep<?, StepLocalWebServer.LocalWebServer> prevStep, final String clientId, final String scope, final String clientSecret, final int timeout) {
-        super(prevStep, clientId, scope, clientSecret);
+    public StepLocalWebServerMsaCode(final AbstractStep<?, StepLocalWebServer.LocalWebServer> prevStep, final int timeout) {
+        super(prevStep);
 
         this.timeout = timeout;
     }
@@ -58,7 +54,7 @@ public class StepLocalWebServerMsaCode extends MsaCodeStep<StepLocalWebServer.Lo
 
                     final Matcher m = Pattern.compile("code=([^&\\s]+)").matcher(get);
                     if (m.find()) {
-                        final MsaCode msaCode = new MsaCode(m.group(1), this.clientId, this.scope, this.clientSecret, localWebServer.getRedirectUri());
+                        final MsaCode msaCode = new MsaCode(m.group(1), localWebServer.getApplicationDetails());
                         MinecraftAuth.LOGGER.info("Got MSA Code");
                         return msaCode;
                     }

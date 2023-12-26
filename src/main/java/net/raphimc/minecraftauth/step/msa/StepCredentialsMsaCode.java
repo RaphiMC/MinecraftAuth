@@ -47,23 +47,21 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
     public static final String AUTHORIZE_URL = "https://login.live.com/oauth20_authorize.srf";
     // public static final String AUTHORIZE_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize";
 
-    private final String redirectUri;
+    private final ApplicationDetails applicationDetails;
 
-    public StepCredentialsMsaCode(final String clientId, final String scope, final String redirectUri) {
-        this(clientId, scope, null, redirectUri);
-    }
+    public StepCredentialsMsaCode(final ApplicationDetails applicationDetails) {
+        super(null);
 
-    public StepCredentialsMsaCode(final String clientId, final String scope, final String clientSecret, final String redirectUri) {
-        super(null, clientId, scope, clientSecret);
-
-        this.redirectUri = redirectUri;
+        this.applicationDetails = applicationDetails;
     }
 
     @Override
     public MsaCode applyStep(final HttpClient httpClient, final StepCredentialsMsaCode.MsaCredentials msaCredentials) throws Exception {
         MinecraftAuth.LOGGER.info("Trying to get MSA Code using email and password...");
 
-        if (msaCredentials == null) throw new IllegalStateException("Missing StepCredentialsMsaCode.MsaCredentials input");
+        if (msaCredentials == null) {
+            throw new IllegalStateException("Missing StepCredentialsMsaCode.MsaCredentials input");
+        }
 
         final BasicCookieStore cookieStore = new BasicCookieStore();
         final HttpClientContext context = HttpClientContext.create();
@@ -92,17 +90,17 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
         httpPost.setEntity(new UrlEncodedFormEntity(postData, StandardCharsets.UTF_8));
         final String code = httpClient.execute(httpPost, new MsaCredentialsResponseHandler(), context);
 
-        final MsaCode msaCode = new MsaCode(code, this.clientId, this.scope, this.clientSecret, this.redirectUri);
+        final MsaCode msaCode = new MsaCode(code, this.applicationDetails);
         MinecraftAuth.LOGGER.info("Got MSA Code");
         return msaCode;
     }
 
     private URI getAuthenticationUrl() throws URISyntaxException {
         return new URIBuilder(AUTHORIZE_URL)
-                .setParameter("client_id", this.clientId)
-                .setParameter("redirect_uri", this.redirectUri)
+                .setParameter("client_id", this.applicationDetails.getClientId())
+                .setParameter("redirect_uri", this.applicationDetails.getRedirectUri())
                 .setParameter("response_type", "code")
-                .setParameter("scope", this.scope)
+                .setParameter("scope", this.applicationDetails.getScope())
                 .build();
     }
 
@@ -114,7 +112,10 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
         String password;
 
         public static MsaCredentials fromJson(final JsonObject json) {
-            return new MsaCredentials(json.get("email").getAsString(), json.get("password").getAsString());
+            return new MsaCredentials(
+                    json.get("email").getAsString(),
+                    json.get("password").getAsString()
+            );
         }
 
         public static JsonObject toJson(final MsaCredentials msaCredentials) {

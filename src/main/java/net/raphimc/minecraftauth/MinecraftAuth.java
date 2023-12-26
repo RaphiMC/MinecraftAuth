@@ -77,11 +77,8 @@ public class MinecraftAuth {
 
     public static class MsaTokenBuilder {
 
-        private String clientId = MicrosoftConstants.JAVA_TITLE_ID;
-        private String scope = MicrosoftConstants.SCOPE1;
-        private String clientSecret = null;
+        private MsaCodeStep.ApplicationDetails applicationDetails = new MsaCodeStep.ApplicationDetails(MicrosoftConstants.JAVA_TITLE_ID, MicrosoftConstants.SCOPE1, null, null);
         private int timeout = 120;
-        private String redirectUri = null;
 
         private AbstractStep<?, MsaCodeStep.MsaCode> msaCodeStep;
 
@@ -92,7 +89,7 @@ public class MinecraftAuth {
          * @return The builder
          */
         public MsaTokenBuilder withClientId(final String clientId) {
-            this.clientId = clientId;
+            this.applicationDetails = this.applicationDetails.withClientId(clientId);
 
             return this;
         }
@@ -104,7 +101,7 @@ public class MinecraftAuth {
          * @return The builder
          */
         public MsaTokenBuilder withScope(final String scope) {
-            this.scope = scope;
+            this.applicationDetails = this.applicationDetails.withScope(scope);
 
             return this;
         }
@@ -116,7 +113,19 @@ public class MinecraftAuth {
          * @return The builder
          */
         public MsaTokenBuilder withClientSecret(final String clientSecret) {
-            this.clientSecret = clientSecret;
+            this.applicationDetails = this.applicationDetails.withClientSecret(clientSecret);
+
+            return this;
+        }
+
+        /**
+         * Sets the redirect uri to use for the local webserver or credentials auth flow
+         *
+         * @param redirectUri The redirect uri
+         * @return The builder
+         */
+        public MsaTokenBuilder withRedirectUri(final String redirectUri) {
+            this.applicationDetails = this.applicationDetails.withRedirectUri(redirectUri);
 
             return this;
         }
@@ -134,25 +143,13 @@ public class MinecraftAuth {
         }
 
         /**
-         * Sets the redirect uri to use for the local webserver or credentials auth flow
-         *
-         * @param redirectUri The redirect uri
-         * @return The builder
-         */
-        public MsaTokenBuilder withRedirectUri(final String redirectUri) {
-            this.redirectUri = redirectUri;
-
-            return this;
-        }
-
-        /**
          * Uses the device code flow to get an MSA token. <b>This is the recommended way to get an MSA token.</b>
          * Needs instance of {@link net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode.MsaDeviceCodeCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, Object)}.
          *
          * @return The builder
          */
         public InitialXblSessionBuilder deviceCode() {
-            this.msaCodeStep = new StepMsaDeviceCodeMsaCode(new StepMsaDeviceCode(this.clientId, this.scope), this.clientId, this.scope, this.clientSecret, this.timeout * 1000);
+            this.msaCodeStep = new StepMsaDeviceCodeMsaCode(new StepMsaDeviceCode(this.applicationDetails), this.timeout * 1000);
 
             return new InitialXblSessionBuilder(this);
         }
@@ -164,11 +161,11 @@ public class MinecraftAuth {
          * @return The builder
          */
         public InitialXblSessionBuilder localWebServer() {
-            if (this.redirectUri == null) {
-                this.redirectUri = "http://localhost";
+            if (this.applicationDetails.getRedirectUri() == null) {
+                this.applicationDetails = this.applicationDetails.withRedirectUri("http://localhost");
             }
 
-            this.msaCodeStep = new StepLocalWebServerMsaCode(new StepLocalWebServer(this.clientId, this.scope, this.redirectUri), this.clientId, this.scope, this.clientSecret, this.timeout * 1000);
+            this.msaCodeStep = new StepLocalWebServerMsaCode(new StepLocalWebServer(this.applicationDetails), this.timeout * 1000);
 
             return new InitialXblSessionBuilder(this);
         }
@@ -180,11 +177,11 @@ public class MinecraftAuth {
          * @return The builder
          */
         public InitialXblSessionBuilder credentials() {
-            if (this.redirectUri == null) {
-                this.redirectUri = MicrosoftConstants.LIVE_OAUTH_DESKTOP_URL;
+            if (this.applicationDetails.getRedirectUri() == null) {
+                this.applicationDetails = this.applicationDetails.withRedirectUri(MicrosoftConstants.LIVE_OAUTH_DESKTOP_URL);
             }
 
-            this.msaCodeStep = new StepCredentialsMsaCode(this.clientId, this.scope, this.clientSecret, this.redirectUri);
+            this.msaCodeStep = new StepCredentialsMsaCode(this.applicationDetails);
 
             return new InitialXblSessionBuilder(this);
         }

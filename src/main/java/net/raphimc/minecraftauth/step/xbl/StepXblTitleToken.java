@@ -46,7 +46,12 @@ public class StepXblTitleToken extends AbstractStep<StepInitialXblSession.Initia
     public XblTitleToken applyStep(final HttpClient httpClient, final StepInitialXblSession.InitialXblSession initialXblSession) throws Exception {
         MinecraftAuth.LOGGER.info("Authenticating title with Xbox Live...");
 
-        if (initialXblSession.getXblDeviceToken() == null) throw new IllegalStateException("A XBL Device Token is needed for Title authentication");
+        if (initialXblSession.getXblDeviceToken() == null) {
+            throw new IllegalStateException("An XBL Device Token is needed for Title authentication");
+        }
+        if(!initialXblSession.getMsaToken().getMsaCode().getApplicationDetails().isTitleClientId()) {
+            throw new IllegalStateException("A Title Client ID is needed for Title authentication");
+        }
 
         final JsonObject postData = new JsonObject();
         final JsonObject properties = new JsonObject();

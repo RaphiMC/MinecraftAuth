@@ -42,12 +42,8 @@ public class StepMsaDeviceCodeMsaCode extends MsaCodeStep<StepMsaDeviceCode.MsaD
 
     private final int timeout;
 
-    public StepMsaDeviceCodeMsaCode(final AbstractStep<?, StepMsaDeviceCode.MsaDeviceCode> prevStep, final String clientId, final String scope, final int timeout) {
-        this(prevStep, clientId, scope, null, timeout);
-    }
-
-    public StepMsaDeviceCodeMsaCode(final AbstractStep<?, StepMsaDeviceCode.MsaDeviceCode> prevStep, final String clientId, final String scope, final String clientSecret, final int timeout) {
-        super(prevStep, clientId, scope, clientSecret);
+    public StepMsaDeviceCodeMsaCode(final AbstractStep<?, StepMsaDeviceCode.MsaDeviceCode> prevStep, final int timeout) {
+        super(prevStep);
 
         this.timeout = timeout;
     }
@@ -59,7 +55,7 @@ public class StepMsaDeviceCodeMsaCode extends MsaCodeStep<StepMsaDeviceCode.MsaD
         final long start = System.currentTimeMillis();
         while (!msaDeviceCode.isExpired() && System.currentTimeMillis() - start <= this.timeout) {
             final List<NameValuePair> postData = new ArrayList<>();
-            postData.add(new BasicNameValuePair("client_id", this.clientId));
+            postData.add(new BasicNameValuePair("client_id", msaDeviceCode.getApplicationDetails().getClientId()));
             postData.add(new BasicNameValuePair("device_code", msaDeviceCode.getDeviceCode()));
             postData.add(new BasicNameValuePair("grant_type", "device_code"));
 
@@ -69,7 +65,7 @@ public class StepMsaDeviceCodeMsaCode extends MsaCodeStep<StepMsaDeviceCode.MsaD
                 final String response = httpClient.execute(httpPost, new MsaResponseHandler());
                 final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
 
-                final MsaCode msaCode = new MsaCode(obj.get("refresh_token").getAsString(), this.clientId, this.scope, this.clientSecret, null);
+                final MsaCode msaCode = new MsaCode(obj.get("refresh_token").getAsString(), msaDeviceCode.getApplicationDetails().withRedirectUri(null));
                 MinecraftAuth.LOGGER.info("Got MSA Code");
                 return msaCode;
             } catch (MsaResponseException e) {

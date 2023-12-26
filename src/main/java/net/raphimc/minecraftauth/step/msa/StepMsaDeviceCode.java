@@ -42,26 +42,26 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
     public static final String CONNECT_URL = "https://login.live.com/oauth20_connect.srf";
     // public static final String CONNECT_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode";
 
-    private final String clientId;
-    private final String scope;
+    private final MsaCodeStep.ApplicationDetails applicationDetails;
 
-    public StepMsaDeviceCode(final String clientId, final String scope) {
+    public StepMsaDeviceCode(final MsaCodeStep.ApplicationDetails applicationDetails) {
         super("msaDeviceCode", null);
 
-        this.clientId = clientId;
-        this.scope = scope;
+        this.applicationDetails = applicationDetails;
     }
 
     @Override
     public MsaDeviceCode applyStep(final HttpClient httpClient, final StepMsaDeviceCode.MsaDeviceCodeCallback msaDeviceCodeCallback) throws Exception {
         MinecraftAuth.LOGGER.info("Getting device code for MSA login...");
 
-        if (msaDeviceCodeCallback == null) throw new IllegalStateException("Missing StepMsaDeviceCode.MsaDeviceCodeCallback input");
+        if (msaDeviceCodeCallback == null) {
+            throw new IllegalStateException("Missing StepMsaDeviceCode.MsaDeviceCodeCallback input");
+        }
 
         final List<NameValuePair> postData = new ArrayList<>();
-        postData.add(new BasicNameValuePair("client_id", this.clientId));
+        postData.add(new BasicNameValuePair("client_id", this.applicationDetails.getClientId()));
         postData.add(new BasicNameValuePair("response_type", "device_code"));
-        postData.add(new BasicNameValuePair("scope", this.scope));
+        postData.add(new BasicNameValuePair("scope", this.applicationDetails.getScope()));
 
         final HttpPost httpPost = new HttpPost(CONNECT_URL);
         httpPost.setEntity(new UrlEncodedFormEntity(postData, StandardCharsets.UTF_8));
@@ -73,7 +73,8 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
                 obj.get("interval").getAsLong() * 1000,
                 obj.get("device_code").getAsString(),
                 obj.get("user_code").getAsString(),
-                obj.get("verification_uri").getAsString()
+                obj.get("verification_uri").getAsString(),
+                this.applicationDetails
         );
         MinecraftAuth.LOGGER.info("Got MSA device code, expires: " + Instant.ofEpochMilli(msaDeviceCode.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         msaDeviceCodeCallback.callback.accept(msaDeviceCode);
@@ -87,7 +88,8 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
                 json.get("intervalMs").getAsLong(),
                 json.get("deviceCode").getAsString(),
                 json.get("userCode").getAsString(),
-                json.get("verificationUrl").getAsString()
+                json.get("verificationUrl").getAsString(),
+                this.applicationDetails
         );
     }
 
@@ -104,13 +106,19 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
 
     @Value
     @EqualsAndHashCode(callSuper = false)
-    public static class MsaDeviceCode extends AbstractStep.FirstStepResult {
+    public static class MsaDeviceCode extends AbstractStep.StepResult<MsaCodeStep.ApplicationDetails> {
 
         long expireTimeMs;
         long intervalMs;
         String deviceCode;
         String userCode;
         String verificationUri;
+        MsaCodeStep.ApplicationDetails applicationDetails;
+
+        @Override
+        protected MsaCodeStep.ApplicationDetails prevResult() {
+            return this.applicationDetails;
+        }
 
         @Override
         public boolean isExpired() {
@@ -126,7 +134,9 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
     @Value
     @EqualsAndHashCode(callSuper = false)
     public static class MsaDeviceCodeCallback extends AbstractStep.InitialInput {
+
         Consumer<MsaDeviceCode> callback;
+
     }
 
 }

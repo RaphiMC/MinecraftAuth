@@ -51,12 +51,17 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
     public StepXblSisuAuthentication.XblSisuTokens applyStep(final HttpClient httpClient, final StepInitialXblSession.InitialXblSession initialXblSession) throws Exception {
         MinecraftAuth.LOGGER.info("Authenticating with Xbox Live using SISU...");
 
-        if (initialXblSession.getXblDeviceToken() == null) throw new IllegalStateException("A XBL Device Token is needed for SISU authentication");
+        if (initialXblSession.getXblDeviceToken() == null) {
+            throw new IllegalStateException("An XBL Device Token is needed for SISU authentication");
+        }
+        if (!initialXblSession.getMsaToken().getMsaCode().getApplicationDetails().isTitleClientId()) {
+            throw new IllegalStateException("A Title Client ID is needed for SISU authentication");
+        }
 
         final JsonObject postData = new JsonObject();
         postData.addProperty("AccessToken", "t=" + initialXblSession.getMsaToken().getAccessToken());
         postData.addProperty("DeviceToken", initialXblSession.getXblDeviceToken().getToken());
-        postData.addProperty("AppId", initialXblSession.getMsaToken().getMsaCode().getClientId());
+        postData.addProperty("AppId", initialXblSession.getMsaToken().getMsaCode().getApplicationDetails().getClientId());
         postData.add("ProofKey", CryptUtil.getProofKey(initialXblSession.getXblDeviceToken().getPublicKey()));
         postData.addProperty("SiteName", "user.auth.xboxlive.com");
         postData.addProperty("RelyingParty", this.relyingParty);
