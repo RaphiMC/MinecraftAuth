@@ -23,6 +23,7 @@ import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MsaCredentialsResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
+import net.raphimc.minecraftauth.util.OAuthEnvironment;
 import org.apache.http.HttpHeaders;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -44,9 +45,6 @@ import java.util.List;
 
 public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.MsaCredentials> {
 
-    public static final String AUTHORIZE_URL = "https://login.live.com/oauth20_authorize.srf";
-    // public static final String AUTHORIZE_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize";
-
     private final ApplicationDetails applicationDetails;
 
     public StepCredentialsMsaCode(final ApplicationDetails applicationDetails) {
@@ -61,6 +59,9 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
 
         if (msaCredentials == null) {
             throw new IllegalStateException("Missing StepCredentialsMsaCode.MsaCredentials input");
+        }
+        if (this.applicationDetails.getOAuthEnvironment() != OAuthEnvironment.LIVE) {
+            throw new IllegalStateException("Credentials can only be used with OAuthEnvironment.LIVE");
         }
 
         final BasicCookieStore cookieStore = new BasicCookieStore();
@@ -96,7 +97,7 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
     }
 
     private URI getAuthenticationUrl() throws URISyntaxException {
-        return new URIBuilder(AUTHORIZE_URL)
+        return new URIBuilder(this.applicationDetails.getOAuthEnvironment().getAuthorizeUrl())
                 .setParameter("client_id", this.applicationDetails.getClientId())
                 .setParameter("redirect_uri", this.applicationDetails.getRedirectUri())
                 .setParameter("response_type", "code")

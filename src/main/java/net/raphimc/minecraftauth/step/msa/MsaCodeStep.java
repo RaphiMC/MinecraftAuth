@@ -23,6 +23,7 @@ import lombok.Value;
 import lombok.With;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.JsonUtil;
+import net.raphimc.minecraftauth.util.OAuthEnvironment;
 import net.raphimc.minecraftauth.util.UuidUtil;
 
 public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends AbstractStep<I, MsaCodeStep.MsaCode> {
@@ -39,7 +40,8 @@ public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends 
                         json.get("clientId").getAsString(),
                         json.get("scope").getAsString(),
                         JsonUtil.getStringOr(json, "clientSecret", null),
-                        JsonUtil.getStringOr(json, "redirectUri", null)
+                        JsonUtil.getStringOr(json, "redirectUri", null),
+                        OAuthEnvironment.valueOf(JsonUtil.getStringOr(json, "oAuthEnvironment", "LIVE"))
                 )
         );
     }
@@ -52,6 +54,7 @@ public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends 
         json.addProperty("scope", msaCode.applicationDetails.scope);
         json.addProperty("clientSecret", msaCode.applicationDetails.clientSecret);
         json.addProperty("redirectUri", msaCode.applicationDetails.redirectUri);
+        json.addProperty("oAuthEnvironment", msaCode.applicationDetails.oAuthEnvironment.name());
         return json;
     }
 
@@ -64,6 +67,7 @@ public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends 
         String scope;
         String clientSecret;
         String redirectUri;
+        OAuthEnvironment oAuthEnvironment;
 
         public boolean isTitleClientId() {
             return !UuidUtil.isDashedUuid(this.clientId);

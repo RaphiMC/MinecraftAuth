@@ -31,9 +31,6 @@ import java.util.function.Consumer;
 
 public class StepLocalWebServer extends AbstractStep<StepLocalWebServer.LocalWebServerCallback, StepLocalWebServer.LocalWebServer> {
 
-    public static final String AUTHORIZE_URL = "https://login.live.com/oauth20_authorize.srf";
-    // public static final String AUTHORIZE_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize";
-
     private final MsaCodeStep.ApplicationDetails applicationDetails;
 
     public StepLocalWebServer(final MsaCodeStep.ApplicationDetails applicationDetails) {
@@ -86,7 +83,7 @@ public class StepLocalWebServer extends AbstractStep<StepLocalWebServer.LocalWeb
     }
 
     private String getAuthenticationUrl(final int localPort) throws URISyntaxException {
-        return new URIBuilder(AUTHORIZE_URL)
+        return new URIBuilder(this.applicationDetails.getOAuthEnvironment().getAuthorizeUrl())
                 .setParameter("client_id", this.applicationDetails.getClientId())
                 .setParameter("redirect_uri", this.applicationDetails.getRedirectUri() + ":" + localPort)
                 .setParameter("response_type", "code")

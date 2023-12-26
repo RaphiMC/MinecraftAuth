@@ -24,6 +24,7 @@ import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MsaResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.JsonUtil;
+import net.raphimc.minecraftauth.util.OAuthEnvironment;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -38,9 +39,6 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceCodeCallback, StepMsaDeviceCode.MsaDeviceCode> {
-
-    public static final String CONNECT_URL = "https://login.live.com/oauth20_connect.srf";
-    // public static final String CONNECT_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode";
 
     private final MsaCodeStep.ApplicationDetails applicationDetails;
 
@@ -60,10 +58,12 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
 
         final List<NameValuePair> postData = new ArrayList<>();
         postData.add(new BasicNameValuePair("client_id", this.applicationDetails.getClientId()));
-        postData.add(new BasicNameValuePair("response_type", "device_code"));
+        if (this.applicationDetails.getOAuthEnvironment() == OAuthEnvironment.LIVE) {
+            postData.add(new BasicNameValuePair("response_type", "device_code"));
+        }
         postData.add(new BasicNameValuePair("scope", this.applicationDetails.getScope()));
 
-        final HttpPost httpPost = new HttpPost(CONNECT_URL);
+        final HttpPost httpPost = new HttpPost(this.applicationDetails.getOAuthEnvironment().getDeviceCodeUrl());
         httpPost.setEntity(new UrlEncodedFormEntity(postData, StandardCharsets.UTF_8));
         final String response = httpClient.execute(httpPost, new MsaResponseHandler());
         final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();

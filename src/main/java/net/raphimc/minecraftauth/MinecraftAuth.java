@@ -32,6 +32,7 @@ import net.raphimc.minecraftauth.step.xbl.adapter.StepXblXstsToFullXblSession;
 import net.raphimc.minecraftauth.step.xbl.session.StepFullXblSession;
 import net.raphimc.minecraftauth.step.xbl.session.StepInitialXblSession;
 import net.raphimc.minecraftauth.util.MicrosoftConstants;
+import net.raphimc.minecraftauth.util.OAuthEnvironment;
 import net.raphimc.minecraftauth.util.logging.ConsoleLogger;
 import net.raphimc.minecraftauth.util.logging.ILogger;
 import org.apache.http.client.HttpClient;
@@ -77,7 +78,7 @@ public class MinecraftAuth {
 
     public static class MsaTokenBuilder {
 
-        private MsaCodeStep.ApplicationDetails applicationDetails = new MsaCodeStep.ApplicationDetails(MicrosoftConstants.JAVA_TITLE_ID, MicrosoftConstants.SCOPE1, null, null);
+        private MsaCodeStep.ApplicationDetails applicationDetails = new MsaCodeStep.ApplicationDetails(MicrosoftConstants.JAVA_TITLE_ID, MicrosoftConstants.SCOPE1, null, null, OAuthEnvironment.LIVE);
         private int timeout = 120;
 
         private AbstractStep<?, MsaCodeStep.MsaCode> msaCodeStep;
@@ -131,6 +132,18 @@ public class MinecraftAuth {
         }
 
         /**
+         * Sets the OAuth environment of the application
+         *
+         * @param oAuthEnvironment The OAuth environment
+         * @return The builder
+         */
+        public MsaTokenBuilder withOAuthEnvironment(final OAuthEnvironment oAuthEnvironment) {
+            this.applicationDetails = this.applicationDetails.withOAuthEnvironment(oAuthEnvironment);
+
+            return this;
+        }
+
+        /**
          * Sets the timeout of the device code or local webserver auth flow
          *
          * @param timeout The timeout in seconds
@@ -178,7 +191,7 @@ public class MinecraftAuth {
          */
         public InitialXblSessionBuilder credentials() {
             if (this.applicationDetails.getRedirectUri() == null) {
-                this.applicationDetails = this.applicationDetails.withRedirectUri(MicrosoftConstants.LIVE_OAUTH_DESKTOP_URL);
+                this.applicationDetails = this.applicationDetails.withRedirectUri(this.applicationDetails.getOAuthEnvironment().getNativeClientUrl());
             }
 
             this.msaCodeStep = new StepCredentialsMsaCode(this.applicationDetails);

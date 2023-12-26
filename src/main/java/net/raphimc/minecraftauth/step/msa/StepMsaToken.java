@@ -38,9 +38,6 @@ import java.util.List;
 
 public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken.MsaToken> {
 
-    public static final String TOKEN_URL = "https://login.live.com/oauth20_token.srf";
-    // public static final String TOKEN_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
-
     public StepMsaToken(final AbstractStep<?, MsaCodeStep.MsaCode> prevStep) {
         super("msaToken", prevStep);
     }
@@ -98,7 +95,7 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
             postData.add(new BasicNameValuePair("client_secret", applicationDetails.getClientSecret()));
         }
 
-        final HttpPost httpPost = new HttpPost(TOKEN_URL);
+        final HttpPost httpPost = new HttpPost(applicationDetails.getOAuthEnvironment().getTokenUrl());
         httpPost.setEntity(new UrlEncodedFormEntity(postData, StandardCharsets.UTF_8));
         final String response = httpClient.execute(httpPost, new MsaResponseHandler());
         final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
