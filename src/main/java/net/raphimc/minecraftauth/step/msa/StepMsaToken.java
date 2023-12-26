@@ -49,20 +49,23 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
 
     @Override
     public MsaToken refresh(final HttpClient httpClient, final MsaToken msaToken) throws Exception {
-        if (msaToken.isExpired()) {
+        if (!msaToken.isExpired()) {
+            return msaToken;
+        } else if (msaToken.getRefreshToken() != null) {
             return this.apply(httpClient, msaToken.getRefreshToken(), "refresh_token", msaToken.getMsaCode());
+        } else {
+            return super.refresh(httpClient, msaToken);
         }
-
-        return msaToken;
     }
 
     @Override
     public MsaToken fromJson(final JsonObject json) {
-        final MsaCodeStep.MsaCode msaCode = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject("msaCode")) : null;
+        final MsaCodeStep.MsaCode msaCode = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         return new MsaToken(
                 json.get("expireTimeMs").getAsLong(),
                 json.get("accessToken").getAsString(),
-                json.get("refreshToken").getAsString(),
+                JsonUtil.getStringOr(json, "refreshToken", null),
+                JsonUtil.getStringOr(json, "idToken", null),
                 msaCode
         );
     }
@@ -73,7 +76,8 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
         json.addProperty("expireTimeMs", msaToken.expireTimeMs);
         json.addProperty("accessToken", msaToken.accessToken);
         json.addProperty("refreshToken", msaToken.refreshToken);
-        if (this.prevStep != null) json.add("msaCode", this.prevStep.toJson(msaToken.msaCode));
+        json.addProperty("idToken", msaToken.idToken);
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(msaToken.msaCode));
         return json;
     }
 
@@ -103,7 +107,8 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
         final MsaToken msaToken = new MsaToken(
                 System.currentTimeMillis() + obj.get("expires_in").getAsLong() * 1000,
                 obj.get("access_token").getAsString(),
-                obj.get("refresh_token").getAsString(),
+                JsonUtil.getStringOr(obj, "refresh_token", null),
+                JsonUtil.getStringOr(obj, "id_token", null),
                 msaCode
         );
         MinecraftAuth.LOGGER.info("Got MSA Token, expires: " + Instant.ofEpochMilli(msaToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
@@ -117,6 +122,7 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
         long expireTimeMs;
         String accessToken;
         String refreshToken;
+        String idToken;
         MsaCodeStep.MsaCode msaCode;
 
         @Override
