@@ -18,16 +18,22 @@
 package net.raphimc.minecraftauth.step.msa;
 
 import net.raphimc.minecraftauth.MinecraftAuth;
+import net.raphimc.minecraftauth.responsehandler.exception.MsaResponseException;
 import net.raphimc.minecraftauth.step.AbstractStep;
+import org.apache.http.NameValuePair;
+import org.apache.http.RequestLine;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicLineParser;
 
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class StepLocalWebServerMsaCode extends MsaCodeStep<StepLocalWebServer.LocalWebServer> {
 
@@ -48,17 +54,28 @@ public class StepLocalWebServerMsaCode extends MsaCodeStep<StepLocalWebServer.Lo
             try {
                 try (final Socket client = localServer.accept()) {
                     final Scanner scanner = new Scanner(client.getInputStream());
-                    final String get = scanner.nextLine();
-                    final String response = "HTTP/1.1 200 OK\r\nConnection: Close\r\n\r\nYou have been logged in! You can close this window.";
-                    client.getOutputStream().write(response.getBytes(StandardCharsets.UTF_8));
+                    try {
+                        final RequestLine requestLine = BasicLineParser.parseRequestLine(scanner.nextLine(), BasicLineParser.INSTANCE);
 
-                    final Matcher m = Pattern.compile("code=([^&\\s]+)").matcher(get);
-                    if (m.find()) {
-                        final MsaCode msaCode = new MsaCode(m.group(1), localWebServer.getApplicationDetails());
+                        final Map<String, String> parameters = URLEncodedUtils.parse(new URI(requestLine.getUri()), StandardCharsets.UTF_8).stream().collect(Collectors.toMap(NameValuePair::getName, NameValuePair::getValue));
+                        if (parameters.containsKey("error") && parameters.containsKey("error_description")) {
+                            throw new MsaResponseException(500, parameters.get("error"), parameters.get("error_description"));
+                        }
+                        if (!parameters.containsKey("code")) {
+                            throw new IllegalStateException("Could not extract MSA Code from response url");
+                        }
+
+                        final String response = "HTTP/1.1 200 OK\r\nConnection: Close\r\n\r\nYou have been logged in! You can close this window.";
+                        client.getOutputStream().write(response.getBytes(StandardCharsets.UTF_8));
+
+                        final MsaCode msaCode = new MsaCode(parameters.get("code"), localWebServer.getApplicationDetails());
                         MinecraftAuth.LOGGER.info("Got MSA Code");
                         return msaCode;
+                    } catch (Throwable e) {
+                        final String response = "HTTP/1.1 500 Internal Server Error\r\nConnection: Close\r\n\r\nLogin failed. Error message: " + e.getMessage();
+                        client.getOutputStream().write(response.getBytes(StandardCharsets.UTF_8));
+                        throw e;
                     }
-                    throw new RuntimeException("Could not find MSA code");
                 }
             } catch (SocketTimeoutException e) {
                 throw new RuntimeException("Failed to get MSA Code. Login timed out");
