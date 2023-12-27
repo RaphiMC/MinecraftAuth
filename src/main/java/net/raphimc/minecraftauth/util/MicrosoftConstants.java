@@ -36,8 +36,10 @@ public class MicrosoftConstants {
     public static final String BEDROCK_NINTENDO_TITLE_ID = "00000000441cc96b"; // Nintendo
     public static final String BEDROCK_ANDROID_TITLE_ID = "0000000048183522"; // Android
     public static final String BEDROCK_IOS_TITLE_ID = "000000004c17c01a"; // iOS
+    public static final String EDU_CLIENT_ID = "b36b1432-1a1c-4c82-9b76-24de1cab42f2"; // Win32
 
     public static final String BEDROCK_PLAY_FAB_TITLE_ID = "20CA2";
+    public static final String EDU_PLAY_FAB_TITLE_ID = "6955F";
 
     public static final String SCOPE1 = "XboxLive.signin XboxLive.offline_access";
     public static final String SCOPE2 = "XboxLive.signin offline_access";

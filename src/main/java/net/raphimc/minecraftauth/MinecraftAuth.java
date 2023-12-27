@@ -22,6 +22,7 @@ import net.raphimc.minecraftauth.step.BiMergeStep;
 import net.raphimc.minecraftauth.step.bedrock.StepMCChain;
 import net.raphimc.minecraftauth.step.bedrock.StepPlayFabToken;
 import net.raphimc.minecraftauth.step.bedrock.session.StepFullBedrockSession;
+import net.raphimc.minecraftauth.step.edu.StepEduJWT;
 import net.raphimc.minecraftauth.step.java.StepMCProfile;
 import net.raphimc.minecraftauth.step.java.StepMCToken;
 import net.raphimc.minecraftauth.step.java.StepPlayerCertificates;
@@ -36,6 +37,7 @@ import net.raphimc.minecraftauth.util.OAuthEnvironment;
 import net.raphimc.minecraftauth.util.logging.ConsoleLogger;
 import net.raphimc.minecraftauth.util.logging.ILogger;
 import org.apache.http.client.HttpClient;
+import org.jetbrains.annotations.ApiStatus;
 
 public class MinecraftAuth {
 
@@ -71,6 +73,12 @@ public class MinecraftAuth {
             .withDeviceToken("Android")
             .sisuTitleAuthentication(MicrosoftConstants.BEDROCK_XSTS_RELYING_PARTY)
             .buildMinecraftBedrockChainStep(true, false);
+
+    @ApiStatus.Experimental
+    public static final AbstractStep<?, StepEduJWT.EduJWT> EDU_DEVICE_CODE_LOGIN = new StepEduJWT(builder()
+            .withClientId(MicrosoftConstants.EDU_CLIENT_ID).withScope("https://meeservices.minecraft.net/.default offline_access").withOAuthEnvironment(OAuthEnvironment.MICROSOFT_ONLINE_COMMON)
+            .deviceCode()
+            .msaTokenStep, "1.20.30", 594, "Windows Desktop Build (Win32)(x64)");
 
     public static MsaTokenBuilder builder() {
         return new MsaTokenBuilder();

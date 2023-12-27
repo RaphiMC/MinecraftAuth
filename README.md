@@ -3,6 +3,7 @@ Simple and easy to use Minecraft microsoft authentication library (Java and Bedr
 
 ## Features
 - Full support for Minecraft: Java Edition and Minecraft: Bedrock Edition
+- Basic support for Minecraft: Education Edition
 - Login using device code, credentials or a local webserver
 - Refreshing and validating token chains
 - Serializing and deserializing token chains to and from json

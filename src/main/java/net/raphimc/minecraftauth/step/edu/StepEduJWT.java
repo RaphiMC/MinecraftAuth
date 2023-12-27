@@ -1,0 +1,112 @@
+/*
+ * This file is part of MinecraftAuth - https://github.com/RaphiMC/MinecraftAuth
+ * Copyright (C) 2023 RK_01/RaphiMC and contributors
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package net.raphimc.minecraftauth.step.edu;
+
+import com.google.gson.JsonObject;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
+import net.raphimc.minecraftauth.MinecraftAuth;
+import net.raphimc.minecraftauth.responsehandler.MinecraftEduServicesResponseHandler;
+import net.raphimc.minecraftauth.step.AbstractStep;
+import net.raphimc.minecraftauth.step.msa.StepMsaToken;
+import net.raphimc.minecraftauth.util.JsonUtil;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+
+public class StepEduJWT extends AbstractStep<StepMsaToken.MsaToken, StepEduJWT.EduJWT> {
+
+    public static final String MINECRAFT_LOGIN_URL = "https://login.minecrafteduservices.com/v2/signin";
+
+    private final String version;
+    private final int buildNumber;
+    private final int protocolVersion;
+    private final String platform;
+
+    public StepEduJWT(final AbstractStep<?, StepMsaToken.MsaToken> prevStep, final String version, final int protocolVersion, final String platform) {
+        super("eduJwt", prevStep);
+
+        final String[] versionParts = version.split("\\.");
+        if (versionParts.length != 3) {
+            throw new IllegalArgumentException("Invalid version: " + version);
+        }
+
+        this.version = version;
+        this.buildNumber = Integer.parseInt(versionParts[0]) * 10_00_00_00 + Integer.parseInt(versionParts[1]) * 10_00_00 + Integer.parseInt(versionParts[2]) * 10_00;
+        this.protocolVersion = protocolVersion;
+        this.platform = platform;
+    }
+
+    @Override
+    public EduJWT applyStep(final HttpClient httpClient, final StepMsaToken.MsaToken msaToken) throws Exception {
+        MinecraftAuth.LOGGER.info("Authenticating with Minecraft Education Services...");
+
+        final JsonObject postData = new JsonObject();
+        postData.addProperty("accessToken", msaToken.getAccessToken());
+        postData.addProperty("build", this.buildNumber);
+        postData.addProperty("clientVersion", this.protocolVersion);
+        postData.addProperty("displayVersion", this.version);
+        postData.addProperty("identityToken", msaToken.getAccessToken());
+        postData.addProperty("platform", this.platform);
+
+        final HttpPost httpPost = new HttpPost(MINECRAFT_LOGIN_URL);
+        httpPost.setEntity(new StringEntity(postData.toString(), ContentType.APPLICATION_JSON));
+        final String response = httpClient.execute(httpPost, new MinecraftEduServicesResponseHandler());
+        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
+
+        final EduJWT eduJwt = new EduJWT(
+                obj.get("response").getAsString(),
+                msaToken
+        );
+        MinecraftAuth.LOGGER.info("Got Edu JWT");
+        return eduJwt;
+    }
+
+    @Override
+    public EduJWT fromJson(final JsonObject json) {
+        final StepMsaToken.MsaToken msaToken = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
+        return new EduJWT(
+                json.get("jwt").getAsString(),
+                msaToken
+        );
+    }
+
+    @Override
+    public JsonObject toJson(final EduJWT eduJWT) {
+        final JsonObject json = new JsonObject();
+        json.addProperty("jwt", eduJWT.jwt);
+        if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(eduJWT.msaToken));
+        return json;
+    }
+
+    @Value
+    @EqualsAndHashCode(callSuper = false)
+    public static class EduJWT extends AbstractStep.StepResult<StepMsaToken.MsaToken> {
+
+        String jwt;
+        StepMsaToken.MsaToken msaToken;
+
+        @Override
+        protected StepMsaToken.MsaToken prevResult() {
+            return this.msaToken;
+        }
+
+    }
+
+}
