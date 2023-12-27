@@ -65,6 +65,7 @@ public class MicrosoftConstants {
         return HttpClientBuilder.create()
                 .setDefaultRequestConfig(requestConfig)
                 .setDefaultHeaders(headers)
+                .disableRedirectHandling()
                 .setRetryHandler(new StandardHttpRequestRetryHandler())
                 .build();
     }

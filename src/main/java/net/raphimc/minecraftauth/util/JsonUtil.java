@@ -23,7 +23,7 @@ import com.google.gson.JsonObject;
 
 public class JsonUtil {
 
-    private static final Gson GSON = new Gson();
+    public static final Gson GSON = new Gson();
 
     public static JsonElement parseString(final String json) {
         return GSON.fromJson(json, JsonElement.class);

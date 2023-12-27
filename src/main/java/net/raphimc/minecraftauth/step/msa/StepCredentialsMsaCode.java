@@ -18,30 +18,38 @@
 package net.raphimc.minecraftauth.step.msa;
 
 import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.raphimc.minecraftauth.MinecraftAuth;
-import net.raphimc.minecraftauth.responsehandler.MsaCredentialsResponseHandler;
+import net.raphimc.minecraftauth.responsehandler.exception.MsaResponseException;
 import net.raphimc.minecraftauth.step.AbstractStep;
-import net.raphimc.minecraftauth.util.OAuthEnvironment;
+import net.raphimc.minecraftauth.util.JsonUtil;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 
+import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.MsaCredentials> {
 
@@ -60,38 +68,103 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
         if (msaCredentials == null) {
             throw new IllegalStateException("Missing StepCredentialsMsaCode.MsaCredentials input");
         }
-        if (this.applicationDetails.getOAuthEnvironment() != OAuthEnvironment.LIVE) {
-            throw new IllegalStateException("Credentials can only be used with OAuthEnvironment.LIVE");
-        }
 
         final BasicCookieStore cookieStore = new BasicCookieStore();
         final HttpClientContext context = HttpClientContext.create();
         context.setCookieStore(cookieStore);
 
-        final HttpGet httpGet = new HttpGet(this.getAuthenticationUrl());
+        final URI authenticationUrl = this.getAuthenticationUrl();
+        final HttpGet httpGet = new HttpGet(authenticationUrl);
         httpGet.setHeader(HttpHeaders.ACCEPT, ContentType.TEXT_HTML.getMimeType());
-        final String getResponse = httpClient.execute(httpGet, new BasicResponseHandler(), context);
+        final HttpResponse getResponse = httpClient.execute(httpGet, context);
+        if (getResponse.getStatusLine().getStatusCode() >= 300) {
+            EntityUtils.consumeQuietly(getResponse.getEntity());
+            if (getResponse.containsHeader(HttpHeaders.LOCATION)) {
+                final URI redirect = new URI(getResponse.getFirstHeader(HttpHeaders.LOCATION).getValue());
+                final Map<String, String> parameters = URLEncodedUtils.parse(redirect, StandardCharsets.UTF_8).stream().collect(Collectors.toMap(NameValuePair::getName, NameValuePair::getValue));
+                if (parameters.containsKey("error") && parameters.containsKey("error_description")) {
+                    throw new MsaResponseException(getResponse.getStatusLine().getStatusCode(), parameters.get("error"), parameters.get("error_description"));
+                }
+            }
+            throw new HttpResponseException(getResponse.getStatusLine().getStatusCode(), getResponse.getStatusLine().getReasonPhrase());
+        }
+        final String getBody = EntityUtils.toString(getResponse.getEntity());
+        final JsonObject config = this.extractConfig(getBody);
 
-        String urlPost = getResponse.substring(getResponse.indexOf("urlPost:"));
-        urlPost = urlPost.substring(urlPost.indexOf("'") + 1);
-        urlPost = urlPost.substring(0, urlPost.indexOf("'"));
-        String sFTTag = getResponse.substring(getResponse.indexOf("sFTTag:"));
-        sFTTag = sFTTag.substring(sFTTag.indexOf("value=\""));
-        sFTTag = sFTTag.substring(sFTTag.indexOf("\"") + 1);
-        sFTTag = sFTTag.substring(0, sFTTag.indexOf("\""));
-
+        String urlPost;
         final List<NameValuePair> postData = new ArrayList<>();
-        postData.add(new BasicNameValuePair("login", msaCredentials.email));
-        postData.add(new BasicNameValuePair("loginfmt", msaCredentials.email));
-        postData.add(new BasicNameValuePair("passwd", msaCredentials.password));
-        postData.add(new BasicNameValuePair("PPFT", sFTTag));
+        switch (this.applicationDetails.getOAuthEnvironment()) {
+            case LIVE: {
+                urlPost = config.get("urlPost").getAsString();
+                final String sFTTag = config.get("sFTTag").getAsString();
+
+                String sFT = sFTTag.substring(sFTTag.indexOf("value=\"") + 7);
+                sFT = sFT.substring(0, sFT.indexOf("\""));
+                String sFTName = sFTTag.substring(sFTTag.indexOf("name=\"") + 6);
+                sFTName = sFTName.substring(0, sFTName.indexOf("\""));
+
+                postData.add(new BasicNameValuePair("login", msaCredentials.email));
+                postData.add(new BasicNameValuePair("loginfmt", msaCredentials.email));
+                postData.add(new BasicNameValuePair("passwd", msaCredentials.password));
+                postData.add(new BasicNameValuePair(sFTName, sFT));
+                break;
+            }
+            case MICROSOFT_ONLINE_COMMON:
+            case MICROSOFT_ONLINE_CONSUMERS: {
+                urlPost = config.get("urlPost").getAsString();
+                urlPost = new URIBuilder(urlPost).setScheme(authenticationUrl.getScheme()).setHost(authenticationUrl.getHost()).build().toString();
+                final String sFT = config.get("sFT").getAsString();
+                final String sFTName = config.get("sFTName").getAsString();
+                final String sCtx = config.get("sCtx").getAsString();
+
+                postData.add(new BasicNameValuePair("login", msaCredentials.email));
+                postData.add(new BasicNameValuePair("loginfmt", msaCredentials.email));
+                postData.add(new BasicNameValuePair("passwd", msaCredentials.password));
+                postData.add(new BasicNameValuePair("ctx", sCtx));
+                postData.add(new BasicNameValuePair(sFTName, sFT));
+                break;
+            }
+            default:
+                throw new IllegalStateException("Unsupported OAuthEnvironment: " + this.applicationDetails.getOAuthEnvironment());
+        }
 
         final HttpPost httpPost = new HttpPost(urlPost);
         httpPost.setHeader(HttpHeaders.ACCEPT, ContentType.TEXT_HTML.getMimeType());
         httpPost.setEntity(new UrlEncodedFormEntity(postData, StandardCharsets.UTF_8));
-        final String code = httpClient.execute(httpPost, new MsaCredentialsResponseHandler(), context);
+        final HttpResponse postResponse = httpClient.execute(httpPost, context);
+        if (postResponse.getStatusLine().getStatusCode() != HttpStatus.SC_MOVED_TEMPORARILY) {
+            final String body = postResponse.getEntity() == null ? null : EntityUtils.toString(postResponse.getEntity());
+            if (body != null && ContentType.getOrDefault(postResponse.getEntity()).getMimeType().equals(ContentType.TEXT_HTML.getMimeType())) {
+                final JsonObject errorConfig = this.extractConfig(body);
+                switch (this.applicationDetails.getOAuthEnvironment()) {
+                    case LIVE: {
+                        if (errorConfig.has("sErrorCode") && errorConfig.has("sErrTxt")) {
+                            throw new MsaResponseException(postResponse.getStatusLine().getStatusCode(), errorConfig.get("sErrorCode").getAsString(), errorConfig.get("sErrTxt").getAsString());
+                        }
+                        break;
+                    }
+                    case MICROSOFT_ONLINE_COMMON:
+                    case MICROSOFT_ONLINE_CONSUMERS: {
+                        if (errorConfig.has("iErrorCode") && errorConfig.has("strServiceExceptionMessage")) {
+                            throw new MsaResponseException(postResponse.getStatusLine().getStatusCode(), errorConfig.get("iErrorCode").getAsString(), errorConfig.get("strServiceExceptionMessage").getAsString());
+                        }
+                        break;
+                    }
+                    default:
+                        throw new IllegalStateException("Unsupported OAuthEnvironment: " + this.applicationDetails.getOAuthEnvironment());
+                }
+            }
+            throw new HttpResponseException(postResponse.getStatusLine().getStatusCode(), postResponse.getStatusLine().getReasonPhrase());
+        }
 
-        final MsaCode msaCode = new MsaCode(code, this.applicationDetails);
+        EntityUtils.consumeQuietly(postResponse.getEntity());
+        final URI redirect = new URI(postResponse.getFirstHeader(HttpHeaders.LOCATION).getValue());
+        final Map<String, String> parameters = URLEncodedUtils.parse(redirect, StandardCharsets.UTF_8).stream().collect(Collectors.toMap(NameValuePair::getName, NameValuePair::getValue));
+        if (!parameters.containsKey("code")) {
+            throw new IllegalStateException("Could not extract MSA Code from redirect url");
+        }
+
+        final MsaCode msaCode = new MsaCode(parameters.get("code"), this.applicationDetails);
         MinecraftAuth.LOGGER.info("Got MSA Code");
         return msaCode;
     }
@@ -104,6 +177,24 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
                 .setParameter("response_type", "code")
                 .setParameter("response_mode", "query")
                 .build();
+    }
+
+    protected JsonObject extractConfig(final String html) {
+        switch (this.applicationDetails.getOAuthEnvironment()) {
+            case LIVE: {
+                final JsonReader jsonReader = new JsonReader(new StringReader(html.substring(html.indexOf("var ServerData = ") + 17)));
+                jsonReader.setLenient(true);
+                return JsonUtil.GSON.fromJson(jsonReader, JsonObject.class);
+            }
+            case MICROSOFT_ONLINE_COMMON:
+            case MICROSOFT_ONLINE_CONSUMERS: {
+                final JsonReader jsonReader = new JsonReader(new StringReader(html.substring(html.indexOf("$Config=") + 8)));
+                jsonReader.setLenient(true);
+                return JsonUtil.GSON.fromJson(jsonReader, JsonObject.class);
+            }
+            default:
+                throw new IllegalStateException("Unsupported OAuthEnvironment: " + this.applicationDetails.getOAuthEnvironment());
+        }
     }
 
     @Value
