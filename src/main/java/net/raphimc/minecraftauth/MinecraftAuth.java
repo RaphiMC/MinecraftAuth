@@ -176,22 +176,6 @@ public class MinecraftAuth {
         }
 
         /**
-         * Generates a URL to open in the browser to get an MSA token. The browser redirects to a localhost URL with the token as a parameter when the user logged in.
-         * Needs instance of {@link StepLocalWebServer.LocalWebServerCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, Object)}.
-         *
-         * @return The builder
-         */
-        public InitialXblSessionBuilder localWebServer() {
-            if (this.applicationDetails.getRedirectUri() == null) {
-                this.applicationDetails = this.applicationDetails.withRedirectUri("http://localhost");
-            }
-
-            this.msaCodeStep = new StepLocalWebServerMsaCode(new StepLocalWebServer(this.applicationDetails), this.timeout * 1000);
-
-            return new InitialXblSessionBuilder(this);
-        }
-
-        /**
          * Logs in with a Microsoft account's credentials and gets an MSA token.
          * Needs instance of {@link net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode.MsaCredentials} as input when calling {@link AbstractStep#getFromInput(HttpClient, Object)}.
          *
@@ -203,6 +187,38 @@ public class MinecraftAuth {
             }
 
             this.msaCodeStep = new StepCredentialsMsaCode(this.applicationDetails);
+
+            return new InitialXblSessionBuilder(this);
+        }
+
+        /**
+         * Opens a JavaFX WebView window to get an MSA token. The window closes when the user logged in.
+         * Optionally accepts a {@link net.raphimc.minecraftauth.step.msa.StepJfxWebViewMsaCode.JavaFxWebView} as input when calling {@link AbstractStep#getFromInput(HttpClient, Object)}.
+         *
+         * @return The builder
+         */
+        public InitialXblSessionBuilder javaFxWebView() {
+            if (this.applicationDetails.getRedirectUri() == null) {
+                this.applicationDetails = this.applicationDetails.withRedirectUri(this.applicationDetails.getOAuthEnvironment().getNativeClientUrl());
+            }
+
+            this.msaCodeStep = new StepJfxWebViewMsaCode(this.applicationDetails, this.timeout * 1000);
+
+            return new InitialXblSessionBuilder(this);
+        }
+
+        /**
+         * Generates a URL to open in the browser to get an MSA token. The browser redirects to a localhost URL with the token as a parameter when the user logged in.
+         * Needs instance of {@link StepLocalWebServer.LocalWebServerCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, Object)}.
+         *
+         * @return The builder
+         */
+        public InitialXblSessionBuilder localWebServer() {
+            if (this.applicationDetails.getRedirectUri() == null) {
+                this.applicationDetails = this.applicationDetails.withRedirectUri("http://localhost");
+            }
+
+            this.msaCodeStep = new StepLocalWebServerMsaCode(new StepLocalWebServer(this.applicationDetails), this.timeout * 1000);
 
             return new InitialXblSessionBuilder(this);
         }

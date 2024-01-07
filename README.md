@@ -4,7 +4,7 @@ Simple and easy to use Minecraft microsoft authentication library (Java and Bedr
 ## Features
 - Full support for Minecraft: Java Edition and Minecraft: Bedrock Edition
 - Basic support for Minecraft: Education Edition
-- Login using device code, credentials or a local webserver
+- Login using device code, credentials, a JavaFX WebView window or a local webserver
 - Refreshing and validating token chains
 - Serializing and deserializing token chains to and from json
 - Customizable login flows (Client ID, scopes, ...)
@@ -22,7 +22,7 @@ If you just want the latest jar file you can download it from [GitHub Actions](h
 MinecraftAuth provides most of its functionality through the ``MinecraftAuth`` class.
 It contains predefined login flows for Minecraft: Java Edition and Minecraft: Bedrock Edition using the official client ids and scopes.
 
-To customize/configure a login flow yourself (for example to change the client id or the scope of the application) you can use the ``MinecraftAuth.builder()`` method.
+To customize/configure a login flow in order to change application details (like client id, scope or client secret) or to use alternative login ways (like JavaFX WebView window or local webserver) you can use the ``MinecraftAuth.builder()`` method.
 For examples, you can look at the predefined login flows in the ``MinecraftAuth`` class.
 
 Here is an example of how to manage a Minecraft: Java Edition account (For Minecraft: Bedrock Edition you can use pretty much the same code, but replace ``Java`` with ``Bedrock``):

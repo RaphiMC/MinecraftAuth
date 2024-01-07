@@ -49,7 +49,7 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
     }
 
     @Override
-    public MsaDeviceCode applyStep(final HttpClient httpClient, final StepMsaDeviceCode.MsaDeviceCodeCallback msaDeviceCodeCallback) throws Exception {
+    public MsaDeviceCode applyStep(final HttpClient httpClient, final MsaDeviceCodeCallback msaDeviceCodeCallback) throws Exception {
         MinecraftAuth.LOGGER.info("Getting device code for MSA login...");
 
         if (msaDeviceCodeCallback == null) {

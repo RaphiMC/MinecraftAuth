@@ -33,6 +33,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 public class StepLocalWebServerMsaCode extends MsaCodeStep<StepLocalWebServer.LocalWebServer> {
@@ -78,7 +79,7 @@ public class StepLocalWebServerMsaCode extends MsaCodeStep<StepLocalWebServer.Lo
                     }
                 }
             } catch (SocketTimeoutException e) {
-                throw new RuntimeException("Failed to get MSA Code. Login timed out");
+                throw new TimeoutException("Failed to get MSA Code. Login timed out");
             }
         }
     }
