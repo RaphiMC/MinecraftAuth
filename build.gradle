@@ -21,7 +21,9 @@ repositories {
 
 dependencies {
     compileOnly "org.jetbrains:annotations:24.1.0"
-    compileOnly "org.openjfx:javafx:22-ea+16"
+    ["base", "graphics", "web", "swing"].each {
+        compileOnly "org.openjfx:javafx-$it:11:win" // Hardcoding the platform is not a problem since this is a compileOnly dependency
+    }
 
     api "org.apache.httpcomponents:httpclient:4.5.14"
     api "com.google.code.gson:gson:2.10.1"
