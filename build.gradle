@@ -15,15 +15,17 @@ base {
     version = project.maven_version ?: rootProject.maven_version
 }
 
+sourceSets {
+    javaFxStub // Java 11+ does not include JavaFX anymore, so the JavaFX stubs are needed for the compiler
+}
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
     compileOnly "org.jetbrains:annotations:24.1.0"
-    ["base", "graphics", "web", "swing"].each {
-        compileOnly "org.openjfx:javafx-$it:11:win" // Hardcoding the platform is not a problem since this is a compileOnly dependency
-    }
+    compileOnly sourceSets.javaFxStub.output
 
     api "org.apache.httpcomponents:httpclient:4.5.14"
     api "com.google.code.gson:gson:2.10.1"
