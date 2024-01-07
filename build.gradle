@@ -21,6 +21,7 @@ repositories {
 
 dependencies {
     compileOnly "org.jetbrains:annotations:24.1.0"
+    compileOnly "org.openjfx:javafx-base:22-ea+16"
 
     api "org.apache.httpcomponents:httpclient:4.5.14"
     api "com.google.code.gson:gson:2.10.1"
