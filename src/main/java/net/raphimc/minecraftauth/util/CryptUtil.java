@@ -20,11 +20,15 @@ package net.raphimc.minecraftauth.util;
 import com.google.gson.JsonObject;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.security.DefaultSecureRequest;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.message.BasicHeader;
+import net.lenni0451.commons.httpclient.content.HttpContent;
+import net.lenni0451.commons.httpclient.model.HttpHeader;
+import net.lenni0451.commons.httpclient.requests.HttpContentRequest;
+import net.lenni0451.commons.httpclient.requests.HttpRequest;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
@@ -38,6 +42,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Optional;
 
 public class CryptUtil {
 
@@ -89,7 +94,7 @@ public class CryptUtil {
         }
     }
 
-    public static BasicHeader getSignatureHeader(final HttpUriRequest httpRequest, final ECPrivateKey privateKey) throws IOException {
+    public static HttpHeader getSignatureHeader(final HttpRequest httpRequest, final ECPrivateKey privateKey) throws IOException {
         final long windowsTimestamp = (Instant.now().getEpochSecond() + 11644473600L) * 10000000L;
 
         final ByteArrayOutputStream signatureContent = new ByteArrayOutputStream();
@@ -100,18 +105,17 @@ public class CryptUtil {
         data.writeByte(0); // 0 byte
         data.write(httpRequest.getMethod().getBytes(StandardCharsets.UTF_8)); // HTTP Method
         data.writeByte(0); // 0 byte
-        data.write((httpRequest.getURI().getPath() + (httpRequest.getURI().getQuery() != null ? httpRequest.getURI().getQuery() : "")).getBytes(StandardCharsets.UTF_8));
+        data.write((httpRequest.getURL().getPath() + (httpRequest.getURL().getQuery() != null ? httpRequest.getURL().getQuery() : "")).getBytes(StandardCharsets.UTF_8));
         data.writeByte(0); // 0 byte
-        if (httpRequest.containsHeader("Authorization")) {
-            data.write(httpRequest.getFirstHeader("Authorization").getValue().getBytes(StandardCharsets.UTF_8)); // Authorization Header
+        final Optional<String> authorizationHeader = httpRequest.getFirstHeader("Authorization");
+        if (authorizationHeader.isPresent()) {
+            data.write(authorizationHeader.get().getBytes(StandardCharsets.UTF_8)); // Authorization Header
         }
         data.writeByte(0); // 0 byte
-        if (httpRequest instanceof HttpEntityEnclosingRequest) {
-            final InputStream content = ((HttpEntityEnclosingRequest) httpRequest).getEntity().getContent();
-            final byte[] buffer = new byte[1024];
-            int read;
-            while ((read = content.read(buffer)) != -1) {
-                data.write(buffer, 0, read); // Body
+        if (httpRequest instanceof HttpContentRequest) {
+            final HttpContent content = ((HttpContentRequest) httpRequest).getContent();
+            if (content != null) {
+                data.write(content.getAsBytes());
             }
         }
         data.writeByte(0); // 0 byte
@@ -122,7 +126,7 @@ public class CryptUtil {
         data.writeLong(windowsTimestamp); // Timestamp
         data.write(Jwts.SIG.ES256.digest(new DefaultSecureRequest<>(new ByteArrayInputStream(signatureContent.toByteArray()), null, null, privateKey))); // Signature
 
-        return new BasicHeader("Signature", Base64.getEncoder().encodeToString(header.toByteArray()));
+        return new HttpHeader("Signature", Base64.getEncoder().encodeToString(header.toByteArray()));
     }
 
     public static JsonObject getProofKey(final ECPublicKey publicKey) {

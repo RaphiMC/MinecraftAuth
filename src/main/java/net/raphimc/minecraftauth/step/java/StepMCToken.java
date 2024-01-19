@@ -20,15 +20,13 @@ package net.raphimc.minecraftauth.step.java;
 import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MinecraftResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
-import net.raphimc.minecraftauth.util.JsonUtil;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import net.raphimc.minecraftauth.util.JsonContent;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -48,10 +46,9 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         final JsonObject postData = new JsonObject();
         postData.addProperty("identityToken", "XBL3.0 x=" + xblXsts.getServiceToken());
 
-        final HttpPost httpPost = new HttpPost(MINECRAFT_LOGIN_URL);
-        httpPost.setEntity(new StringEntity(postData.toString(), ContentType.APPLICATION_JSON));
-        final String response = httpClient.execute(httpPost, new MinecraftResponseHandler());
-        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
+        final PostRequest postRequest = new PostRequest(MINECRAFT_LOGIN_URL);
+        postRequest.setContent(new JsonContent(postData));
+        final JsonObject obj = httpClient.execute(postRequest, new MinecraftResponseHandler());
 
         final MCToken mcToken = new MCToken(
                 obj.get("access_token").getAsString(),

@@ -17,32 +17,29 @@
  */
 package net.raphimc.minecraftauth.responsehandler;
 
-import net.raphimc.minecraftauth.responsehandler.exception.XblResponseException;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.util.EntityUtils;
+import com.google.gson.JsonObject;
+import net.lenni0451.commons.httpclient.HttpResponse;
+import net.raphimc.minecraftauth.responsehandler.exception.XblRequestException;
 
 import java.io.IOException;
+import java.util.Optional;
 
-public class XblResponseHandler implements ResponseHandler<String> {
+public class XblResponseHandler extends JsonHttpResponseHandler {
 
     @Override
-    public String handleResponse(HttpResponse response) throws IOException {
-        final StatusLine statusLine = response.getStatusLine();
-        final HttpEntity entity = response.getEntity();
-        if (statusLine.getStatusCode() >= 300) {
-            EntityUtils.consumeQuietly(entity);
-            if (response.containsHeader("X-Err")) {
-                final long xblErrorCode = Long.parseLong(response.getFirstHeader("X-Err").getValue());
-                final String errorReason = XblResponseException.ERROR_CODES.getOrDefault(xblErrorCode, statusLine.getReasonPhrase());
-                throw new XblResponseException(statusLine.getStatusCode(), xblErrorCode, errorReason);
+    public JsonObject handle(final HttpResponse response) throws IOException {
+        if (response.getStatusCode() >= 300) {
+            final Optional<String> xErrHeader = response.getFirstHeader("X-Err");
+            if (xErrHeader.isPresent()) {
+                throw new XblRequestException(response, Long.parseLong(xErrHeader.get()));
             }
-            throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
         }
-        return entity == null ? null : EntityUtils.toString(entity);
+
+        return super.handle(response);
+    }
+
+    @Override
+    protected void handleJsonError(final HttpResponse response, final JsonObject obj) {
     }
 
 }

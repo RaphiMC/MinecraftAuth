@@ -22,17 +22,15 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.XblResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.session.StepFullXblSession;
 import net.raphimc.minecraftauth.step.xbl.session.StepInitialXblSession;
 import net.raphimc.minecraftauth.util.CryptUtil;
-import net.raphimc.minecraftauth.util.JsonUtil;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import net.raphimc.minecraftauth.util.JsonContent;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -71,14 +69,13 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
         postData.addProperty("RelyingParty", this.relyingParty);
         postData.addProperty("TokenType", "JWT");
 
-        final HttpPost httpPost = new HttpPost(XBL_XSTS_URL);
-        httpPost.setEntity(new StringEntity(postData.toString(), ContentType.APPLICATION_JSON));
-        httpPost.addHeader("x-xbl-contract-version", "1");
+        final PostRequest postRequest = new PostRequest(XBL_XSTS_URL);
+        postRequest.setContent(new JsonContent(postData));
+        postRequest.setHeader("x-xbl-contract-version", "1");
         if (fullXblSession.getXblTitleToken() != null) {
-            httpPost.addHeader(CryptUtil.getSignatureHeader(httpPost, fullXblSession.getXblTitleToken().getInitialXblSession().getXblDeviceToken().getPrivateKey()));
+            postRequest.setHeader(CryptUtil.getSignatureHeader(postRequest, fullXblSession.getXblTitleToken().getInitialXblSession().getXblDeviceToken().getPrivateKey()));
         }
-        final String response = httpClient.execute(httpPost, new XblResponseHandler());
-        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
+        final JsonObject obj = httpClient.execute(postRequest, new XblResponseHandler());
 
         final XblXstsToken xblXstsToken = new XblXstsToken(
                 Instant.parse(obj.get("NotAfter").getAsString()).toEpochMilli(),

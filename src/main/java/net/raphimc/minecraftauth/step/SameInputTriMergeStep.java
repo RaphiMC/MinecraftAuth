@@ -18,7 +18,7 @@
 package net.raphimc.minecraftauth.step;
 
 import com.google.gson.JsonObject;
-import org.apache.http.client.HttpClient;
+import net.lenni0451.commons.httpclient.HttpClient;
 
 import java.util.ArrayList;
 import java.util.List;

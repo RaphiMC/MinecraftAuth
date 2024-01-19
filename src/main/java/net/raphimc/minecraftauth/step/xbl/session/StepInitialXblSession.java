@@ -20,11 +20,11 @@ package net.raphimc.minecraftauth.step.xbl.session;
 import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import net.lenni0451.commons.httpclient.HttpClient;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.BiMergeStep;
 import net.raphimc.minecraftauth.step.msa.StepMsaToken;
 import net.raphimc.minecraftauth.step.xbl.StepXblDeviceToken;
-import org.apache.http.client.HttpClient;
 
 public class StepInitialXblSession extends BiMergeStep<StepMsaToken.MsaToken, StepXblDeviceToken.XblDeviceToken, StepInitialXblSession.InitialXblSession> {
 

@@ -17,24 +17,24 @@
  */
 package net.raphimc.minecraftauth.step.msa;
 
+import com.sun.net.httpserver.HttpServer;
+import lombok.SneakyThrows;
+import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.HttpResponse;
+import net.lenni0451.commons.httpclient.constants.StatusCodes;
+import net.lenni0451.commons.httpclient.utils.URLWrapper;
 import net.raphimc.minecraftauth.MinecraftAuth;
-import net.raphimc.minecraftauth.responsehandler.exception.MsaResponseException;
+import net.raphimc.minecraftauth.responsehandler.exception.MsaRequestException;
 import net.raphimc.minecraftauth.step.AbstractStep;
-import org.apache.http.NameValuePair;
-import org.apache.http.RequestLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.message.BasicLineParser;
 
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.net.URI;
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Map;
-import java.util.Scanner;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 
 public class StepLocalWebServerMsaCode extends MsaCodeStep<StepLocalWebServer.LocalWebServer> {
 
@@ -47,39 +47,54 @@ public class StepLocalWebServerMsaCode extends MsaCodeStep<StepLocalWebServer.Lo
     }
 
     @Override
+    @SneakyThrows
     public MsaCode applyStep(final HttpClient httpClient, final StepLocalWebServer.LocalWebServer localWebServer) throws Exception {
         MinecraftAuth.LOGGER.info("Waiting for MSA login via local webserver...");
 
-        try (final ServerSocket localServer = new ServerSocket(localWebServer.getPort())) {
-            localServer.setSoTimeout(this.timeout);
+        final CompletableFuture<MsaCode> msaCodeFuture = new CompletableFuture<>();
+        final HttpServer httpServer = HttpServer.create(new InetSocketAddress(localWebServer.getPort()), 0);
+        httpServer.createContext("/", httpExchange -> {
             try {
-                try (final Socket client = localServer.accept()) {
-                    final Scanner scanner = new Scanner(client.getInputStream());
-                    try {
-                        final RequestLine requestLine = BasicLineParser.parseRequestLine(scanner.nextLine(), BasicLineParser.INSTANCE);
-
-                        final Map<String, String> parameters = URLEncodedUtils.parse(new URI(requestLine.getUri()), StandardCharsets.UTF_8).stream().collect(Collectors.toMap(NameValuePair::getName, NameValuePair::getValue));
-                        if (parameters.containsKey("error") && parameters.containsKey("error_description")) {
-                            throw new MsaResponseException(500, parameters.get("error"), parameters.get("error_description"));
-                        }
-                        if (!parameters.containsKey("code")) {
-                            throw new IllegalStateException("Could not extract MSA Code from response url");
-                        }
-
-                        final String response = "HTTP/1.1 200 OK\r\nConnection: Close\r\n\r\nYou have been logged in! You can close this window.";
-                        client.getOutputStream().write(response.getBytes(StandardCharsets.UTF_8));
-
-                        final MsaCode msaCode = new MsaCode(parameters.get("code"), localWebServer.getApplicationDetails());
-                        MinecraftAuth.LOGGER.info("Got MSA Code");
-                        return msaCode;
-                    } catch (Throwable e) {
-                        final String response = "HTTP/1.1 500 Internal Server Error\r\nConnection: Close\r\n\r\nLogin failed. Error message: " + e.getMessage();
-                        client.getOutputStream().write(response.getBytes(StandardCharsets.UTF_8));
-                        throw e;
-                    }
+                final Map<String, String> parameters = new URLWrapper(httpExchange.getRequestURI()).wrapQuery().getQueries();
+                if (parameters.containsKey("error") && parameters.containsKey("error_description")) {
+                    final HttpResponse fakeResponse = new HttpResponse(null, 500, new byte[0], Collections.emptyMap());
+                    throw new MsaRequestException(fakeResponse, parameters.get("error"), parameters.get("error_description"));
                 }
-            } catch (SocketTimeoutException e) {
-                throw new TimeoutException("Failed to get MSA Code. Login timed out");
+                if (!parameters.containsKey("code")) {
+                    throw new IllegalStateException("Could not extract MSA Code from response url");
+                }
+
+                final byte[] response = "You have been logged in! You can now close this window.".getBytes(StandardCharsets.UTF_8);
+                httpExchange.sendResponseHeaders(StatusCodes.OK, response.length);
+                httpExchange.getResponseBody().write(response);
+                httpExchange.close();
+
+                msaCodeFuture.complete(new MsaCode(parameters.get("code"), localWebServer.getApplicationDetails()));
+            } catch (Throwable e) {
+                final byte[] response = ("Login failed. Error message: " + e.getMessage()).getBytes(StandardCharsets.UTF_8);
+                httpExchange.sendResponseHeaders(StatusCodes.INTERNAL_SERVER_ERROR, response.length);
+                httpExchange.getResponseBody().write(response);
+                httpExchange.close();
+
+                msaCodeFuture.completeExceptionally(e);
+            }
+        });
+        httpServer.start();
+
+        try {
+            final MsaCode msaCode = msaCodeFuture.get(this.timeout, TimeUnit.MILLISECONDS);
+            httpServer.stop(0);
+            MinecraftAuth.LOGGER.info("Got MSA Code");
+            return msaCode;
+        } catch (TimeoutException e) {
+            httpServer.stop(0);
+            throw new TimeoutException("MSA login timed out");
+        } catch (ExecutionException e) {
+            httpServer.stop(0);
+            if (e.getCause() != null) {
+                throw e.getCause();
+            } else {
+                throw e;
             }
         }
     }

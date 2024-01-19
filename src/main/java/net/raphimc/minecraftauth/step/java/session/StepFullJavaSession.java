@@ -20,12 +20,12 @@ package net.raphimc.minecraftauth.step.java.session;
 import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import net.lenni0451.commons.httpclient.HttpClient;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.BiMergeStep;
 import net.raphimc.minecraftauth.step.SameInputBiMergeStep;
 import net.raphimc.minecraftauth.step.java.StepMCProfile;
 import net.raphimc.minecraftauth.step.java.StepPlayerCertificates;
-import org.apache.http.client.HttpClient;
 
 public class StepFullJavaSession extends SameInputBiMergeStep<StepMCProfile.MCProfile, StepPlayerCertificates.PlayerCertificates, StepFullJavaSession.FullJavaSession> {
 

@@ -20,13 +20,13 @@ package net.raphimc.minecraftauth.step.msa;
 import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.utils.URLWrapper;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.utils.URIBuilder;
 
 import java.net.ServerSocket;
-import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.function.Consumer;
 
 public class StepLocalWebServer extends AbstractStep<StepLocalWebServer.LocalWebServerCallback, StepLocalWebServer.LocalWebServer> {
@@ -54,8 +54,14 @@ public class StepLocalWebServer extends AbstractStep<StepLocalWebServer.LocalWeb
         try (final ServerSocket localServer = new ServerSocket(0)) {
             final int localPort = localServer.getLocalPort();
 
+            final URL authenticationUrl = new URLWrapper(this.applicationDetails.getOAuthEnvironment().getAuthorizeUrl()).wrapQuery()
+                    .addQueries(this.applicationDetails.getOAuthParameters())
+                    .setQuery("redirect_uri", this.applicationDetails.getRedirectUri() + ":" + localPort)
+                    .setQuery("prompt", "select_account")
+                    .apply().toURL();
+
             final LocalWebServer localWebServer = new LocalWebServer(
-                    this.getAuthenticationUrl(localPort),
+                    authenticationUrl.toString(),
                     localPort,
                     this.applicationDetails
             );
@@ -80,17 +86,6 @@ public class StepLocalWebServer extends AbstractStep<StepLocalWebServer.LocalWeb
         json.addProperty("authenticationUrl", localWebServer.authenticationUrl);
         json.addProperty("port", localWebServer.port);
         return json;
-    }
-
-    private String getAuthenticationUrl(final int localPort) throws URISyntaxException {
-        return new URIBuilder(this.applicationDetails.getOAuthEnvironment().getAuthorizeUrl())
-                .setParameter("client_id", this.applicationDetails.getClientId())
-                .setParameter("redirect_uri", this.applicationDetails.getRedirectUri() + ":" + localPort)
-                .setParameter("scope", this.applicationDetails.getScope())
-                .setParameter("response_type", "code")
-                .setParameter("response_mode", "query")
-                .setParameter("prompt", "select_account")
-                .build().toString();
     }
 
     @Value

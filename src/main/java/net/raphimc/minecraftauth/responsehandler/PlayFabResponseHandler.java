@@ -18,35 +18,18 @@
 package net.raphimc.minecraftauth.responsehandler;
 
 import com.google.gson.JsonObject;
-import net.raphimc.minecraftauth.responsehandler.exception.PlayFabResponseException;
-import net.raphimc.minecraftauth.util.JsonUtil;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.entity.ContentType;
-import org.apache.http.util.EntityUtils;
+import net.lenni0451.commons.httpclient.HttpResponse;
+import net.raphimc.minecraftauth.responsehandler.exception.PlayFabRequestException;
 
 import java.io.IOException;
 
-public class PlayFabResponseHandler implements ResponseHandler<String> {
+public class PlayFabResponseHandler extends JsonHttpResponseHandler {
 
     @Override
-    public String handleResponse(HttpResponse response) throws IOException {
-        final StatusLine statusLine = response.getStatusLine();
-        final HttpEntity entity = response.getEntity();
-        final String body = entity == null ? null : EntityUtils.toString(entity);
-        if (statusLine.getStatusCode() >= 300) {
-            if (body != null && ContentType.getOrDefault(entity).getMimeType().equals(ContentType.APPLICATION_JSON.getMimeType())) {
-                final JsonObject obj = (JsonObject) JsonUtil.parseString(body);
-                if (obj.has("error") && obj.has("errorMessage")) {
-                    throw new PlayFabResponseException(statusLine.getStatusCode(), obj.get("error").getAsString(), obj.get("errorMessage").getAsString());
-                }
-            }
-            throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+    protected void handleJsonError(final HttpResponse response, final JsonObject obj) throws IOException {
+        if (obj.has("error") && obj.has("errorMessage")) {
+            throw new PlayFabRequestException(response, obj.get("error").getAsString(), obj.get("errorMessage").getAsString());
         }
-        return body;
     }
 
 }

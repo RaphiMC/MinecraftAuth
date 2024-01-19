@@ -26,6 +26,9 @@ import net.raphimc.minecraftauth.util.JsonUtil;
 import net.raphimc.minecraftauth.util.OAuthEnvironment;
 import net.raphimc.minecraftauth.util.UuidUtil;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends AbstractStep<I, MsaCodeStep.MsaCode> {
 
     public MsaCodeStep(final AbstractStep<?, I> prevStep) {
@@ -71,6 +74,16 @@ public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends 
 
         public boolean isTitleClientId() {
             return !UuidUtil.isDashedUuid(this.clientId);
+        }
+
+        public Map<String, String> getOAuthParameters() {
+            final Map<String, String> parameters = new HashMap<>();
+            parameters.put("client_id", this.clientId);
+            parameters.put("scope", this.scope);
+            parameters.put("redirect_uri", this.redirectUri);
+            parameters.put("response_type", "code");
+            parameters.put("response_mode", "query");
+            return parameters;
         }
 
     }

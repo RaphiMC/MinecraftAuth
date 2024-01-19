@@ -15,20 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.minecraftauth.responsehandler.exception;
+package net.raphimc.minecraftauth.util;
 
-import lombok.Getter;
-import org.apache.http.client.HttpResponseException;
+import com.google.gson.JsonObject;
+import net.lenni0451.commons.httpclient.constants.ContentTypes;
+import net.lenni0451.commons.httpclient.content.impl.StringContent;
 
-@Getter
-public class PlayFabResponseException extends HttpResponseException {
+public class JsonContent extends StringContent {
 
-    private final String error;
-
-    public PlayFabResponseException(final int statusCode, final String error, final String reasonPhrase) {
-        super(statusCode, reasonPhrase + ", playfab error: " + error);
-
-        this.error = error;
+    public JsonContent(final JsonObject jsonObject) {
+        super(ContentTypes.APPLICATION_JSON, jsonObject.toString());
     }
 
 }

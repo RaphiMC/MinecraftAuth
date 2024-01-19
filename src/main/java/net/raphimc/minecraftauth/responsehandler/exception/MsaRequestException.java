@@ -18,14 +18,17 @@
 package net.raphimc.minecraftauth.responsehandler.exception;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
-import java.io.IOException;
+import net.lenni0451.commons.httpclient.HttpResponse;
 
 @Getter
-@RequiredArgsConstructor
-public class RetryException extends IOException {
+public class MsaRequestException extends ApiHttpRequestException {
 
-    private final int retryAfterSeconds;
+    private final String error;
+
+    public MsaRequestException(final HttpResponse response, final String error, final String errorMessage) {
+        super(response, error, errorMessage);
+
+        this.error = error;
+    }
 
 }

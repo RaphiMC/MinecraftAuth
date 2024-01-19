@@ -30,29 +30,27 @@ Here is an example of how to manage a Minecraft: Java Edition account (For Minec
 The device code auth flow blocks the thread until the user has logged in and throws an exception if the process times out.
 The timeout is 120 seconds by default.
 ```java
-try (CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-    StepFullJavaSession.FullJavaSession javaSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCode -> {
-        // Method to generate a verification URL and a code for the user to enter on that page
-        System.out.println("Go to " + msaDeviceCode.getVerificationUri());
-        System.out.println("Enter code " + msaDeviceCode.getUserCode());
+HttpClient httpClient = MinecraftAuth.createHttpClient();
+StepFullJavaSession.FullJavaSession javaSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCode -> {
+    // Method to generate a verification URL and a code for the user to enter on that page
+    System.out.println("Go to " + msaDeviceCode.getVerificationUri());
+    System.out.println("Enter code " + msaDeviceCode.getUserCode());
 
-        // There is also a method to generate a direct URL without needing the user to enter a code
-        System.out.println("Go to " + msaDeviceCode.getDirectVerificationUri());
-    }));
-    System.out.println("Username: " + javaSession.getMcProfile().getName());
-    System.out.println("Access token: " + javaSession.getMcProfile().getMcToken().getAccessToken());
-    System.out.println("Player certificates: " + javaSession.getPlayerCertificates());
-}
+    // There is also a method to generate a direct URL without needing the user to enter a code
+    System.out.println("Go to " + msaDeviceCode.getDirectVerificationUri());
+}));
+System.out.println("Username: " + javaSession.getMcProfile().getName());
+System.out.println("Access token: " + javaSession.getMcProfile().getMcToken().getAccessToken());
+System.out.println("Player certificates: " + javaSession.getPlayerCertificates());
 ```
 ### Log in using credentials
 The credentials auth flow does not handle 2FA and will throw an exception if the user has 2FA enabled. You should consider using the device code auth flow instead if you want to support 2FA.
 ```java
-try (CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-    StepFullJavaSession.FullJavaSession javaSession = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(httpClient, new StepCredentialsMsaCode.MsaCredentials("email@test.com", "P4ssw0rd"));
-    System.out.println("Username: " + javaSession.getMcProfile().getName());
-    System.out.println("Access token: " + javaSession.getMcProfile().getMcToken().getAccessToken());
-    System.out.println("Player certificates: " + javaSession.getPlayerCertificates());
-}
+HttpClient httpClient = MinecraftAuth.createHttpClient();
+StepFullJavaSession.FullJavaSession javaSession = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(httpClient, new StepCredentialsMsaCode.MsaCredentials("email@test.com", "P4ssw0rd"));
+System.out.println("Username: " + javaSession.getMcProfile().getName());
+System.out.println("Access token: " + javaSession.getMcProfile().getMcToken().getAccessToken());
+System.out.println("Player certificates: " + javaSession.getPlayerCertificates());
 ```
 ### Save the token chain to a json object
 ```java
@@ -67,9 +65,7 @@ MinecraftAuth implements a refresh method that only refreshes the tokens that ar
 You can call this everytime before you access/use the token chain to make sure it is valid. (Don't spam it though or else you will be rate limited by Microsoft)
 This method will throw an exception if the refresh fails (The initial refresh token is no longer valid and the user has to login again).
 ```java
-try (CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-    StepFullJavaSession.FullJavaSession readyToUseSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.refresh(httpClient, loadedSession);
-}
+StepFullJavaSession.FullJavaSession readyToUseSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.refresh(httpClient, loadedSession);
 ```
 ### Minecraft Realms API
 MinecraftAuth provides a basic implementation of the Minecraft Realms API. It supports listing and joining the realms of an user.  
@@ -88,9 +84,9 @@ if (!isAvailable) {
     try {
         System.out.println("Connect to: " + javaRealmsService.joinWorld(realmsWorlds.get(0)).join());
     } catch (CompletionException e) {
-        if (e.getCause() instanceof RealmsResponseException) {
-            RealmsResponseException exception = (RealmsResponseException) e.getCause();
-            if (exception.getErrorCode() == RealmsResponseException.TOS_NOT_ACCEPTED) {
+        if (e.getCause() instanceof RealmsRequestException) {
+            RealmsRequestException exception = (RealmsRequestException) e.getCause();
+            if (exception.getErrorCode() == RealmsRequestException.TOS_NOT_ACCEPTED) {
                 // The Java Edition Realms API requires users to accept the Minecraft Realms Terms of Service (https://aka.ms/MinecraftRealmsTerms)
                 // You should display the terms to the user and ask them to accept them:
                 javaRealmsService.acceptTos().join();

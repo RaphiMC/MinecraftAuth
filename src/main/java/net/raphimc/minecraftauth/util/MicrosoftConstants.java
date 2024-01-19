@@ -17,19 +17,6 @@
  */
 package net.raphimc.minecraftauth.util;
 
-import net.raphimc.minecraftauth.MinecraftAuth;
-import org.apache.http.Header;
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.StandardHttpRequestRetryHandler;
-import org.apache.http.message.BasicHeader;
-
-import java.util.ArrayList;
-import java.util.List;
-
 public class MicrosoftConstants {
 
     public static final String JAVA_TITLE_ID = "00000000402b5328"; // Win32
@@ -51,30 +38,5 @@ public class MicrosoftConstants {
     public static final String BEDROCK_XSTS_RELYING_PARTY = "https://multiplayer.minecraft.net/";
     public static final String BEDROCK_PLAY_FAB_XSTS_RELYING_PARTY = "https://b980a380.minecraft.playfabapi.com/";
     public static final String BEDROCK_REALMS_XSTS_RELYING_PARTY = "https://pocket.realms.minecraft.net/";
-
-    public static CloseableHttpClient createHttpClient() {
-        final int timeout = 5;
-        final RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(timeout * 1000)
-                .setConnectionRequestTimeout(timeout * 1000)
-                .setSocketTimeout(timeout * 1000).build();
-
-        final List<Header> headers = getDefaultHeaders();
-        headers.add(new BasicHeader(HttpHeaders.USER_AGENT, "MinecraftAuth/" + MinecraftAuth.VERSION));
-
-        return HttpClientBuilder.create()
-                .setDefaultRequestConfig(requestConfig)
-                .setDefaultHeaders(headers)
-                .disableRedirectHandling()
-                .setRetryHandler(new StandardHttpRequestRetryHandler())
-                .build();
-    }
-
-    public static List<Header> getDefaultHeaders() {
-        final List<Header> headers = new ArrayList<>();
-        headers.add(new BasicHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType()));
-        headers.add(new BasicHeader(HttpHeaders.ACCEPT_LANGUAGE, "en-US,en"));
-        return headers;
-    }
 
 }

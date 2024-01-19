@@ -17,7 +17,7 @@
  */
 package net.raphimc.minecraftauth.step;
 
-import org.apache.http.client.HttpClient;
+import net.lenni0451.commons.httpclient.HttpClient;
 
 public abstract class TriMergeStep<I1 extends AbstractStep.StepResult<?>, I2 extends AbstractStep.StepResult<?>, I3 extends AbstractStep.StepResult<?>, O extends TriMergeStep.StepResult<I1, I2, I3>> extends BiMergeStep<I1, I2, O> {
 

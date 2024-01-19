@@ -22,12 +22,12 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.experimental.NonFinal;
+import net.lenni0451.commons.httpclient.HttpClient;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.BiMergeStep;
 import net.raphimc.minecraftauth.step.SameInputBiMergeStep;
 import net.raphimc.minecraftauth.step.xbl.StepXblTitleToken;
 import net.raphimc.minecraftauth.step.xbl.StepXblUserToken;
-import org.apache.http.client.HttpClient;
 
 public class StepFullXblSession extends SameInputBiMergeStep<StepXblUserToken.XblUserToken, StepXblTitleToken.XblTitleToken, StepFullXblSession.FullXblSession> {
 

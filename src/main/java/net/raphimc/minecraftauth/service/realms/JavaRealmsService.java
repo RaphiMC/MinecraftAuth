@@ -19,20 +19,16 @@ package net.raphimc.minecraftauth.service.realms;
 
 import com.google.gson.JsonObject;
 import lombok.SneakyThrows;
+import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.requests.HttpRequest;
+import net.lenni0451.commons.httpclient.requests.impl.GetRequest;
+import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
 import net.raphimc.minecraftauth.responsehandler.RealmsResponseHandler;
-import net.raphimc.minecraftauth.responsehandler.exception.RetryException;
 import net.raphimc.minecraftauth.service.realms.model.RealmsWorld;
 import net.raphimc.minecraftauth.step.java.StepMCProfile;
-import net.raphimc.minecraftauth.util.JsonUtil;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.cookie.BasicClientCookie;
-import org.apache.http.message.AbstractHttpMessage;
 
+import java.net.CookieManager;
+import java.net.HttpCookie;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
@@ -44,14 +40,12 @@ public class JavaRealmsService extends AbstractRealmsService {
     private final boolean isSnapshot;
 
     public JavaRealmsService(final HttpClient httpClient, final String clientVersion, final StepMCProfile.MCProfile mcProfile) {
-        super("pc.realms.minecraft.net", httpClient, HttpClientContext.create());
+        super("pc.realms.minecraft.net", httpClient, new CookieManager());
         this.isSnapshot = !clientVersion.matches("\\d+\\.\\d+(\\.\\d+)?");
 
-        final BasicCookieStore cookieStore = new BasicCookieStore();
-        cookieStore.addCookie(this.createCookie("sid", "token:" + mcProfile.getMcToken().getAccessToken() + ':' + mcProfile.getId().toString().replace("-", "")));
-        cookieStore.addCookie(this.createCookie("user", mcProfile.getName()));
-        cookieStore.addCookie(this.createCookie("version", clientVersion));
-        this.context.setCookieStore(cookieStore);
+        this.cookieManager.getCookieStore().add(null, this.createCookie("sid", "token:" + mcProfile.getMcToken().getAccessToken() + ':' + mcProfile.getId().toString().replace("-", "")));
+        this.cookieManager.getCookieStore().add(null, this.createCookie("user", mcProfile.getName()));
+        this.cookieManager.getCookieStore().add(null, this.createCookie("version", clientVersion));
     }
 
     @Override
@@ -60,17 +54,11 @@ public class JavaRealmsService extends AbstractRealmsService {
             @Override
             @SneakyThrows
             public String get() {
-                final HttpGet httpGet = new HttpGet(JOIN_WORLD_URL.replace("$ID", String.valueOf(realmsWorld.getId())));
-                JavaRealmsService.this.addRequestHeaders(httpGet);
-                while (true) {
-                    try {
-                        final String response = JavaRealmsService.this.httpClient.execute(httpGet, new RealmsResponseHandler(), JavaRealmsService.this.context);
-                        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
-                        return obj.get("address").getAsString();
-                    } catch (RetryException e) {
-                        Thread.sleep(e.getRetryAfterSeconds() * 1000L);
-                    }
-                }
+                final GetRequest getRequest = new GetRequest(JOIN_WORLD_URL.replace("$ID", String.valueOf(realmsWorld.getId())));
+                getRequest.setCookieManager(JavaRealmsService.this.cookieManager);
+                JavaRealmsService.this.addRequestHeaders(getRequest);
+                final JsonObject obj = JavaRealmsService.this.httpClient.execute(getRequest, new RealmsResponseHandler());
+                return obj.get("address").getAsString();
             }
         });
     }
@@ -80,21 +68,23 @@ public class JavaRealmsService extends AbstractRealmsService {
             @Override
             @SneakyThrows
             public void run() {
-                final HttpPost httpPost = new HttpPost(AGREE_TOS_URL);
-                JavaRealmsService.this.addRequestHeaders(httpPost);
-                JavaRealmsService.this.httpClient.execute(httpPost, new RealmsResponseHandler(), JavaRealmsService.this.context);
+                final PostRequest postRequest = new PostRequest(AGREE_TOS_URL);
+                postRequest.setCookieManager(JavaRealmsService.this.cookieManager);
+                JavaRealmsService.this.addRequestHeaders(postRequest);
+                JavaRealmsService.this.httpClient.execute(postRequest, new RealmsResponseHandler());
             }
         });
     }
 
     @Override
-    protected void addRequestHeaders(final AbstractHttpMessage httpMessage) {
-        httpMessage.addHeader("Is-Prerelease", String.valueOf(this.isSnapshot));
+    protected void addRequestHeaders(final HttpRequest httpRequest) {
+        httpRequest.setHeader("Is-Prerelease", String.valueOf(this.isSnapshot));
     }
 
-    private Cookie createCookie(final String name, final String value) {
-        final BasicClientCookie cookie = new BasicClientCookie(name, value);
+    private HttpCookie createCookie(final String name, final String value) {
+        final HttpCookie cookie = new HttpCookie(name, value);
         cookie.setDomain(this.host);
+        cookie.setPath("/");
         return cookie;
     }
 

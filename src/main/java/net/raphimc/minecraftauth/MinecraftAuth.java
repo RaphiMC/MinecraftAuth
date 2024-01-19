@@ -17,6 +17,10 @@
  */
 package net.raphimc.minecraftauth;
 
+import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.RetryHandler;
+import net.lenni0451.commons.httpclient.constants.ContentTypes;
+import net.lenni0451.commons.httpclient.constants.Headers;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.BiMergeStep;
 import net.raphimc.minecraftauth.step.bedrock.StepMCChain;
@@ -36,7 +40,6 @@ import net.raphimc.minecraftauth.util.MicrosoftConstants;
 import net.raphimc.minecraftauth.util.OAuthEnvironment;
 import net.raphimc.minecraftauth.util.logging.ConsoleLogger;
 import net.raphimc.minecraftauth.util.logging.ILogger;
-import org.apache.http.client.HttpClient;
 import org.jetbrains.annotations.ApiStatus;
 
 public class MinecraftAuth {
@@ -45,6 +48,7 @@ public class MinecraftAuth {
     public static final String IMPL_VERSION = "${impl_version}";
 
     public static ILogger LOGGER = new ConsoleLogger();
+    public static String USER_AGENT = "MinecraftAuth/" + VERSION;
 
     public static final AbstractStep<?, StepFullJavaSession.FullJavaSession> JAVA_DEVICE_CODE_LOGIN = builder()
             .withClientId(MicrosoftConstants.JAVA_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
@@ -82,6 +86,20 @@ public class MinecraftAuth {
 
     public static MsaTokenBuilder builder() {
         return new MsaTokenBuilder();
+    }
+
+    public static HttpClient createHttpClient() {
+        final int timeout = 5000;
+
+        return new HttpClient()
+                .setConnectTimeout(timeout)
+                .setReadTimeout(timeout * 2)
+                .setCookieManager(null)
+                .setFollowRedirects(false)
+                .setRetryHandler(new RetryHandler(0, 50))
+                .setHeader(Headers.ACCEPT, ContentTypes.APPLICATION_JSON.toString())
+                .setHeader(Headers.ACCEPT_LANGUAGE, "en-US,en")
+                .setHeader(Headers.USER_AGENT, USER_AGENT);
     }
 
     public static class MsaTokenBuilder {

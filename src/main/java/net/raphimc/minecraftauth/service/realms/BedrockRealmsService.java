@@ -19,17 +19,15 @@ package net.raphimc.minecraftauth.service.realms;
 
 import com.google.gson.JsonObject;
 import lombok.SneakyThrows;
+import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.constants.Headers;
+import net.lenni0451.commons.httpclient.requests.HttpRequest;
+import net.lenni0451.commons.httpclient.requests.impl.DeleteRequest;
+import net.lenni0451.commons.httpclient.requests.impl.GetRequest;
+import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
 import net.raphimc.minecraftauth.responsehandler.RealmsResponseHandler;
-import net.raphimc.minecraftauth.responsehandler.exception.RetryException;
 import net.raphimc.minecraftauth.service.realms.model.RealmsWorld;
 import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
-import net.raphimc.minecraftauth.util.JsonUtil;
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.AbstractHttpMessage;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
@@ -55,17 +53,10 @@ public class BedrockRealmsService extends AbstractRealmsService {
             @Override
             @SneakyThrows
             public String get() {
-                final HttpGet httpGet = new HttpGet(JOIN_WORLD_URL.replace("$ID", String.valueOf(realmsWorld.getId())));
-                BedrockRealmsService.this.addRequestHeaders(httpGet);
-                while (true) {
-                    try {
-                        final String response = BedrockRealmsService.this.httpClient.execute(httpGet, new RealmsResponseHandler());
-                        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
-                        return obj.get("address").getAsString();
-                    } catch (RetryException e) {
-                        Thread.sleep(e.getRetryAfterSeconds() * 1000L);
-                    }
-                }
+                final GetRequest getRequest = new GetRequest(JOIN_WORLD_URL.replace("$ID", String.valueOf(realmsWorld.getId())));
+                BedrockRealmsService.this.addRequestHeaders(getRequest);
+                final JsonObject obj = BedrockRealmsService.this.httpClient.execute(getRequest, new RealmsResponseHandler());
+                return obj.get("address").getAsString();
             }
         });
     }
@@ -75,10 +66,9 @@ public class BedrockRealmsService extends AbstractRealmsService {
             @Override
             @SneakyThrows
             public RealmsWorld get() {
-                final HttpPost httpPost = new HttpPost(ACCEPT_INVITE_URL.replace("$CODE", realmCode));
-                BedrockRealmsService.this.addRequestHeaders(httpPost);
-                final String response = BedrockRealmsService.this.httpClient.execute(httpPost, new RealmsResponseHandler());
-                final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
+                final PostRequest postRequest = new PostRequest(ACCEPT_INVITE_URL.replace("$CODE", realmCode));
+                BedrockRealmsService.this.addRequestHeaders(postRequest);
+                final JsonObject obj = BedrockRealmsService.this.httpClient.execute(postRequest, new RealmsResponseHandler());
                 return RealmsWorld.fromJson(obj);
             }
         });
@@ -89,20 +79,20 @@ public class BedrockRealmsService extends AbstractRealmsService {
             @Override
             @SneakyThrows
             public void run() {
-                final HttpDelete httpDelete = new HttpDelete(DELETE_INVITE_URL.replace("$ID", String.valueOf(realmsWorld.getId())));
-                BedrockRealmsService.this.addRequestHeaders(httpDelete);
-                final String response = BedrockRealmsService.this.httpClient.execute(httpDelete, new RealmsResponseHandler());
-                if (response != null) {
-                    throw new IllegalStateException("Failed to delete invite: " + response);
+                final DeleteRequest deleteRequest = new DeleteRequest(DELETE_INVITE_URL.replace("$ID", String.valueOf(realmsWorld.getId())));
+                BedrockRealmsService.this.addRequestHeaders(deleteRequest);
+                final JsonObject obj = BedrockRealmsService.this.httpClient.execute(deleteRequest, new RealmsResponseHandler());
+                if (obj != null) {
+                    throw new IllegalStateException("Failed to delete invite: " + obj);
                 }
             }
         });
     }
 
     @Override
-    protected void addRequestHeaders(final AbstractHttpMessage httpMessage) {
-        httpMessage.addHeader(HttpHeaders.AUTHORIZATION, "XBL3.0 x=" + this.realmsXsts.getServiceToken());
-        httpMessage.addHeader("Client-Version", this.clientVersion);
+    protected void addRequestHeaders(final HttpRequest httpRequest) {
+        httpRequest.setHeader(Headers.AUTHORIZATION, "XBL3.0 x=" + this.realmsXsts.getServiceToken());
+        httpRequest.setHeader("Client-Version", this.clientVersion);
     }
 
 }

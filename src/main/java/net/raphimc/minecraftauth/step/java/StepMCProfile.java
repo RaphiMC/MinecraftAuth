@@ -20,16 +20,14 @@ package net.raphimc.minecraftauth.step.java;
 import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.constants.Headers;
+import net.lenni0451.commons.httpclient.requests.impl.GetRequest;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MinecraftResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
-import net.raphimc.minecraftauth.util.JsonUtil;
 import net.raphimc.minecraftauth.util.UuidUtil;
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 
-import java.io.IOException;
 import java.util.UUID;
 
 public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfile.MCProfile> {
@@ -44,14 +42,9 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
     public MCProfile applyStep(final HttpClient httpClient, final StepMCToken.MCToken mcToken) throws Exception {
         MinecraftAuth.LOGGER.info("Getting profile...");
 
-        final HttpGet httpGet = new HttpGet(MINECRAFT_PROFILE_URL);
-        httpGet.addHeader(HttpHeaders.AUTHORIZATION, mcToken.getTokenType() + " " + mcToken.getAccessToken());
-        final String response = httpClient.execute(httpGet, new MinecraftResponseHandler());
-        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
-
-        if (obj.has("error")) {
-            throw new IOException("No valid minecraft profile found: " + obj);
-        }
+        final GetRequest getRequest = new GetRequest(MINECRAFT_PROFILE_URL);
+        getRequest.setHeader(Headers.AUTHORIZATION, mcToken.getTokenType() + " " + mcToken.getAccessToken());
+        final JsonObject obj = httpClient.execute(getRequest, new MinecraftResponseHandler());
 
         final MCProfile mcProfile = new MCProfile(
                 UuidUtil.fromLenientString(obj.get("id").getAsString()),

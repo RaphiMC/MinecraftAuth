@@ -20,16 +20,15 @@ package net.raphimc.minecraftauth.step.java;
 import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.constants.ContentTypes;
+import net.lenni0451.commons.httpclient.constants.Headers;
+import net.lenni0451.commons.httpclient.content.impl.StringContent;
+import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MinecraftResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.CryptUtil;
-import net.raphimc.minecraftauth.util.JsonUtil;
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -51,11 +50,10 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
     public PlayerCertificates applyStep(final HttpClient httpClient, final StepMCToken.MCToken mcToken) throws Exception {
         MinecraftAuth.LOGGER.info("Getting player certificates...");
 
-        final HttpPost httpPost = new HttpPost(PLAYER_CERTIFICATES_URL);
-        httpPost.setEntity(new StringEntity("", ContentType.APPLICATION_JSON));
-        httpPost.addHeader(HttpHeaders.AUTHORIZATION, mcToken.getTokenType() + " " + mcToken.getAccessToken());
-        final String response = httpClient.execute(httpPost, new MinecraftResponseHandler());
-        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
+        final PostRequest postRequest = new PostRequest(PLAYER_CERTIFICATES_URL);
+        postRequest.setContent(new StringContent(ContentTypes.APPLICATION_JSON, ""));
+        postRequest.setHeader(Headers.AUTHORIZATION, mcToken.getTokenType() + " " + mcToken.getAccessToken());
+        final JsonObject obj = httpClient.execute(postRequest, new MinecraftResponseHandler());
         final JsonObject keyPair = obj.getAsJsonObject("keyPair");
 
         final PKCS8EncodedKeySpec encodedPrivateKey = new PKCS8EncodedKeySpec(Base64.getMimeDecoder().decode(keyPair.get("privateKey").getAsString()

@@ -18,10 +18,10 @@
 package net.raphimc.minecraftauth.step.xbl.adapter;
 
 import com.google.gson.JsonObject;
+import net.lenni0451.commons.httpclient.HttpClient;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
 import net.raphimc.minecraftauth.step.xbl.session.StepFullXblSession;
-import org.apache.http.client.HttpClient;
 
 public class StepXblXstsToFullXblSession extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepFullXblSession.FullXblSession> {
 

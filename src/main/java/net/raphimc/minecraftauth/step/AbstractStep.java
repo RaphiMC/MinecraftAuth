@@ -18,7 +18,7 @@
 package net.raphimc.minecraftauth.step;
 
 import com.google.gson.JsonObject;
-import org.apache.http.client.HttpClient;
+import net.lenni0451.commons.httpclient.HttpClient;
 
 public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O extends AbstractStep.StepResult<?>> {
 

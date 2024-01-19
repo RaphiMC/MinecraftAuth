@@ -18,21 +18,17 @@
 package net.raphimc.minecraftauth.step.msa;
 
 import com.google.gson.JsonObject;
+import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.constants.StatusCodes;
+import net.lenni0451.commons.httpclient.content.impl.URLEncodedFormContent;
+import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MsaResponseHandler;
-import net.raphimc.minecraftauth.responsehandler.exception.MsaResponseException;
+import net.raphimc.minecraftauth.responsehandler.exception.MsaRequestException;
 import net.raphimc.minecraftauth.step.AbstractStep;
-import net.raphimc.minecraftauth.util.JsonUtil;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 public class StepMsaDeviceCodeMsaCode extends MsaCodeStep<StepMsaDeviceCode.MsaDeviceCode> {
@@ -51,22 +47,21 @@ public class StepMsaDeviceCodeMsaCode extends MsaCodeStep<StepMsaDeviceCode.MsaD
 
         final long start = System.currentTimeMillis();
         while (!msaDeviceCode.isExpired() && System.currentTimeMillis() - start <= this.timeout) {
-            final List<NameValuePair> postData = new ArrayList<>();
-            postData.add(new BasicNameValuePair("client_id", msaDeviceCode.getApplicationDetails().getClientId()));
-            postData.add(new BasicNameValuePair("device_code", msaDeviceCode.getDeviceCode()));
-            postData.add(new BasicNameValuePair("grant_type", "device_code"));
+            final Map<String, String> postData = new HashMap<>();
+            postData.put("client_id", msaDeviceCode.getApplicationDetails().getClientId());
+            postData.put("device_code", msaDeviceCode.getDeviceCode());
+            postData.put("grant_type", "device_code");
 
-            final HttpPost httpPost = new HttpPost(msaDeviceCode.getApplicationDetails().getOAuthEnvironment().getTokenUrl());
-            httpPost.setEntity(new UrlEncodedFormEntity(postData, StandardCharsets.UTF_8));
+            final PostRequest postRequest = new PostRequest(msaDeviceCode.getApplicationDetails().getOAuthEnvironment().getTokenUrl());
+            postRequest.setContent(new URLEncodedFormContent(postData));
             try {
-                final String response = httpClient.execute(httpPost, new MsaResponseHandler());
-                final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
+                final JsonObject obj = httpClient.execute(postRequest, new MsaResponseHandler());
 
                 final MsaCode msaCode = new MsaCode(obj.get("refresh_token").getAsString(), msaDeviceCode.getApplicationDetails().withRedirectUri(null));
                 MinecraftAuth.LOGGER.info("Got MSA Code");
                 return msaCode;
-            } catch (MsaResponseException e) {
-                if (e.getStatusCode() == HttpStatus.SC_BAD_REQUEST && e.getError().equals("authorization_pending")) {
+            } catch (MsaRequestException e) {
+                if (e.getResponse().getStatusCode() == StatusCodes.BAD_REQUEST && e.getError().equals("authorization_pending")) {
                     Thread.sleep(msaDeviceCode.getIntervalMs());
                     continue;
                 }

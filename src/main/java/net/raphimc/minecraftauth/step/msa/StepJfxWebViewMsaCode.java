@@ -24,26 +24,24 @@ import javafx.scene.web.WebView;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 import lombok.Value;
+import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.HttpResponse;
+import net.lenni0451.commons.httpclient.utils.URLWrapper;
 import net.raphimc.minecraftauth.MinecraftAuth;
-import net.raphimc.minecraftauth.responsehandler.exception.MsaResponseException;
+import net.raphimc.minecraftauth.responsehandler.exception.MsaRequestException;
 import net.raphimc.minecraftauth.step.AbstractStep;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.client.utils.URLEncodedUtils;
 
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
+import java.net.URL;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 public class StepJfxWebViewMsaCode extends MsaCodeStep<StepJfxWebViewMsaCode.JavaFxWebView> {
 
@@ -63,46 +61,45 @@ public class StepJfxWebViewMsaCode extends MsaCodeStep<StepJfxWebViewMsaCode.Jav
         MinecraftAuth.LOGGER.info("Opening JavaFX WebView window for MSA login...");
 
         final JFXPanel jfxPanel = new JFXPanel();
-        final URI authenticationUrl = this.getAuthenticationUrl();
+        final URL authenticationUrl = new URLWrapper(this.applicationDetails.getOAuthEnvironment().getAuthorizeUrl()).wrapQuery().addQueries(this.applicationDetails.getOAuthParameters()).apply().toURL();
         final CompletableFuture<MsaCode> msaCodeFuture = new CompletableFuture<>();
 
-        Platform.runLater(() -> {
-            final JFrame window = new JFrame("MinecraftAuth - Microsoft Login");
-            window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            window.setSize(800, 600);
-            window.setLocationRelativeTo(null);
-            window.setResizable(false);
-            window.setContentPane(jfxPanel);
-            window.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent e) {
-                    if (!msaCodeFuture.isDone()) {
-                        msaCodeFuture.completeExceptionally(new UserClosedWindowException());
-                    }
+        final JFrame window = new JFrame("MinecraftAuth - Microsoft Login");
+        window.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        window.setSize(800, 600);
+        window.setLocationRelativeTo(null);
+        window.setResizable(false);
+        window.setContentPane(jfxPanel);
+        window.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (!msaCodeFuture.isDone()) {
+                    msaCodeFuture.completeExceptionally(new UserClosedWindowException());
                 }
-            });
+            }
+        });
 
+        Platform.runLater(() -> {
             final WebView webView = new WebView();
             webView.setContextMenuEnabled(false);
-            webView.getEngine().setUserAgent("MinecraftAuth/" + MinecraftAuth.VERSION);
+            webView.getEngine().setUserAgent(MinecraftAuth.USER_AGENT);
             webView.getEngine().load(authenticationUrl.toString());
             webView.getEngine().locationProperty().addListener((observable, oldValue, newValue) -> {
                 try {
                     if (newValue.startsWith(this.applicationDetails.getRedirectUri())) {
-                        final Map<String, String> parameters = URLEncodedUtils.parse(new URI(newValue), StandardCharsets.UTF_8).stream().collect(Collectors.toMap(NameValuePair::getName, NameValuePair::getValue));
+                        final Map<String, String> parameters = new URLWrapper(newValue).wrapQuery().getQueries();
                         if (parameters.containsKey("error") && parameters.containsKey("error_description")) {
-                            throw new MsaResponseException(500, parameters.get("error"), parameters.get("error_description"));
+                            final HttpResponse fakeResponse = new HttpResponse(null, 500, new byte[0], Collections.emptyMap());
+                            throw new MsaRequestException(fakeResponse, parameters.get("error"), parameters.get("error_description"));
                         }
                         if (!parameters.containsKey("code")) {
                             throw new IllegalStateException("Could not extract MSA Code from response url");
                         }
 
                         msaCodeFuture.complete(new MsaCode(parameters.get("code"), this.applicationDetails));
-                        window.dispose();
                     }
                 } catch (Throwable e) {
                     msaCodeFuture.completeExceptionally(e);
-                    window.dispose();
                 }
             });
             jfxPanel.setScene(new Scene(webView, window.getWidth(), window.getHeight()));
@@ -116,25 +113,20 @@ public class StepJfxWebViewMsaCode extends MsaCodeStep<StepJfxWebViewMsaCode.Jav
 
         try {
             final MsaCode msaCode = msaCodeFuture.get(this.timeout, TimeUnit.MILLISECONDS);
+            window.dispose();
             MinecraftAuth.LOGGER.info("Got MSA Code");
             return msaCode;
+        } catch (TimeoutException e) {
+            window.dispose();
+            throw new TimeoutException("MSA login timed out");
         } catch (ExecutionException e) {
+            window.dispose();
             if (e.getCause() != null) {
                 throw e.getCause();
             } else {
                 throw e;
             }
         }
-    }
-
-    private URI getAuthenticationUrl() throws URISyntaxException {
-        return new URIBuilder(this.applicationDetails.getOAuthEnvironment().getAuthorizeUrl())
-                .setParameter("client_id", this.applicationDetails.getClientId())
-                .setParameter("redirect_uri", this.applicationDetails.getRedirectUri())
-                .setParameter("scope", this.applicationDetails.getScope())
-                .setParameter("response_type", "code")
-                .setParameter("response_mode", "query")
-                .build();
     }
 
     @Value

@@ -20,17 +20,16 @@ package net.raphimc.minecraftauth.service.realms;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.SneakyThrows;
+import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.constants.ContentTypes;
+import net.lenni0451.commons.httpclient.constants.Headers;
+import net.lenni0451.commons.httpclient.handler.ThrowingResponseHandler;
+import net.lenni0451.commons.httpclient.requests.HttpRequest;
+import net.lenni0451.commons.httpclient.requests.impl.GetRequest;
 import net.raphimc.minecraftauth.responsehandler.RealmsResponseHandler;
 import net.raphimc.minecraftauth.service.realms.model.RealmsWorld;
-import net.raphimc.minecraftauth.util.JsonUtil;
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.message.AbstractHttpMessage;
 
+import java.net.CookieManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -43,12 +42,12 @@ public abstract class AbstractRealmsService {
 
     protected final String host;
     protected final HttpClient httpClient;
-    protected final HttpClientContext context;
+    protected final CookieManager cookieManager;
 
-    public AbstractRealmsService(final String host, final HttpClient httpClient, final HttpClientContext context) {
+    public AbstractRealmsService(final String host, final HttpClient httpClient, final CookieManager cookieManager) {
         this.host = host;
         this.httpClient = httpClient;
-        this.context = context;
+        this.cookieManager = cookieManager;
     }
 
     public CompletableFuture<Boolean> isAvailable() {
@@ -56,10 +55,11 @@ public abstract class AbstractRealmsService {
             @Override
             @SneakyThrows
             public Boolean get() {
-                final HttpGet httpGet = new HttpGet(CLIENT_COMPATIBLE_URL.replace("$HOST", AbstractRealmsService.this.host));
-                httpGet.addHeader(HttpHeaders.ACCEPT, ContentType.TEXT_PLAIN.getMimeType());
-                AbstractRealmsService.this.addRequestHeaders(httpGet);
-                final String response = AbstractRealmsService.this.httpClient.execute(httpGet, new BasicResponseHandler(), AbstractRealmsService.this.context);
+                final GetRequest getRequest = new GetRequest(CLIENT_COMPATIBLE_URL.replace("$HOST", AbstractRealmsService.this.host));
+                getRequest.setCookieManager(AbstractRealmsService.this.cookieManager);
+                getRequest.setHeader(Headers.ACCEPT, ContentTypes.TEXT_PLAIN.getMimeType());
+                AbstractRealmsService.this.addRequestHeaders(getRequest);
+                final String response = AbstractRealmsService.this.httpClient.execute(getRequest, new ThrowingResponseHandler()).getContentAsString();
                 return response.equals("COMPATIBLE");
             }
         });
@@ -70,10 +70,10 @@ public abstract class AbstractRealmsService {
             @Override
             @SneakyThrows
             public List<RealmsWorld> get() {
-                final HttpGet httpGet = new HttpGet(WORLDS_URL.replace("$HOST", AbstractRealmsService.this.host));
-                AbstractRealmsService.this.addRequestHeaders(httpGet);
-                final String response = AbstractRealmsService.this.httpClient.execute(httpGet, new RealmsResponseHandler(), AbstractRealmsService.this.context);
-                final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
+                final GetRequest getRequest = new GetRequest(WORLDS_URL.replace("$HOST", AbstractRealmsService.this.host));
+                getRequest.setCookieManager(AbstractRealmsService.this.cookieManager);
+                AbstractRealmsService.this.addRequestHeaders(getRequest);
+                final JsonObject obj = AbstractRealmsService.this.httpClient.execute(getRequest, new RealmsResponseHandler());
 
                 final List<RealmsWorld> realmsWorlds = new ArrayList<>();
                 for (JsonElement server : obj.getAsJsonArray("servers")) {
@@ -86,6 +86,6 @@ public abstract class AbstractRealmsService {
 
     public abstract CompletableFuture<String> joinWorld(final RealmsWorld realmsWorld);
 
-    protected abstract void addRequestHeaders(final AbstractHttpMessage httpMessage);
+    protected abstract void addRequestHeaders(final HttpRequest httpRequest);
 
 }

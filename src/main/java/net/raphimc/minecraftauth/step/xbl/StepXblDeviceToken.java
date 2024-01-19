@@ -20,15 +20,13 @@ package net.raphimc.minecraftauth.step.xbl;
 import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.XblResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.CryptUtil;
-import net.raphimc.minecraftauth.util.JsonUtil;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import net.raphimc.minecraftauth.util.JsonContent;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -74,12 +72,11 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
         postData.addProperty("RelyingParty", "http://auth.xboxlive.com");
         postData.addProperty("TokenType", "JWT");
 
-        final HttpPost httpPost = new HttpPost(XBL_DEVICE_URL);
-        httpPost.setEntity(new StringEntity(postData.toString(), ContentType.APPLICATION_JSON));
-        httpPost.addHeader("x-xbl-contract-version", "1");
-        httpPost.addHeader(CryptUtil.getSignatureHeader(httpPost, privateKey));
-        final String response = httpClient.execute(httpPost, new XblResponseHandler());
-        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
+        final PostRequest postRequest = new PostRequest(XBL_DEVICE_URL);
+        postRequest.setContent(new JsonContent(postData));
+        postRequest.setHeader("x-xbl-contract-version", "1");
+        postRequest.setHeader(CryptUtil.getSignatureHeader(postRequest, privateKey));
+        final JsonObject obj = httpClient.execute(postRequest, new XblResponseHandler());
 
         final XblDeviceToken xblDeviceToken = new XblDeviceToken(
                 publicKey,

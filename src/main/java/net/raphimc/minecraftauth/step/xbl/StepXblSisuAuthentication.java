@@ -20,17 +20,15 @@ package net.raphimc.minecraftauth.step.xbl;
 import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.XblResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.session.StepFullXblSession;
 import net.raphimc.minecraftauth.step.xbl.session.StepInitialXblSession;
 import net.raphimc.minecraftauth.util.CryptUtil;
-import net.raphimc.minecraftauth.util.JsonUtil;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import net.raphimc.minecraftauth.util.JsonContent;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -68,11 +66,10 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
         postData.addProperty("Sandbox", "RETAIL");
         postData.addProperty("UseModernGamertag", true);
 
-        final HttpPost httpPost = new HttpPost(XBL_SISU_URL);
-        httpPost.setEntity(new StringEntity(postData.toString(), ContentType.APPLICATION_JSON));
-        httpPost.addHeader(CryptUtil.getSignatureHeader(httpPost, initialXblSession.getXblDeviceToken().getPrivateKey()));
-        final String response = httpClient.execute(httpPost, new XblResponseHandler());
-        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
+        final PostRequest postRequest = new PostRequest(XBL_SISU_URL);
+        postRequest.setContent(new JsonContent(postData));
+        postRequest.setHeader(CryptUtil.getSignatureHeader(postRequest, initialXblSession.getXblDeviceToken().getPrivateKey()));
+        final JsonObject obj = httpClient.execute(postRequest, new XblResponseHandler());
 
         final XblSisuTokens xblSisuTokens = new XblSisuTokens(
                 new XblSisuTokens.SisuTitleToken(

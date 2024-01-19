@@ -18,17 +18,17 @@
 package net.raphimc.minecraftauth.responsehandler.exception;
 
 import lombok.Getter;
-import org.apache.http.client.HttpResponseException;
+import net.lenni0451.commons.httpclient.HttpResponse;
 
 @Getter
-public class RealmsResponseException extends HttpResponseException {
+public class RealmsRequestException extends ApiHttpRequestException {
 
     public static final int TOS_NOT_ACCEPTED = 6002;
 
     private final int errorCode;
 
-    public RealmsResponseException(final int statusCode, final int errorCode, final String reasonPhrase) {
-        super(statusCode, reasonPhrase + ", realms error code: " + errorCode);
+    public RealmsRequestException(final HttpResponse response, final int errorCode, final String errorMessage) {
+        super(response, String.valueOf(errorCode), errorMessage);
 
         this.errorCode = errorCode;
     }

@@ -18,15 +18,15 @@
 package net.raphimc.minecraftauth.responsehandler.exception;
 
 import lombok.Getter;
-import org.apache.http.client.HttpResponseException;
+import net.lenni0451.commons.httpclient.HttpResponse;
 
 @Getter
-public class MinecraftResponseException extends HttpResponseException {
+public class PlayFabRequestException extends ApiHttpRequestException {
 
     private final String error;
 
-    public MinecraftResponseException(final int statusCode, final String error, final String reasonPhrase) {
-        super(statusCode, reasonPhrase + ", minecraft error: " + error);
+    public PlayFabRequestException(final HttpResponse response, final String error, final String errorMessage) {
+        super(response, error, errorMessage);
 
         this.error = error;
     }

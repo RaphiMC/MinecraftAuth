@@ -18,13 +18,13 @@
 package net.raphimc.minecraftauth.responsehandler.exception;
 
 import lombok.Getter;
-import org.apache.http.client.HttpResponseException;
+import net.lenni0451.commons.httpclient.HttpResponse;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Getter
-public class XblResponseException extends HttpResponseException {
+public class XblRequestException extends ApiHttpRequestException {
 
     public static final Map<Long, String> ERROR_CODES = new HashMap<>();
 
@@ -41,8 +41,8 @@ public class XblResponseException extends HttpResponseException {
 
     private final long errorCode;
 
-    public XblResponseException(final int statusCode, final long errorCode, final String reasonPhrase) {
-        super(statusCode, reasonPhrase + ", xbox live error code: " + errorCode);
+    public XblRequestException(final HttpResponse response, final long errorCode) {
+        super(response, String.valueOf(errorCode), ERROR_CODES.getOrDefault(errorCode, "Unknown error"));
 
         this.errorCode = errorCode;
     }

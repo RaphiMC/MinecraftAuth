@@ -24,17 +24,15 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.constants.Headers;
+import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MinecraftResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
 import net.raphimc.minecraftauth.util.CryptUtil;
-import net.raphimc.minecraftauth.util.JsonUtil;
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import net.raphimc.minecraftauth.util.JsonContent;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -70,12 +68,11 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         final JsonObject postData = new JsonObject();
         postData.addProperty("identityPublicKey", Base64.getEncoder().encodeToString(publicKey.getEncoded()));
 
-        final HttpPost httpPost = new HttpPost(MINECRAFT_LOGIN_URL);
-        httpPost.setEntity(new StringEntity(postData.toString(), ContentType.APPLICATION_JSON));
-        httpPost.addHeader(HttpHeaders.AUTHORIZATION, "XBL3.0 x=" + xblXsts.getServiceToken());
-        final String response = httpClient.execute(httpPost, new MinecraftResponseHandler());
-        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
-        final JsonArray chain = obj.get("chain").getAsJsonArray();
+        final PostRequest postRequest = new PostRequest(MINECRAFT_LOGIN_URL);
+        postRequest.setContent(new JsonContent(postData));
+        postRequest.setHeader(Headers.AUTHORIZATION, "XBL3.0 x=" + xblXsts.getServiceToken());
+        final JsonObject obj = httpClient.execute(postRequest, new MinecraftResponseHandler());
+        final JsonArray chain = obj.getAsJsonArray("chain");
         if (chain.size() != 2) {
             throw new IllegalStateException("Invalid chain size");
         }

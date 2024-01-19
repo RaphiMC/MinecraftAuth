@@ -20,21 +20,18 @@ package net.raphimc.minecraftauth.step.msa;
 import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.content.impl.URLEncodedFormContent;
+import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MsaResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.JsonUtil;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken.MsaToken> {
 
@@ -85,24 +82,23 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
         final MsaCodeStep.ApplicationDetails applicationDetails = msaCode.getApplicationDetails();
         MinecraftAuth.LOGGER.info("Getting MSA Token...");
 
-        final List<NameValuePair> postData = new ArrayList<>();
-        postData.add(new BasicNameValuePair("client_id", applicationDetails.getClientId()));
-        postData.add(new BasicNameValuePair("scope", applicationDetails.getScope()));
-        postData.add(new BasicNameValuePair("grant_type", type));
+        final Map<String, String> postData = new HashMap<>();
+        postData.put("client_id", applicationDetails.getClientId());
+        postData.put("scope", applicationDetails.getScope());
+        postData.put("grant_type", type);
         if (type.equals("refresh_token")) {
-            postData.add(new BasicNameValuePair("refresh_token", code));
+            postData.put("refresh_token", code);
         } else {
-            postData.add(new BasicNameValuePair("code", code));
-            postData.add(new BasicNameValuePair("redirect_uri", applicationDetails.getRedirectUri()));
+            postData.put("code", code);
+            postData.put("redirect_uri", applicationDetails.getRedirectUri());
         }
         if (applicationDetails.getClientSecret() != null) {
-            postData.add(new BasicNameValuePair("client_secret", applicationDetails.getClientSecret()));
+            postData.put("client_secret", applicationDetails.getClientSecret());
         }
 
-        final HttpPost httpPost = new HttpPost(applicationDetails.getOAuthEnvironment().getTokenUrl());
-        httpPost.setEntity(new UrlEncodedFormEntity(postData, StandardCharsets.UTF_8));
-        final String response = httpClient.execute(httpPost, new MsaResponseHandler());
-        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
+        final PostRequest postRequest = new PostRequest(applicationDetails.getOAuthEnvironment().getTokenUrl());
+        postRequest.setContent(new URLEncodedFormContent(postData));
+        final JsonObject obj = httpClient.execute(postRequest, new MsaResponseHandler());
 
         final MsaToken msaToken = new MsaToken(
                 System.currentTimeMillis() + obj.get("expires_in").getAsLong() * 1000,

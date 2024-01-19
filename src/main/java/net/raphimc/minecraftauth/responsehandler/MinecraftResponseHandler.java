@@ -18,35 +18,21 @@
 package net.raphimc.minecraftauth.responsehandler;
 
 import com.google.gson.JsonObject;
-import net.raphimc.minecraftauth.responsehandler.exception.MinecraftResponseException;
-import net.raphimc.minecraftauth.util.JsonUtil;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.entity.ContentType;
-import org.apache.http.util.EntityUtils;
+import net.lenni0451.commons.httpclient.HttpResponse;
+import net.raphimc.minecraftauth.responsehandler.exception.InformativeHttpRequestException;
+import net.raphimc.minecraftauth.responsehandler.exception.MinecraftRequestException;
 
 import java.io.IOException;
 
-public class MinecraftResponseHandler implements ResponseHandler<String> {
+public class MinecraftResponseHandler extends JsonHttpResponseHandler {
 
     @Override
-    public String handleResponse(HttpResponse response) throws IOException {
-        final StatusLine statusLine = response.getStatusLine();
-        final HttpEntity entity = response.getEntity();
-        final String body = entity == null ? null : EntityUtils.toString(entity);
-        if (statusLine.getStatusCode() >= 300) {
-            if (body != null && ContentType.getOrDefault(entity).getMimeType().equals(ContentType.APPLICATION_JSON.getMimeType())) {
-                final JsonObject obj = (JsonObject) JsonUtil.parseString(body);
-                if (obj.has("error") && obj.has("errorMessage")) {
-                    throw new MinecraftResponseException(statusLine.getStatusCode(), obj.get("error").getAsString(), obj.get("errorMessage").getAsString());
-                }
-            }
-            throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+    protected void handleJsonError(final HttpResponse response, final JsonObject obj) throws IOException {
+        if (obj.has("error") && obj.has("errorMessage")) {
+            throw new MinecraftRequestException(response, obj.get("error").getAsString(), obj.get("errorMessage").getAsString());
+        } else if (obj.has("errorMessage")) {
+            throw new InformativeHttpRequestException(response, obj.get("errorMessage").getAsString());
         }
-        return body;
     }
 
 }

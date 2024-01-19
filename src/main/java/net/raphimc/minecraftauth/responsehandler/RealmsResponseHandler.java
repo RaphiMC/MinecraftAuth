@@ -18,43 +18,18 @@
 package net.raphimc.minecraftauth.responsehandler;
 
 import com.google.gson.JsonObject;
-import net.raphimc.minecraftauth.responsehandler.exception.RealmsResponseException;
-import net.raphimc.minecraftauth.responsehandler.exception.RetryException;
-import net.raphimc.minecraftauth.util.JsonUtil;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.entity.ContentType;
-import org.apache.http.util.EntityUtils;
+import net.lenni0451.commons.httpclient.HttpResponse;
+import net.raphimc.minecraftauth.responsehandler.exception.RealmsRequestException;
 
 import java.io.IOException;
 
-public class RealmsResponseHandler implements ResponseHandler<String> {
+public class RealmsResponseHandler extends JsonHttpResponseHandler {
 
     @Override
-    public String handleResponse(HttpResponse response) throws IOException {
-        final StatusLine statusLine = response.getStatusLine();
-        final HttpEntity entity = response.getEntity();
-        final String body = entity == null ? null : EntityUtils.toString(entity);
-        if (statusLine.getStatusCode() >= 300) {
-            if (response.containsHeader("Retry-After")) {
-                final String retryAfter = response.getFirstHeader("Retry-After").getValue();
-                if (retryAfter.matches("\\d+")) {
-                    throw new RetryException(Integer.parseInt(retryAfter));
-                }
-            }
-
-            if (body != null && ContentType.getOrDefault(entity).getMimeType().equals(ContentType.APPLICATION_JSON.getMimeType())) {
-                final JsonObject obj = (JsonObject) JsonUtil.parseString(body);
-                if (obj.has("errorCode") && obj.has("errorMsg")) {
-                    throw new RealmsResponseException(statusLine.getStatusCode(), obj.get("errorCode").getAsInt(), obj.get("errorMsg").getAsString());
-                }
-            }
-            throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+    protected void handleJsonError(final HttpResponse response, final JsonObject obj) throws IOException {
+        if (obj.has("errorCode") && obj.has("errorMsg")) {
+            throw new RealmsRequestException(response, obj.get("errorCode").getAsInt(), obj.get("errorMsg").getAsString());
         }
-        return body;
     }
 
 }

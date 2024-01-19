@@ -15,21 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.minecraftauth.responsehandler;
+package net.raphimc.minecraftauth.responsehandler.exception;
 
-import com.google.gson.JsonObject;
 import net.lenni0451.commons.httpclient.HttpResponse;
-import net.raphimc.minecraftauth.responsehandler.exception.InformativeHttpRequestException;
+import net.lenni0451.commons.httpclient.exceptions.HttpRequestException;
 
-import java.io.IOException;
+public class InformativeHttpRequestException extends HttpRequestException {
 
-public class MinecraftEduServicesResponseHandler extends JsonHttpResponseHandler {
-
-    @Override
-    protected void handleJsonError(final HttpResponse response, final JsonObject obj) throws IOException {
-        if (obj.has("reason")) {
-            throw new InformativeHttpRequestException(response, obj.get("reason").getAsString());
-        }
+    public InformativeHttpRequestException(final HttpResponse response, final String message) {
+        super(response, "status: " + response.getStatusCode() + " " + response.getStatusMessage() + ", message: " + message);
     }
 
 }

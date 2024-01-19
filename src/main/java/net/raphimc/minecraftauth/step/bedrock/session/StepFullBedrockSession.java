@@ -20,13 +20,13 @@ package net.raphimc.minecraftauth.step.bedrock.session;
 import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import net.lenni0451.commons.httpclient.HttpClient;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.SameInputTriMergeStep;
 import net.raphimc.minecraftauth.step.TriMergeStep;
 import net.raphimc.minecraftauth.step.bedrock.StepMCChain;
 import net.raphimc.minecraftauth.step.bedrock.StepPlayFabToken;
 import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
-import org.apache.http.client.HttpClient;
 
 public class StepFullBedrockSession extends SameInputTriMergeStep<StepMCChain.MCChain, StepPlayFabToken.PlayFabToken, StepXblXstsToken.XblXsts<?>, StepFullBedrockSession.FullBedrockSession> {
 

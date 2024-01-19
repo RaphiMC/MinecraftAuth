@@ -20,22 +20,18 @@ package net.raphimc.minecraftauth.step.msa;
 import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.content.impl.URLEncodedFormContent;
+import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MsaResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
-import net.raphimc.minecraftauth.util.JsonUtil;
 import net.raphimc.minecraftauth.util.OAuthEnvironment;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceCodeCallback, StepMsaDeviceCode.MsaDeviceCode> {
@@ -56,17 +52,16 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
             throw new IllegalStateException("Missing StepMsaDeviceCode.MsaDeviceCodeCallback input");
         }
 
-        final List<NameValuePair> postData = new ArrayList<>();
-        postData.add(new BasicNameValuePair("client_id", this.applicationDetails.getClientId()));
+        final Map<String, String> postData = new HashMap<>();
+        postData.put("client_id", this.applicationDetails.getClientId());
+        postData.put("scope", this.applicationDetails.getScope());
         if (this.applicationDetails.getOAuthEnvironment() == OAuthEnvironment.LIVE) {
-            postData.add(new BasicNameValuePair("response_type", "device_code"));
+            postData.put("response_type", "device_code");
         }
-        postData.add(new BasicNameValuePair("scope", this.applicationDetails.getScope()));
 
-        final HttpPost httpPost = new HttpPost(this.applicationDetails.getOAuthEnvironment().getDeviceCodeUrl());
-        httpPost.setEntity(new UrlEncodedFormEntity(postData, StandardCharsets.UTF_8));
-        final String response = httpClient.execute(httpPost, new MsaResponseHandler());
-        final JsonObject obj = JsonUtil.parseString(response).getAsJsonObject();
+        final PostRequest postRequest = new PostRequest(this.applicationDetails.getOAuthEnvironment().getDeviceCodeUrl());
+        postRequest.setContent(new URLEncodedFormContent(postData));
+        final JsonObject obj = httpClient.execute(postRequest, new MsaResponseHandler());
 
         final MsaDeviceCode msaDeviceCode = new MsaDeviceCode(
                 System.currentTimeMillis() + obj.get("expires_in").getAsLong() * 1000,
