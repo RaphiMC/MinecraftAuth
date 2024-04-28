@@ -21,6 +21,8 @@ import com.google.gson.JsonObject;
 import lombok.Value;
 import net.raphimc.minecraftauth.util.JsonUtil;
 
+import java.util.UUID;
+
 @Value
 public class RealmsWorld {
 
@@ -39,15 +41,15 @@ public class RealmsWorld {
 
     public static RealmsWorld fromJson(final JsonObject json) {
         return new RealmsWorld(
-                json.get("id").getAsLong(),
-                JsonUtil.getStringOr(json, "owner", ""),
-                json.get("ownerUUID").getAsString(),
-                json.get("name").getAsString(),
-                json.get("motd").getAsString(),
-                json.get("state").getAsString(),
-                json.get("expired").getAsBoolean(),
-                json.get("worldType").getAsString(),
-                json.get("maxPlayers").getAsInt(),
+                JsonUtil.getLongOr(json, "id", -1L),
+                JsonUtil.getStringOr(json, "owner", null),
+                JsonUtil.getStringOr(json, "ownerUUID", new UUID(0L, 0L).toString()),
+                JsonUtil.getStringOr(json, "name", null),
+                JsonUtil.getStringOr(json, "motd", null),
+                JsonUtil.getStringOr(json, "state", "CLOSED"),
+                JsonUtil.getBooleanOr(json, "expired", false),
+                JsonUtil.getStringOr(json, "worldType", "NORMAL"),
+                JsonUtil.getIntOr(json, "maxPlayers", 0),
                 JsonUtil.getStringOr(json, "compatibility", "COMPATIBLE").equals("COMPATIBLE"),
                 JsonUtil.getStringOr(json, "activeVersion", ""),
                 json

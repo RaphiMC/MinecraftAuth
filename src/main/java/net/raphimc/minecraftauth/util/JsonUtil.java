@@ -38,6 +38,15 @@ public class JsonUtil {
         }
     }
 
+    public static boolean getBooleanOr(final JsonObject obj, final String key, final boolean defaultValue) {
+        final JsonElement element = obj.get(key);
+        if (element != null && !element.isJsonNull()) {
+            return element.getAsBoolean();
+        } else {
+            return defaultValue;
+        }
+    }
+
     public static int getIntOr(final JsonObject obj, final String key, final int defaultValue) {
         final JsonElement element = obj.get(key);
         if (element != null && !element.isJsonNull()) {
