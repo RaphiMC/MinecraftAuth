@@ -33,7 +33,7 @@ import java.time.ZoneId;
 
 public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepMCToken.MCToken> {
 
-    public static final String MINECRAFT_LOGIN_URL = "https://api.minecraftservices.com/authentication/login_with_xbox";
+    public static final String MINECRAFT_LOGIN_URL = "https://api.minecraftservices.com/launcher/login";
 
     public StepMCToken(final AbstractStep<?, ? extends StepXblXstsToken.XblXsts<?>> prevStep) {
         super("mcToken", (AbstractStep<?, StepXblXstsToken.XblXsts<?>>) prevStep);
@@ -44,7 +44,8 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         MinecraftAuth.LOGGER.info("Authenticating with Minecraft Services...");
 
         final JsonObject postData = new JsonObject();
-        postData.addProperty("identityToken", "XBL3.0 x=" + xblXsts.getServiceToken());
+        postData.addProperty("platform", "PC_LAUNCHER");
+        postData.addProperty("xtoken", "XBL3.0 x=" + xblXsts.getServiceToken());
 
         final PostRequest postRequest = new PostRequest(MINECRAFT_LOGIN_URL);
         postRequest.setContent(new JsonContent(postData));
