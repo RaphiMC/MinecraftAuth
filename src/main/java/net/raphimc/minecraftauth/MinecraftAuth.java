@@ -57,11 +57,27 @@ public class MinecraftAuth {
             .sisuTitleAuthentication(MicrosoftConstants.JAVA_XSTS_RELYING_PARTY)
             .buildMinecraftJavaProfileStep(true);
 
+    @ApiStatus.Experimental
+    public static final AbstractStep<?, StepFullJavaSession.FullJavaSession> ALT_JAVA_DEVICE_CODE_LOGIN = builder()
+            .withClientId(MicrosoftConstants.JAVA_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
+            .deviceCode()
+            .withoutDeviceToken()
+            .regularAuthentication(MicrosoftConstants.JAVA_XSTS_RELYING_PARTY)
+            .buildMinecraftJavaProfileStep(true);
+
     public static final AbstractStep<?, StepFullJavaSession.FullJavaSession> JAVA_CREDENTIALS_LOGIN = builder()
             .withClientId(MicrosoftConstants.JAVA_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
             .credentials()
             .withDeviceToken("Win32")
             .sisuTitleAuthentication(MicrosoftConstants.JAVA_XSTS_RELYING_PARTY)
+            .buildMinecraftJavaProfileStep(true);
+
+    @ApiStatus.Experimental
+    public static final AbstractStep<?, StepFullJavaSession.FullJavaSession> ALT_JAVA_CREDENTIALS_LOGIN = builder()
+            .withClientId(MicrosoftConstants.JAVA_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
+            .credentials()
+            .withoutDeviceToken()
+            .regularAuthentication(MicrosoftConstants.JAVA_XSTS_RELYING_PARTY)
             .buildMinecraftJavaProfileStep(true);
 
     public static final AbstractStep<?, StepFullBedrockSession.FullBedrockSession> BEDROCK_DEVICE_CODE_LOGIN = builder()
@@ -82,7 +98,7 @@ public class MinecraftAuth {
     public static final AbstractStep<?, StepEduJWT.EduJWT> EDU_DEVICE_CODE_LOGIN = new StepEduJWT(builder()
             .withClientId(MicrosoftConstants.EDU_CLIENT_ID).withScope("https://meeservices.minecraft.net/.default offline_access").withOAuthEnvironment(OAuthEnvironment.MICROSOFT_ONLINE_COMMON)
             .deviceCode()
-            .msaTokenStep, "1.20.30", 594, "Windows Desktop Build (Win32)(x64)");
+            .msaTokenStep, "1.20.80", 671, "Windows Desktop Build (Win32)(x64)");
 
     public static MsaTokenBuilder builder() {
         return new MsaTokenBuilder();
