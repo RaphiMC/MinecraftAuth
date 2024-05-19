@@ -43,7 +43,7 @@ public class TimeUtil {
                 final HttpResponse response = httpClient.execute(new GetRequest(OAuthEnvironment.LIVE.getBaseUrl()));
 
                 final Instant clientTime = Instant.now();
-                final Instant serverTime = response.getFirstHeader("Date").map(s -> DateTimeFormatter.RFC_1123_DATE_TIME.parse(s, Instant::from)).orElse(clientTime);
+                final Instant serverTime = response.getFirstHeader("Date").map(s -> DateTimeFormatter.RFC_1123_DATE_TIME.parse(s, Instant::from)).get();
                 CLIENT_TIME_OFFSET = Duration.between(clientTime, serverTime);
 
                 if (CLIENT_TIME_OFFSET.abs().compareTo(Duration.ofMinutes(2)) > 0) {
