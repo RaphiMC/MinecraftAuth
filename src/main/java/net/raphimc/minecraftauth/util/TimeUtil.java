@@ -47,10 +47,10 @@ public class TimeUtil {
                 CLIENT_TIME_OFFSET = Duration.between(clientTime, serverTime);
 
                 if (CLIENT_TIME_OFFSET.abs().compareTo(Duration.ofMinutes(2)) > 0) {
-                    MinecraftAuth.LOGGER.warn("Local clock is off by " + CLIENT_TIME_OFFSET.toMinutes() + " minutes");
+                    MinecraftAuth.LOGGER.warn("Local clock is off by " + CLIENT_TIME_OFFSET.negated().toMinutes() + " minutes");
                 }
             } catch (Throwable e) {
-                MinecraftAuth.LOGGER.error("Failed to get client time offset. This may cause issues with authentication");
+                MinecraftAuth.LOGGER.error("Failed to get client time offset. This may cause issues with authentication if the local clock is wrong.");
                 e.printStackTrace();
                 CLIENT_TIME_OFFSET = Duration.ZERO;
             }
