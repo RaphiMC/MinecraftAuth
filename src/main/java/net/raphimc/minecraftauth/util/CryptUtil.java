@@ -95,7 +95,7 @@ public class CryptUtil {
     }
 
     public static HttpHeader getSignatureHeader(final HttpRequest httpRequest, final ECPrivateKey privateKey) throws IOException {
-        final long windowsTimestamp = (Instant.now().getEpochSecond() + 11644473600L) * 10000000L;
+        final long windowsTimestamp = (Instant.now().plus(TimeUtil.getClientTimeOffset()).getEpochSecond() + 11644473600L) * 10000000L;
 
         final ByteArrayOutputStream signatureContent = new ByteArrayOutputStream();
         DataOutputStream data = new DataOutputStream(signatureContent);
