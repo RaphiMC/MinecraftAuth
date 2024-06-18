@@ -18,13 +18,14 @@
 package net.raphimc.minecraftauth.step.msa;
 
 import com.google.gson.JsonObject;
-import lombok.EqualsAndHashCode;
-import lombok.Value;
-import lombok.With;
+import lombok.*;
+import lombok.experimental.NonFinal;
+import lombok.experimental.PackagePrivate;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.JsonUtil;
 import net.raphimc.minecraftauth.util.OAuthEnvironment;
 import net.raphimc.minecraftauth.util.UuidUtil;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +39,7 @@ public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends 
     @Override
     public MsaCode fromJson(final JsonObject json) {
         return new MsaCode(
-                json.get("code").getAsString(),
+                JsonUtil.getStringOr(json, "code", null),
                 new ApplicationDetails(
                         json.get("clientId").getAsString(),
                         json.get("scope").getAsString(),
@@ -94,6 +95,20 @@ public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends 
 
         String code;
         ApplicationDetails applicationDetails;
+
+        @ApiStatus.Internal
+        @Getter(AccessLevel.NONE)
+        @Setter(AccessLevel.NONE)
+        @PackagePrivate
+        @NonFinal
+        @ToString.Exclude
+        @EqualsAndHashCode.Exclude
+        StepMsaToken.MsaToken msaToken; // Used in device code flow
+
+        public MsaCode(final String code, final ApplicationDetails applicationDetails) {
+            this.code = code;
+            this.applicationDetails = applicationDetails;
+        }
 
         @Override
         protected ApplicationDetails prevResult() {

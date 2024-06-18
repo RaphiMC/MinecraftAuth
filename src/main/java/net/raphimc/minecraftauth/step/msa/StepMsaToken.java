@@ -41,7 +41,11 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
 
     @Override
     public MsaToken applyStep(final HttpClient httpClient, final MsaCodeStep.MsaCode msaCode) throws Exception {
-        return this.apply(httpClient, msaCode.getCode(), msaCode.getApplicationDetails().getRedirectUri() != null ? "authorization_code" : "refresh_token", msaCode);
+        if (msaCode.msaToken != null) {
+            return msaCode.msaToken;
+        }
+
+        return this.apply(httpClient, "authorization_code", msaCode.getCode(), msaCode);
     }
 
     @Override
@@ -49,7 +53,7 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
         if (!msaToken.isExpired()) {
             return msaToken;
         } else if (msaToken.getRefreshToken() != null) {
-            return this.apply(httpClient, msaToken.getRefreshToken(), "refresh_token", msaToken.getMsaCode());
+            return this.apply(httpClient, "refresh_token", msaToken.getRefreshToken(), msaToken.getMsaCode());
         } else {
             return super.refresh(httpClient, msaToken);
         }
@@ -62,7 +66,6 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
                 json.get("expireTimeMs").getAsLong(),
                 json.get("accessToken").getAsString(),
                 JsonUtil.getStringOr(json, "refreshToken", null),
-                JsonUtil.getStringOr(json, "idToken", null),
                 msaCode
         );
     }
@@ -73,12 +76,11 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
         json.addProperty("expireTimeMs", msaToken.expireTimeMs);
         json.addProperty("accessToken", msaToken.accessToken);
         json.addProperty("refreshToken", msaToken.refreshToken);
-        json.addProperty("idToken", msaToken.idToken);
         if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(msaToken.msaCode));
         return json;
     }
 
-    private MsaToken apply(final HttpClient httpClient, final String code, final String type, final MsaCodeStep.MsaCode msaCode) throws Exception {
+    private MsaToken apply(final HttpClient httpClient, final String type, final String code, final MsaCodeStep.MsaCode msaCode) throws Exception {
         final MsaCodeStep.ApplicationDetails applicationDetails = msaCode.getApplicationDetails();
         MinecraftAuth.LOGGER.info("Getting MSA Token...");
 
@@ -104,7 +106,6 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
                 System.currentTimeMillis() + obj.get("expires_in").getAsLong() * 1000,
                 obj.get("access_token").getAsString(),
                 JsonUtil.getStringOr(obj, "refresh_token", null),
-                JsonUtil.getStringOr(obj, "id_token", null),
                 msaCode
         );
         MinecraftAuth.LOGGER.info("Got MSA Token, expires: " + Instant.ofEpochMilli(msaToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
@@ -118,7 +119,6 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
         long expireTimeMs;
         String accessToken;
         String refreshToken;
-        String idToken;
         MsaCodeStep.MsaCode msaCode;
 
         @Override

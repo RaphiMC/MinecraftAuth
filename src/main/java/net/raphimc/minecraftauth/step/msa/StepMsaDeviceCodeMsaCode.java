@@ -26,7 +26,10 @@ import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MsaResponseHandler;
 import net.raphimc.minecraftauth.responsehandler.exception.MsaRequestException;
 import net.raphimc.minecraftauth.step.AbstractStep;
+import net.raphimc.minecraftauth.util.JsonUtil;
 
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
@@ -57,8 +60,14 @@ public class StepMsaDeviceCodeMsaCode extends MsaCodeStep<StepMsaDeviceCode.MsaD
             try {
                 final JsonObject obj = httpClient.execute(postRequest, new MsaResponseHandler());
 
-                final MsaCode msaCode = new MsaCode(obj.get("refresh_token").getAsString(), msaDeviceCode.getApplicationDetails().withRedirectUri(null));
-                MinecraftAuth.LOGGER.info("Got MSA Code");
+                final MsaCode msaCode = new MsaCode(null, msaDeviceCode.getApplicationDetails());
+                msaCode.msaToken = new StepMsaToken.MsaToken(
+                        System.currentTimeMillis() + obj.get("expires_in").getAsLong() * 1000,
+                        obj.get("access_token").getAsString(),
+                        JsonUtil.getStringOr(obj, "refresh_token", null),
+                        msaCode
+                );
+                MinecraftAuth.LOGGER.info("Got MSA Token, expires: " + Instant.ofEpochMilli(msaCode.msaToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
                 return msaCode;
             } catch (MsaRequestException e) {
                 if (e.getResponse().getStatusCode() == StatusCodes.BAD_REQUEST && e.getError().equals("authorization_pending")) {
