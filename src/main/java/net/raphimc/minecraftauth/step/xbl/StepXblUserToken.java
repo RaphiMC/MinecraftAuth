@@ -28,6 +28,7 @@ import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.session.StepInitialXblSession;
 import net.raphimc.minecraftauth.util.CryptUtil;
 import net.raphimc.minecraftauth.util.JsonContent;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -64,12 +65,7 @@ public class StepXblUserToken extends AbstractStep<StepInitialXblSession.Initial
         }
         final JsonObject obj = httpClient.execute(postRequest, new XblResponseHandler());
 
-        final XblUserToken xblUserToken = new XblUserToken(
-                Instant.parse(obj.get("NotAfter").getAsString()).toEpochMilli(),
-                obj.get("Token").getAsString(),
-                obj.getAsJsonObject("DisplayClaims").getAsJsonArray("xui").get(0).getAsJsonObject().get("uhs").getAsString(),
-                initialXblSession
-        );
+        final XblUserToken xblUserToken = XblUserToken.fromMicrosoftJson(obj, initialXblSession);
         MinecraftAuth.LOGGER.info("Got XBL User Token, expires: " + Instant.ofEpochMilli(xblUserToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return xblUserToken;
     }
@@ -77,20 +73,12 @@ public class StepXblUserToken extends AbstractStep<StepInitialXblSession.Initial
     @Override
     public XblUserToken fromJson(final JsonObject json) {
         final StepInitialXblSession.InitialXblSession initialXblSession = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
-        return new XblUserToken(
-                json.get("expireTimeMs").getAsLong(),
-                json.get("token").getAsString(),
-                json.get("userHash").getAsString(),
-                initialXblSession
-        );
+        return XblUserToken.fromJson(json, initialXblSession);
     }
 
     @Override
     public JsonObject toJson(final XblUserToken xblUserToken) {
-        final JsonObject json = new JsonObject();
-        json.addProperty("expireTimeMs", xblUserToken.expireTimeMs);
-        json.addProperty("token", xblUserToken.token);
-        json.addProperty("userHash", xblUserToken.userHash);
+        final JsonObject json = XblUserToken.toJson(xblUserToken);
         if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(xblUserToken.initialXblSession));
         return json;
     }
@@ -103,6 +91,35 @@ public class StepXblUserToken extends AbstractStep<StepInitialXblSession.Initial
         String token;
         String userHash;
         StepInitialXblSession.InitialXblSession initialXblSession;
+
+        @ApiStatus.Internal
+        public static XblUserToken fromMicrosoftJson(final JsonObject obj, final StepInitialXblSession.InitialXblSession initialXblSession) {
+            return new XblUserToken(
+                    Instant.parse(obj.get("NotAfter").getAsString()).toEpochMilli(),
+                    obj.get("Token").getAsString(),
+                    obj.getAsJsonObject("DisplayClaims").getAsJsonArray("xui").get(0).getAsJsonObject().get("uhs").getAsString(),
+                    initialXblSession
+            );
+        }
+
+        @ApiStatus.Internal
+        public static XblUserToken fromJson(final JsonObject json, final StepInitialXblSession.InitialXblSession initialXblSession) {
+            return new XblUserToken(
+                    json.get("expireTimeMs").getAsLong(),
+                    json.get("token").getAsString(),
+                    json.get("userHash").getAsString(),
+                    initialXblSession
+            );
+        }
+
+        @ApiStatus.Internal
+        public static JsonObject toJson(final XblUserToken xblUserToken) {
+            final JsonObject json = new JsonObject();
+            json.addProperty("expireTimeMs", xblUserToken.expireTimeMs);
+            json.addProperty("token", xblUserToken.token);
+            json.addProperty("userHash", xblUserToken.userHash);
+            return json;
+        }
 
         @Override
         protected StepInitialXblSession.InitialXblSession prevResult() {

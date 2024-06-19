@@ -28,6 +28,7 @@ import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.session.StepInitialXblSession;
 import net.raphimc.minecraftauth.util.CryptUtil;
 import net.raphimc.minecraftauth.util.JsonContent;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -68,12 +69,7 @@ public class StepXblTitleToken extends AbstractStep<StepInitialXblSession.Initia
         postRequest.setHeader(CryptUtil.getSignatureHeader(postRequest, initialXblSession.getXblDeviceToken().getPrivateKey()));
         final JsonObject obj = httpClient.execute(postRequest, new XblResponseHandler());
 
-        final XblTitleToken xblTitleToken = new XblTitleToken(
-                Instant.parse(obj.get("NotAfter").getAsString()).toEpochMilli(),
-                obj.get("Token").getAsString(),
-                obj.getAsJsonObject("DisplayClaims").getAsJsonObject("xti").get("tid").getAsString(),
-                initialXblSession
-        );
+        final XblTitleToken xblTitleToken = XblTitleToken.fromMicrosoftJson(obj, initialXblSession);
         MinecraftAuth.LOGGER.info("Got XBL Title Token, expires: " + Instant.ofEpochMilli(xblTitleToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return xblTitleToken;
     }
@@ -81,20 +77,12 @@ public class StepXblTitleToken extends AbstractStep<StepInitialXblSession.Initia
     @Override
     public XblTitleToken fromJson(final JsonObject json) {
         final StepInitialXblSession.InitialXblSession initialXblSession = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
-        return new XblTitleToken(
-                json.get("expireTimeMs").getAsLong(),
-                json.get("token").getAsString(),
-                json.get("titleId").getAsString(),
-                initialXblSession
-        );
+        return XblTitleToken.fromJson(json, initialXblSession);
     }
 
     @Override
     public JsonObject toJson(final XblTitleToken xblTitleToken) {
-        final JsonObject json = new JsonObject();
-        json.addProperty("expireTimeMs", xblTitleToken.expireTimeMs);
-        json.addProperty("token", xblTitleToken.token);
-        json.addProperty("titleId", xblTitleToken.titleId);
+        final JsonObject json = XblTitleToken.toJson(xblTitleToken);
         if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(xblTitleToken.initialXblSession));
         return json;
     }
@@ -107,6 +95,35 @@ public class StepXblTitleToken extends AbstractStep<StepInitialXblSession.Initia
         String token;
         String titleId;
         StepInitialXblSession.InitialXblSession initialXblSession;
+
+        @ApiStatus.Internal
+        public static XblTitleToken fromMicrosoftJson(final JsonObject obj, final StepInitialXblSession.InitialXblSession initialXblSession) {
+            return new XblTitleToken(
+                    Instant.parse(obj.get("NotAfter").getAsString()).toEpochMilli(),
+                    obj.get("Token").getAsString(),
+                    obj.getAsJsonObject("DisplayClaims").getAsJsonObject("xti").get("tid").getAsString(),
+                    initialXblSession
+            );
+        }
+
+        @ApiStatus.Internal
+        public static XblTitleToken fromJson(final JsonObject json, final StepInitialXblSession.InitialXblSession initialXblSession) {
+            return new XblTitleToken(
+                    json.get("expireTimeMs").getAsLong(),
+                    json.get("token").getAsString(),
+                    json.get("titleId").getAsString(),
+                    initialXblSession
+            );
+        }
+
+        @ApiStatus.Internal
+        public static JsonObject toJson(final XblTitleToken xblTitleToken) {
+            final JsonObject json = new JsonObject();
+            json.addProperty("expireTimeMs", xblTitleToken.expireTimeMs);
+            json.addProperty("token", xblTitleToken.token);
+            json.addProperty("titleId", xblTitleToken.titleId);
+            return json;
+        }
 
         @Override
         protected StepInitialXblSession.InitialXblSession prevResult() {

@@ -31,6 +31,7 @@ import net.raphimc.minecraftauth.step.xbl.session.StepFullXblSession;
 import net.raphimc.minecraftauth.step.xbl.session.StepInitialXblSession;
 import net.raphimc.minecraftauth.util.CryptUtil;
 import net.raphimc.minecraftauth.util.JsonContent;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -77,12 +78,7 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
         }
         final JsonObject obj = httpClient.execute(postRequest, new XblResponseHandler());
 
-        final XblXstsToken xblXstsToken = new XblXstsToken(
-                Instant.parse(obj.get("NotAfter").getAsString()).toEpochMilli(),
-                obj.get("Token").getAsString(),
-                obj.getAsJsonObject("DisplayClaims").getAsJsonArray("xui").get(0).getAsJsonObject().get("uhs").getAsString(),
-                fullXblSession
-        );
+        final XblXstsToken xblXstsToken = XblXstsToken.fromMicrosoftJson(obj, fullXblSession);
         MinecraftAuth.LOGGER.info("Got XSTS Token, expires: " + Instant.ofEpochMilli(xblXstsToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return xblXstsToken;
     }
@@ -90,20 +86,12 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
     @Override
     public XblXstsToken fromJson(final JsonObject json) {
         final StepFullXblSession.FullXblSession fullXblSession = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
-        return new XblXstsToken(
-                json.get("expireTimeMs").getAsLong(),
-                json.get("token").getAsString(),
-                json.get("userHash").getAsString(),
-                fullXblSession
-        );
+        return XblXstsToken.fromJson(json, fullXblSession);
     }
 
     @Override
     public JsonObject toJson(final StepXblXstsToken.XblXstsToken xblXstsToken) {
-        final JsonObject json = new JsonObject();
-        json.addProperty("expireTimeMs", xblXstsToken.expireTimeMs);
-        json.addProperty("token", xblXstsToken.token);
-        json.addProperty("userHash", xblXstsToken.userHash);
+        final JsonObject json = XblXstsToken.toJson(xblXstsToken);
         if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(xblXstsToken.fullXblSession));
         return json;
     }
@@ -116,6 +104,35 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
         String token;
         String userHash;
         StepFullXblSession.FullXblSession fullXblSession;
+
+        @ApiStatus.Internal
+        public static XblXstsToken fromMicrosoftJson(final JsonObject obj, final StepFullXblSession.FullXblSession fullXblSession) {
+            return new XblXstsToken(
+                    Instant.parse(obj.get("NotAfter").getAsString()).toEpochMilli(),
+                    obj.get("Token").getAsString(),
+                    obj.getAsJsonObject("DisplayClaims").getAsJsonArray("xui").get(0).getAsJsonObject().get("uhs").getAsString(),
+                    fullXblSession
+            );
+        }
+
+        @ApiStatus.Internal
+        public static XblXstsToken fromJson(final JsonObject json, final StepFullXblSession.FullXblSession fullXblSession) {
+            return new XblXstsToken(
+                    json.get("expireTimeMs").getAsLong(),
+                    json.get("token").getAsString(),
+                    json.get("userHash").getAsString(),
+                    fullXblSession
+            );
+        }
+
+        @ApiStatus.Internal
+        public static JsonObject toJson(final XblXstsToken xblXstsToken) {
+            final JsonObject json = new JsonObject();
+            json.addProperty("expireTimeMs", xblXstsToken.expireTimeMs);
+            json.addProperty("token", xblXstsToken.token);
+            json.addProperty("userHash", xblXstsToken.userHash);
+            return json;
+        }
 
         @Override
         protected StepFullXblSession.FullXblSession prevResult() {
