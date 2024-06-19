@@ -49,7 +49,7 @@ public abstract class TriMergeStep<I1 extends AbstractStep.StepResult<?>, I2 ext
     }
 
     @Override
-    public O getFromInput(final HttpClient httpClient, final Object input) throws Exception {
+    public O getFromInput(final HttpClient httpClient, final InitialInput input) throws Exception {
         final I1 prevResult1 = this.prevStep.getFromInput(httpClient, input);
         final I2 prevResult2 = this.prevStep2 != null ? this.prevStep2.getFromInput(httpClient, input) : null;
         final I3 prevResult3 = this.prevStep3 != null ? this.prevStep3.getFromInput(httpClient, input) : null;

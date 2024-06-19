@@ -26,6 +26,7 @@ import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MsaResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
+import net.raphimc.minecraftauth.step.InitialPreparationStep;
 import net.raphimc.minecraftauth.util.OAuthEnvironment;
 
 import java.time.Instant;
@@ -34,12 +35,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceCodeCallback, StepMsaDeviceCode.MsaDeviceCode> {
+public class StepMsaDeviceCode extends InitialPreparationStep<StepMsaDeviceCode.MsaDeviceCodeCallback, StepMsaDeviceCode.MsaDeviceCode> {
 
     private final MsaCodeStep.ApplicationDetails applicationDetails;
 
     public StepMsaDeviceCode(final MsaCodeStep.ApplicationDetails applicationDetails) {
-        super("msaDeviceCode", null);
+        super("msaDeviceCode");
 
         this.applicationDetails = applicationDetails;
     }
@@ -76,32 +77,9 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
         return msaDeviceCode;
     }
 
-    @Override
-    public MsaDeviceCode fromJson(final JsonObject json) {
-        return new MsaDeviceCode(
-                json.get("expireTimeMs").getAsLong(),
-                json.get("intervalMs").getAsLong(),
-                json.get("deviceCode").getAsString(),
-                json.get("userCode").getAsString(),
-                json.get("verificationUrl").getAsString(),
-                this.applicationDetails
-        );
-    }
-
-    @Override
-    public JsonObject toJson(final MsaDeviceCode msaDeviceCode) {
-        final JsonObject json = new JsonObject();
-        json.addProperty("expireTimeMs", msaDeviceCode.expireTimeMs);
-        json.addProperty("intervalMs", msaDeviceCode.intervalMs);
-        json.addProperty("deviceCode", msaDeviceCode.deviceCode);
-        json.addProperty("userCode", msaDeviceCode.userCode);
-        json.addProperty("verificationUrl", msaDeviceCode.verificationUri);
-        return json;
-    }
-
     @Value
     @EqualsAndHashCode(callSuper = false)
-    public static class MsaDeviceCode extends AbstractStep.StepResult<MsaCodeStep.ApplicationDetails> {
+    public static class MsaDeviceCode extends AbstractStep.InitialInput {
 
         long expireTimeMs;
         long intervalMs;
@@ -109,11 +87,6 @@ public class StepMsaDeviceCode extends AbstractStep<StepMsaDeviceCode.MsaDeviceC
         String userCode;
         String verificationUri;
         MsaCodeStep.ApplicationDetails applicationDetails;
-
-        @Override
-        protected MsaCodeStep.ApplicationDetails prevResult() {
-            return this.applicationDetails;
-        }
 
         @Override
         public boolean isExpired() {

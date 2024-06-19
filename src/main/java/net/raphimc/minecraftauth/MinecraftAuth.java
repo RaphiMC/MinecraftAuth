@@ -199,7 +199,7 @@ public class MinecraftAuth {
 
         /**
          * Uses the device code flow to get an MSA token. <b>This is the recommended way to get an MSA token.</b>
-         * Needs instance of {@link net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode.MsaDeviceCodeCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, Object)}.
+         * Needs instance of {@link net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode.MsaDeviceCodeCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
          *
          * @return The builder
          */
@@ -211,7 +211,7 @@ public class MinecraftAuth {
 
         /**
          * Logs in with a Microsoft account's credentials and gets an MSA token.
-         * Needs instance of {@link net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode.MsaCredentials} as input when calling {@link AbstractStep#getFromInput(HttpClient, Object)}.
+         * Needs instance of {@link net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode.MsaCredentials} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
          *
          * @return The builder
          */
@@ -227,7 +227,7 @@ public class MinecraftAuth {
 
         /**
          * Opens a JavaFX WebView window to get an MSA token. The window closes when the user logged in.
-         * Optionally accepts a {@link net.raphimc.minecraftauth.step.msa.StepJfxWebViewMsaCode.JavaFxWebView} as input when calling {@link AbstractStep#getFromInput(HttpClient, Object)}.
+         * Optionally accepts a {@link net.raphimc.minecraftauth.step.msa.StepJfxWebViewMsaCode.JavaFxWebView} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
          *
          * @return The builder
          */
@@ -243,7 +243,7 @@ public class MinecraftAuth {
 
         /**
          * Generates a URL to open in the browser to get an MSA token. The browser redirects to a localhost URL with the token as a parameter when the user logged in.
-         * Needs instance of {@link StepLocalWebServer.LocalWebServerCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, Object)}.
+         * Needs instance of {@link StepLocalWebServer.LocalWebServerCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
          *
          * @return The builder
          */

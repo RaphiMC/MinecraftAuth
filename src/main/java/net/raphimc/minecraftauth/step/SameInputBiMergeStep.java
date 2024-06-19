@@ -49,7 +49,7 @@ public abstract class SameInputBiMergeStep<I1 extends AbstractStep.StepResult<?>
     }
 
     @Override
-    public O getFromInput(final HttpClient httpClient, final Object input) throws Exception {
+    public O getFromInput(final HttpClient httpClient, final InitialInput input) throws Exception {
         final I1 prevResult1 = this.prevStep.getFromInput(httpClient, input);
         final I2 prevResult2 = this.applySecondaryStepChain(httpClient, prevResult1, this.steps1UntilSameInput, this.steps2UntilSameInput);
         return this.applyStep(httpClient, prevResult1, prevResult2);

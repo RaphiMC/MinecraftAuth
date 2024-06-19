@@ -17,24 +17,24 @@
  */
 package net.raphimc.minecraftauth.step.msa;
 
-import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.utils.URLWrapper;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
+import net.raphimc.minecraftauth.step.InitialPreparationStep;
 
 import java.net.ServerSocket;
 import java.net.URL;
 import java.util.function.Consumer;
 
-public class StepLocalWebServer extends AbstractStep<StepLocalWebServer.LocalWebServerCallback, StepLocalWebServer.LocalWebServer> {
+public class StepLocalWebServer extends InitialPreparationStep<StepLocalWebServer.LocalWebServerCallback, StepLocalWebServer.LocalWebServer> {
 
     private final MsaCodeStep.ApplicationDetails applicationDetails;
 
     public StepLocalWebServer(final MsaCodeStep.ApplicationDetails applicationDetails) {
-        super("localWebServer", null);
+        super("localWebServer");
 
         if (applicationDetails.getRedirectUri().endsWith("/")) {
             throw new IllegalArgumentException("Redirect URI must not end with a slash");
@@ -71,26 +71,9 @@ public class StepLocalWebServer extends AbstractStep<StepLocalWebServer.LocalWeb
         }
     }
 
-    @Override
-    public LocalWebServer fromJson(final JsonObject json) {
-        return new LocalWebServer(
-                json.get("authenticationUrl").getAsString(),
-                json.get("port").getAsInt(),
-                this.applicationDetails
-        );
-    }
-
-    @Override
-    public JsonObject toJson(final LocalWebServer localWebServer) {
-        final JsonObject json = new JsonObject();
-        json.addProperty("authenticationUrl", localWebServer.authenticationUrl);
-        json.addProperty("port", localWebServer.port);
-        return json;
-    }
-
     @Value
     @EqualsAndHashCode(callSuper = false)
-    public static class LocalWebServer extends AbstractStep.StepResult<MsaCodeStep.ApplicationDetails> {
+    public static class LocalWebServer extends AbstractStep.InitialInput {
 
         String authenticationUrl;
         int port;
@@ -100,11 +83,6 @@ public class StepLocalWebServer extends AbstractStep<StepLocalWebServer.LocalWeb
             this.authenticationUrl = authenticationUrl;
             this.port = port;
             this.applicationDetails = applicationDetails.withRedirectUri(applicationDetails.getRedirectUri() + ":" + port);
-        }
-
-        @Override
-        protected MsaCodeStep.ApplicationDetails prevResult() {
-            return this.applicationDetails;
         }
 
     }

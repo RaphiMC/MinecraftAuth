@@ -40,7 +40,7 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
         return this.applyStep(httpClient, this.prevStep != null ? this.prevStep.refresh(httpClient, (I) result.prevResult()) : null);
     }
 
-    public O getFromInput(final HttpClient httpClient, final Object input) throws Exception {
+    public O getFromInput(final HttpClient httpClient, final InitialInput input) throws Exception {
         return this.applyStep(httpClient, this.prevStep != null ? this.prevStep.getFromInput(httpClient, input) : (I) input);
     }
 
@@ -61,7 +61,7 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
     public abstract static class FirstStepResult extends StepResult<StepResult<?>> {
 
         @Override
-        protected StepResult<?> prevResult() {
+        protected final StepResult<?> prevResult() {
             return null;
         }
 
@@ -70,7 +70,7 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
     public abstract static class InitialInput extends StepResult<StepResult<?>> {
 
         @Override
-        protected StepResult<?> prevResult() {
+        protected final StepResult<?> prevResult() {
             throw new UnsupportedOperationException();
         }
 

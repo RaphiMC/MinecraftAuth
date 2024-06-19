@@ -21,6 +21,7 @@ import com.google.gson.JsonObject;
 import lombok.*;
 import lombok.experimental.NonFinal;
 import lombok.experimental.PackagePrivate;
+import net.lenni0451.commons.httpclient.HttpClient;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.JsonUtil;
 import net.raphimc.minecraftauth.util.OAuthEnvironment;
@@ -30,14 +31,19 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends AbstractStep<I, MsaCodeStep.MsaCode> {
+public abstract class MsaCodeStep<I extends AbstractStep.InitialInput> extends AbstractStep<I, MsaCodeStep.MsaCode> {
 
     public MsaCodeStep(final AbstractStep<?, I> prevStep) {
         super("msaCode", prevStep);
     }
 
     @Override
-    public MsaCode fromJson(final JsonObject json) {
+    public final MsaCodeStep.MsaCode refresh(final HttpClient httpClient, final MsaCodeStep.MsaCode result) {
+        throw new UnsupportedOperationException("Cannot refresh MsaCodeStep");
+    }
+
+    @Override
+    public final MsaCode fromJson(final JsonObject json) {
         return new MsaCode(
                 JsonUtil.getStringOr(json, "code", null),
                 new ApplicationDetails(
@@ -51,7 +57,7 @@ public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends 
     }
 
     @Override
-    public JsonObject toJson(final MsaCode msaCode) {
+    public final JsonObject toJson(final MsaCode msaCode) {
         final JsonObject json = new JsonObject();
         json.addProperty("code", msaCode.code);
         json.addProperty("clientId", msaCode.applicationDetails.clientId);
@@ -65,7 +71,7 @@ public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends 
     @Value
     @With
     @EqualsAndHashCode(callSuper = false)
-    public static class ApplicationDetails extends AbstractStep.FirstStepResult {
+    public static class ApplicationDetails {
 
         String clientId;
         String scope;
@@ -91,7 +97,7 @@ public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends 
 
     @Value
     @EqualsAndHashCode(callSuper = false)
-    public static class MsaCode extends AbstractStep.StepResult<ApplicationDetails> {
+    public static class MsaCode extends AbstractStep.FirstStepResult {
 
         String code;
         ApplicationDetails applicationDetails;
@@ -108,11 +114,6 @@ public abstract class MsaCodeStep<I extends AbstractStep.StepResult<?>> extends 
         public MsaCode(final String code, final ApplicationDetails applicationDetails) {
             this.code = code;
             this.applicationDetails = applicationDetails;
-        }
-
-        @Override
-        protected ApplicationDetails prevResult() {
-            return this.applicationDetails;
         }
 
     }
