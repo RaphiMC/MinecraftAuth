@@ -65,4 +65,13 @@ public class JsonUtil {
         }
     }
 
+    public static JsonObject getObjectNonNull(final JsonObject obj, final String key) {
+        final JsonElement element = obj.get(key);
+        if (element != null && !element.isJsonNull()) {
+            return element.getAsJsonObject();
+        } else {
+            return new JsonObject();
+        }
+    }
+
 }

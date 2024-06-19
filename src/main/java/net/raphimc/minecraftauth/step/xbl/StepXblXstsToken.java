@@ -31,10 +31,14 @@ import net.raphimc.minecraftauth.step.xbl.session.StepFullXblSession;
 import net.raphimc.minecraftauth.step.xbl.session.StepInitialXblSession;
 import net.raphimc.minecraftauth.util.CryptUtil;
 import net.raphimc.minecraftauth.util.JsonContent;
+import net.raphimc.minecraftauth.util.JsonUtil;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSession, StepXblXstsToken.XblXstsToken> {
 
@@ -103,24 +107,30 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
         long expireTimeMs;
         String token;
         String userHash;
+        Map<String, String> displayClaims;
         StepFullXblSession.FullXblSession fullXblSession;
 
         @ApiStatus.Internal
         public static XblXstsToken fromMicrosoftJson(final JsonObject obj, final StepFullXblSession.FullXblSession fullXblSession) {
+            final JsonObject displayClaims = obj.getAsJsonObject("DisplayClaims").getAsJsonArray("xui").get(0).getAsJsonObject();
+            final Map<String, String> displayClaimsMap = displayClaims.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getAsString()));
             return new XblXstsToken(
                     Instant.parse(obj.get("NotAfter").getAsString()).toEpochMilli(),
                     obj.get("Token").getAsString(),
-                    obj.getAsJsonObject("DisplayClaims").getAsJsonArray("xui").get(0).getAsJsonObject().get("uhs").getAsString(),
+                    displayClaims.get("uhs").getAsString(),
+                    Collections.unmodifiableMap(displayClaimsMap),
                     fullXblSession
             );
         }
 
         @ApiStatus.Internal
         public static XblXstsToken fromJson(final JsonObject json, final StepFullXblSession.FullXblSession fullXblSession) {
+            final JsonObject displayClaims = JsonUtil.getObjectNonNull(json, "displayClaims");
             return new XblXstsToken(
                     json.get("expireTimeMs").getAsLong(),
                     json.get("token").getAsString(),
                     json.get("userHash").getAsString(),
+                    Collections.unmodifiableMap(displayClaims.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getAsString()))),
                     fullXblSession
             );
         }
@@ -131,6 +141,7 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
             json.addProperty("expireTimeMs", xblXstsToken.expireTimeMs);
             json.addProperty("token", xblXstsToken.token);
             json.addProperty("userHash", xblXstsToken.userHash);
+            json.add("displayClaims", JsonUtil.GSON.toJsonTree(xblXstsToken.displayClaims));
             return json;
         }
 
@@ -153,6 +164,8 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
         public abstract String getToken();
 
         public abstract String getUserHash();
+
+        public abstract Map<String, String> getDisplayClaims();
 
         public String getServiceToken() {
             return this.getUserHash() + ';' + this.getToken();

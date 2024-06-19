@@ -32,6 +32,7 @@ import net.raphimc.minecraftauth.util.JsonContent;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Map;
 
 public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSession.InitialXblSession, StepXblSisuAuthentication.XblSisuTokens> {
 
@@ -132,6 +133,11 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
         @Override
         public String getUserHash() {
             return this.xstsToken.getUserHash();
+        }
+
+        @Override
+        public Map<String, String> getDisplayClaims() {
+            return this.xstsToken.getDisplayClaims();
         }
 
         @Override
