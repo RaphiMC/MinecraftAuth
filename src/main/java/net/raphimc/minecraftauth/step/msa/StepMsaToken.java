@@ -80,7 +80,7 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
         return json;
     }
 
-    private MsaToken apply(final HttpClient httpClient, final String type, final String code, final MsaCodeStep.MsaCode msaCode) throws Exception {
+    private MsaToken apply(final HttpClient httpClient, final String type, final String codeOrRefreshToken, final MsaCodeStep.MsaCode msaCode) throws Exception {
         final MsaCodeStep.ApplicationDetails applicationDetails = msaCode.getApplicationDetails();
         MinecraftAuth.LOGGER.info("Getting MSA Token...");
 
@@ -89,9 +89,9 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
         postData.put("scope", applicationDetails.getScope());
         postData.put("grant_type", type);
         if (type.equals("refresh_token")) {
-            postData.put("refresh_token", code);
+            postData.put("refresh_token", codeOrRefreshToken);
         } else {
-            postData.put("code", code);
+            postData.put("code", codeOrRefreshToken);
             postData.put("redirect_uri", applicationDetails.getRedirectUri());
         }
         if (applicationDetails.getClientSecret() != null) {

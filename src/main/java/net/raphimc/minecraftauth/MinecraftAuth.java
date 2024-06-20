@@ -42,6 +42,8 @@ import net.raphimc.minecraftauth.util.logging.ConsoleLogger;
 import net.raphimc.minecraftauth.util.logging.ILogger;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.function.Function;
+
 public class MinecraftAuth {
 
     public static final String VERSION = "${version}";
@@ -198,8 +200,8 @@ public class MinecraftAuth {
         }
 
         /**
-         * Uses the device code flow to get an MSA token. <b>This is the recommended way to get an MSA token.</b>
-         * Needs instance of {@link net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode.MsaDeviceCodeCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
+         * Uses the device code flow to get an MSA token. <b>This is the recommended way to get an MSA token.</b><br>
+         * Needs instance of {@link StepMsaDeviceCode.MsaDeviceCodeCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
          *
          * @return The builder
          */
@@ -210,8 +212,8 @@ public class MinecraftAuth {
         }
 
         /**
-         * Logs in with a Microsoft account's credentials and gets an MSA token.
-         * Needs instance of {@link net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode.MsaCredentials} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
+         * Logs in with a Microsoft account's credentials and gets an MSA token.<br>
+         * Needs instance of {@link StepCredentialsMsaCode.MsaCredentials} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
          *
          * @return The builder
          */
@@ -226,8 +228,8 @@ public class MinecraftAuth {
         }
 
         /**
-         * Opens a JavaFX WebView window to get an MSA token. The window closes when the user logged in.
-         * Optionally accepts a {@link net.raphimc.minecraftauth.step.msa.StepJfxWebViewMsaCode.JavaFxWebView} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
+         * Opens a JavaFX WebView window to get an MSA token. The window closes when the user logged in.<br>
+         * Optionally accepts a {@link StepJfxWebViewMsaCode.JavaFxWebView} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
          *
          * @return The builder
          */
@@ -242,7 +244,7 @@ public class MinecraftAuth {
         }
 
         /**
-         * Generates a URL to open in the browser to get an MSA token. The browser redirects to a localhost URL with the token as a parameter when the user logged in.
+         * Generates a URL to open in the browser to get an MSA token. The browser redirects to a localhost URL with the token as a parameter when the user logged in.<br>
          * Needs instance of {@link StepLocalWebServer.LocalWebServerCallback} as input when calling {@link AbstractStep#getFromInput(HttpClient, AbstractStep.InitialInput)}.
          *
          * @return The builder
@@ -257,6 +259,19 @@ public class MinecraftAuth {
             return new InitialXblSessionBuilder(this);
         }
 
+        /**
+         * Uses the specified custom MSA code step to get an MSA token.<br>
+         * An example of a custom MSA code step is {@link StepRefreshTokenMsaCode}, which can be used to migrate existing refresh tokens to MinecraftAuth token chains.
+         *
+         * @return The builder
+         */
+        public InitialXblSessionBuilder customMsaCodeStep(final Function<MsaCodeStep.ApplicationDetails, AbstractStep<?, MsaCodeStep.MsaCode>> msaCodeStepProvider) {
+            this.msaCodeStep = msaCodeStepProvider.apply(this.applicationDetails);
+
+            return new InitialXblSessionBuilder(this);
+        }
+
+        @Deprecated
         public InitialXblSessionBuilder customMsaCodeStep(final AbstractStep<?, MsaCodeStep.MsaCode> msaCodeStep) {
             this.msaCodeStep = msaCodeStep;
 
