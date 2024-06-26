@@ -22,11 +22,11 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
-import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.XblResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.CryptUtil;
 import net.raphimc.minecraftauth.util.JsonContent;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -51,8 +51,8 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
     }
 
     @Override
-    public XblDeviceToken applyStep(final HttpClient httpClient, final StepResult<?> prevResult) throws Exception {
-        MinecraftAuth.LOGGER.info("Authenticating device with Xbox Live...");
+    public XblDeviceToken applyStep(final ILogger logger, final HttpClient httpClient, final StepResult<?> prevResult) throws Exception {
+        logger.info("Authenticating device with Xbox Live...");
 
         final UUID id = UUID.randomUUID();
         final KeyPairGenerator secp256r1 = KeyPairGenerator.getInstance("EC");
@@ -86,7 +86,7 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
                 obj.get("Token").getAsString(),
                 obj.getAsJsonObject("DisplayClaims").getAsJsonObject("xdi").get("did").getAsString()
         );
-        MinecraftAuth.LOGGER.info("Got XBL Device Token, expires: " + Instant.ofEpochMilli(xblDeviceToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info("Got XBL Device Token, expires: " + Instant.ofEpochMilli(xblDeviceToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return xblDeviceToken;
     }
 

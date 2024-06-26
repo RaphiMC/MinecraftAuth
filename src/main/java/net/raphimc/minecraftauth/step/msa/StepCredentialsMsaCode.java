@@ -30,11 +30,11 @@ import net.lenni0451.commons.httpclient.exceptions.HttpRequestException;
 import net.lenni0451.commons.httpclient.requests.impl.GetRequest;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
 import net.lenni0451.commons.httpclient.utils.URLWrapper;
-import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.exception.InformativeHttpRequestException;
 import net.raphimc.minecraftauth.responsehandler.exception.MsaRequestException;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.JsonUtil;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 import java.io.StringReader;
 import java.net.CookieManager;
@@ -54,8 +54,8 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
     }
 
     @Override
-    public MsaCode applyStep(final HttpClient httpClient, final MsaCredentials msaCredentials) throws Exception {
-        MinecraftAuth.LOGGER.info("Trying to get MSA Code using email and password...");
+    public MsaCode applyStep(final ILogger logger, final HttpClient httpClient, final MsaCredentials msaCredentials) throws Exception {
+        logger.info("Trying to get MSA Code using email and password...");
 
         if (msaCredentials == null) {
             throw new IllegalStateException("Missing StepCredentialsMsaCode.MsaCredentials input");
@@ -163,7 +163,7 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
         });
 
         final MsaCode msaCode = new MsaCode(code, this.applicationDetails);
-        MinecraftAuth.LOGGER.info("Got MSA Code");
+        logger.info("Got MSA Code");
         return msaCode;
     }
 

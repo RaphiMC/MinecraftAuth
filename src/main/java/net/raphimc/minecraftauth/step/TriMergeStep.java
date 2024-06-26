@@ -18,6 +18,7 @@
 package net.raphimc.minecraftauth.step;
 
 import net.lenni0451.commons.httpclient.HttpClient;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 public abstract class TriMergeStep<I1 extends AbstractStep.StepResult<?>, I2 extends AbstractStep.StepResult<?>, I3 extends AbstractStep.StepResult<?>, O extends TriMergeStep.StepResult<I1, I2, I3>> extends BiMergeStep<I1, I2, O> {
 
@@ -37,22 +38,22 @@ public abstract class TriMergeStep<I1 extends AbstractStep.StepResult<?>, I2 ext
     public abstract O applyStep(final HttpClient httpClient, final I1 prevResult1, final I2 prevResult2, final I3 prevResult3) throws Exception;
 
     @Override
-    public O refresh(final HttpClient httpClient, final O result) throws Exception {
+    public O refresh(final ILogger logger, final HttpClient httpClient, final O result) throws Exception {
         if (!result.isExpired()) {
             return result;
         }
 
-        final I1 prevResult1 = this.prevStep.refresh(httpClient, result.prevResult());
-        final I2 prevResult2 = this.prevStep2 != null ? this.prevStep2.refresh(httpClient, result.prevResult2()) : null;
-        final I3 prevResult3 = this.prevStep3 != null ? this.prevStep3.refresh(httpClient, result.prevResult3()) : null;
+        final I1 prevResult1 = this.prevStep.refresh(logger, httpClient, result.prevResult());
+        final I2 prevResult2 = this.prevStep2 != null ? this.prevStep2.refresh(logger, httpClient, result.prevResult2()) : null;
+        final I3 prevResult3 = this.prevStep3 != null ? this.prevStep3.refresh(logger, httpClient, result.prevResult3()) : null;
         return this.applyStep(httpClient, prevResult1, prevResult2, prevResult3);
     }
 
     @Override
-    public O getFromInput(final HttpClient httpClient, final InitialInput input) throws Exception {
-        final I1 prevResult1 = this.prevStep.getFromInput(httpClient, input);
-        final I2 prevResult2 = this.prevStep2 != null ? this.prevStep2.getFromInput(httpClient, input) : null;
-        final I3 prevResult3 = this.prevStep3 != null ? this.prevStep3.getFromInput(httpClient, input) : null;
+    public O getFromInput(final ILogger logger, final HttpClient httpClient, final InitialInput input) throws Exception {
+        final I1 prevResult1 = this.prevStep.getFromInput(logger, httpClient, input);
+        final I2 prevResult2 = this.prevStep2 != null ? this.prevStep2.getFromInput(logger, httpClient, input) : null;
+        final I3 prevResult3 = this.prevStep3 != null ? this.prevStep3.getFromInput(logger, httpClient, input) : null;
         return this.applyStep(httpClient, prevResult1, prevResult2, prevResult3);
     }
 

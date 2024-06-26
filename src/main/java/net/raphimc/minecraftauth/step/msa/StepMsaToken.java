@@ -23,10 +23,10 @@ import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.content.impl.URLEncodedFormContent;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
-import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MsaResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.JsonUtil;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -40,22 +40,22 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
     }
 
     @Override
-    public MsaToken applyStep(final HttpClient httpClient, final MsaCodeStep.MsaCode msaCode) throws Exception {
+    public MsaToken applyStep(final ILogger logger, final HttpClient httpClient, final MsaCodeStep.MsaCode msaCode) throws Exception {
         if (msaCode.msaToken != null) {
             return msaCode.msaToken;
         }
 
-        return this.apply(httpClient, "authorization_code", msaCode.getCode(), msaCode);
+        return this.apply(logger, httpClient, "authorization_code", msaCode.getCode(), msaCode);
     }
 
     @Override
-    public MsaToken refresh(final HttpClient httpClient, final MsaToken msaToken) throws Exception {
+    public MsaToken refresh(final ILogger logger, final HttpClient httpClient, final MsaToken msaToken) throws Exception {
         if (!msaToken.isExpired()) {
             return msaToken;
         } else if (msaToken.getRefreshToken() != null) {
-            return this.apply(httpClient, "refresh_token", msaToken.getRefreshToken(), msaToken.getMsaCode());
+            return this.apply(logger, httpClient, "refresh_token", msaToken.getRefreshToken(), msaToken.getMsaCode());
         } else {
-            return super.refresh(httpClient, msaToken);
+            return super.refresh(logger, httpClient, msaToken);
         }
     }
 
@@ -80,9 +80,9 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
         return json;
     }
 
-    private MsaToken apply(final HttpClient httpClient, final String type, final String codeOrRefreshToken, final MsaCodeStep.MsaCode msaCode) throws Exception {
+    private MsaToken apply(final ILogger logger, final HttpClient httpClient, final String type, final String codeOrRefreshToken, final MsaCodeStep.MsaCode msaCode) throws Exception {
         final MsaCodeStep.ApplicationDetails applicationDetails = msaCode.getApplicationDetails();
-        MinecraftAuth.LOGGER.info("Getting MSA Token...");
+        logger.info("Getting MSA Token...");
 
         final Map<String, String> postData = new HashMap<>();
         postData.put("client_id", applicationDetails.getClientId());
@@ -108,7 +108,7 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
                 JsonUtil.getStringOr(obj, "refresh_token", null),
                 msaCode
         );
-        MinecraftAuth.LOGGER.info("Got MSA Token, expires: " + Instant.ofEpochMilli(msaToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info("Got MSA Token, expires: " + Instant.ofEpochMilli(msaToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return msaToken;
     }
 

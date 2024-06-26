@@ -19,6 +19,7 @@ package net.raphimc.minecraftauth.step;
 
 import com.google.gson.JsonObject;
 import net.lenni0451.commons.httpclient.HttpClient;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,20 +39,20 @@ public abstract class SameInputBiMergeStep<I1 extends AbstractStep.StepResult<?>
     }
 
     @Override
-    public O refresh(final HttpClient httpClient, final O result) throws Exception {
+    public O refresh(final ILogger logger, final HttpClient httpClient, final O result) throws Exception {
         if (!result.isExpired()) {
             return result;
         }
 
-        final I1 prevResult1 = this.prevStep.refresh(httpClient, result.prevResult());
-        final I2 prevResult2 = this.refreshSecondaryStepChain(httpClient, prevResult1, result.prevResult2(), this.steps1UntilSameInput, this.steps2UntilSameInput);
+        final I1 prevResult1 = this.prevStep.refresh(logger, httpClient, result.prevResult());
+        final I2 prevResult2 = this.refreshSecondaryStepChain(logger, httpClient, prevResult1, result.prevResult2(), this.steps1UntilSameInput, this.steps2UntilSameInput);
         return this.applyStep(httpClient, prevResult1, prevResult2);
     }
 
     @Override
-    public O getFromInput(final HttpClient httpClient, final InitialInput input) throws Exception {
-        final I1 prevResult1 = this.prevStep.getFromInput(httpClient, input);
-        final I2 prevResult2 = this.applySecondaryStepChain(httpClient, prevResult1, this.steps1UntilSameInput, this.steps2UntilSameInput);
+    public O getFromInput(final ILogger logger, final HttpClient httpClient, final InitialInput input) throws Exception {
+        final I1 prevResult1 = this.prevStep.getFromInput(logger, httpClient, input);
+        final I2 prevResult2 = this.applySecondaryStepChain(logger, httpClient, prevResult1, this.steps1UntilSameInput, this.steps2UntilSameInput);
         return this.applyStep(httpClient, prevResult1, prevResult2);
     }
 

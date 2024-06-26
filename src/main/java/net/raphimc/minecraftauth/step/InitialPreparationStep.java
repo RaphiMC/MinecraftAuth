@@ -19,6 +19,7 @@ package net.raphimc.minecraftauth.step;
 
 import com.google.gson.JsonObject;
 import net.lenni0451.commons.httpclient.HttpClient;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 public abstract class InitialPreparationStep<I extends AbstractStep.InitialInput, O extends AbstractStep.InitialInput> extends AbstractStep<I, O> {
 
@@ -27,7 +28,7 @@ public abstract class InitialPreparationStep<I extends AbstractStep.InitialInput
     }
 
     @Override
-    public final O refresh(final HttpClient httpClient, final O result) {
+    public final O refresh(final ILogger logger, final HttpClient httpClient, final O result) {
         throw new UnsupportedOperationException("Cannot refresh initial steps");
     }
 

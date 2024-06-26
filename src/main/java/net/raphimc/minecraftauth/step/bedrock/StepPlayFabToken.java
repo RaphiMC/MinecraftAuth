@@ -22,12 +22,12 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
-import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.PlayFabResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
 import net.raphimc.minecraftauth.util.JsonContent;
 import net.raphimc.minecraftauth.util.MicrosoftConstants;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -41,8 +41,8 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
     }
 
     @Override
-    public PlayFabToken applyStep(final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
-        MinecraftAuth.LOGGER.info("Authenticating with PlayFab...");
+    public PlayFabToken applyStep(final ILogger logger, final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
+        logger.info("Authenticating with PlayFab...");
 
         final JsonObject postData = new JsonObject();
         postData.addProperty("CreateAccount", true);
@@ -82,7 +82,7 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
                 data.get("PlayFabId").getAsString(),
                 xblXsts
         );
-        MinecraftAuth.LOGGER.info("Got PlayFab Token, expires: " + Instant.ofEpochMilli(playFabToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info("Got PlayFab Token, expires: " + Instant.ofEpochMilli(playFabToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return playFabToken;
     }
 

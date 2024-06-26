@@ -23,11 +23,11 @@ import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.content.impl.URLEncodedFormContent;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
-import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MsaResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.InitialPreparationStep;
 import net.raphimc.minecraftauth.util.OAuthEnvironment;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -46,8 +46,8 @@ public class StepMsaDeviceCode extends InitialPreparationStep<StepMsaDeviceCode.
     }
 
     @Override
-    public MsaDeviceCode applyStep(final HttpClient httpClient, final MsaDeviceCodeCallback msaDeviceCodeCallback) throws Exception {
-        MinecraftAuth.LOGGER.info("Getting device code for MSA login...");
+    public MsaDeviceCode applyStep(final ILogger logger, final HttpClient httpClient, final MsaDeviceCodeCallback msaDeviceCodeCallback) throws Exception {
+        logger.info("Getting device code for MSA login...");
 
         if (msaDeviceCodeCallback == null) {
             throw new IllegalStateException("Missing StepMsaDeviceCode.MsaDeviceCodeCallback input");
@@ -72,7 +72,7 @@ public class StepMsaDeviceCode extends InitialPreparationStep<StepMsaDeviceCode.
                 obj.get("verification_uri").getAsString(),
                 this.applicationDetails
         );
-        MinecraftAuth.LOGGER.info("Got MSA device code, expires: " + Instant.ofEpochMilli(msaDeviceCode.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info("Got MSA device code, expires: " + Instant.ofEpochMilli(msaDeviceCode.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         msaDeviceCodeCallback.callback.accept(msaDeviceCode);
         return msaDeviceCode;
     }

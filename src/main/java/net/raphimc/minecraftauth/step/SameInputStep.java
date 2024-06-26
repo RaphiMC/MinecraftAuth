@@ -19,6 +19,7 @@ package net.raphimc.minecraftauth.step;
 
 import com.google.gson.JsonObject;
 import net.lenni0451.commons.httpclient.HttpClient;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,7 +31,7 @@ public interface SameInputStep<I1 extends AbstractStep.StepResult<?>, O extends 
 
     JsonObject toRawJson(final O result);
 
-    default <I2 extends AbstractStep.StepResult<?>> I2 applySecondaryStepChain(final HttpClient httpClient, final I1 prevResult1, final List<AbstractStep<?, ?>> steps1UntilSameInput, final List<AbstractStep<?, ?>> steps2UntilSameInput) throws Exception {
+    default <I2 extends AbstractStep.StepResult<?>> I2 applySecondaryStepChain(final ILogger logger, final HttpClient httpClient, final I1 prevResult1, final List<AbstractStep<?, ?>> steps1UntilSameInput, final List<AbstractStep<?, ?>> steps2UntilSameInput) throws Exception {
         if (steps2UntilSameInput.isEmpty()) {
             return null;
         }
@@ -42,13 +43,13 @@ public interface SameInputStep<I1 extends AbstractStep.StepResult<?>, O extends 
 
         for (int i = 1; i < steps2UntilSameInput.size(); i++) {
             final AbstractStep step = steps2UntilSameInput.get(i);
-            prevResult = step.applyStep(httpClient, prevResult);
+            prevResult = step.applyStep(logger, httpClient, prevResult);
         }
 
         return (I2) prevResult;
     }
 
-    default <I2 extends AbstractStep.StepResult<?>> I2 refreshSecondaryStepChain(final HttpClient httpClient, final I1 prevResult1, AbstractStep.StepResult<?> prevResult2, final List<AbstractStep<?, ?>> steps1UntilSameInput, final List<AbstractStep<?, ?>> steps2UntilSameInput) throws Exception {
+    default <I2 extends AbstractStep.StepResult<?>> I2 refreshSecondaryStepChain(final ILogger logger, final HttpClient httpClient, final I1 prevResult1, AbstractStep.StepResult<?> prevResult2, final List<AbstractStep<?, ?>> steps1UntilSameInput, final List<AbstractStep<?, ?>> steps2UntilSameInput) throws Exception {
         int count = 1;
         while (count < steps2UntilSameInput.size()) {
             if (prevResult2.isExpired()) {
@@ -69,7 +70,7 @@ public interface SameInputStep<I1 extends AbstractStep.StepResult<?>, O extends 
 
         for (int i = steps2UntilSameInput.size() - count + 1; i < steps2UntilSameInput.size(); i++) {
             final AbstractStep step = steps2UntilSameInput.get(i);
-            prevResult2 = step.applyStep(httpClient, prevResult2);
+            prevResult2 = step.applyStep(logger, httpClient, prevResult2);
         }
 
         return (I2) prevResult2;

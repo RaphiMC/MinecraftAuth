@@ -25,10 +25,10 @@ import net.lenni0451.commons.httpclient.constants.ContentTypes;
 import net.lenni0451.commons.httpclient.constants.Headers;
 import net.lenni0451.commons.httpclient.content.impl.StringContent;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
-import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MinecraftResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.CryptUtil;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -47,8 +47,8 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
     }
 
     @Override
-    public PlayerCertificates applyStep(final HttpClient httpClient, final StepMCToken.MCToken mcToken) throws Exception {
-        MinecraftAuth.LOGGER.info("Getting player certificates...");
+    public PlayerCertificates applyStep(final ILogger logger, final HttpClient httpClient, final StepMCToken.MCToken mcToken) throws Exception {
+        logger.info("Getting player certificates...");
 
         final PostRequest postRequest = new PostRequest(PLAYER_CERTIFICATES_URL);
         postRequest.setContent(new StringContent(ContentTypes.APPLICATION_JSON, ""));
@@ -76,7 +76,7 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
                 obj.has("publicKeySignature") ? Base64.getMimeDecoder().decode(obj.get("publicKeySignature").getAsString()) : new byte[0],
                 mcToken
         );
-        MinecraftAuth.LOGGER.info("Got player certificates, expires: " + Instant.ofEpochMilli(playerCertificates.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info("Got player certificates, expires: " + Instant.ofEpochMilli(playerCertificates.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return playerCertificates;
     }
 

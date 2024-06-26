@@ -26,6 +26,7 @@ import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.JsonUtil;
 import net.raphimc.minecraftauth.util.OAuthEnvironment;
 import net.raphimc.minecraftauth.util.UuidUtil;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
@@ -38,7 +39,7 @@ public abstract class MsaCodeStep<I extends AbstractStep.InitialInput> extends A
     }
 
     @Override
-    public final MsaCodeStep.MsaCode refresh(final HttpClient httpClient, final MsaCodeStep.MsaCode result) {
+    public final MsaCodeStep.MsaCode refresh(final ILogger logger, final HttpClient httpClient, final MsaCode result) {
         throw new UnsupportedOperationException("Cannot refresh MsaCodeStep");
     }
 

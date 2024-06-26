@@ -22,12 +22,12 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
-import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.XblResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.session.StepInitialXblSession;
 import net.raphimc.minecraftauth.util.CryptUtil;
 import net.raphimc.minecraftauth.util.JsonContent;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.time.Instant;
@@ -42,8 +42,8 @@ public class StepXblUserToken extends AbstractStep<StepInitialXblSession.Initial
     }
 
     @Override
-    public XblUserToken applyStep(final HttpClient httpClient, final StepInitialXblSession.InitialXblSession initialXblSession) throws Exception {
-        MinecraftAuth.LOGGER.info("Authenticating user with Xbox Live...");
+    public XblUserToken applyStep(final ILogger logger, final HttpClient httpClient, final StepInitialXblSession.InitialXblSession initialXblSession) throws Exception {
+        logger.info("Authenticating user with Xbox Live...");
 
         final JsonObject postData = new JsonObject();
         final JsonObject properties = new JsonObject();
@@ -66,7 +66,7 @@ public class StepXblUserToken extends AbstractStep<StepInitialXblSession.Initial
         final JsonObject obj = httpClient.execute(postRequest, new XblResponseHandler());
 
         final XblUserToken xblUserToken = XblUserToken.fromMicrosoftJson(obj, initialXblSession);
-        MinecraftAuth.LOGGER.info("Got XBL User Token, expires: " + Instant.ofEpochMilli(xblUserToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info("Got XBL User Token, expires: " + Instant.ofEpochMilli(xblUserToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return xblUserToken;
     }
 

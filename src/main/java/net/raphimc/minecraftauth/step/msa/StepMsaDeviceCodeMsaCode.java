@@ -22,11 +22,11 @@ import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.constants.StatusCodes;
 import net.lenni0451.commons.httpclient.content.impl.URLEncodedFormContent;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
-import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MsaResponseHandler;
 import net.raphimc.minecraftauth.responsehandler.exception.MsaRequestException;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.JsonUtil;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -45,8 +45,8 @@ public class StepMsaDeviceCodeMsaCode extends MsaCodeStep<StepMsaDeviceCode.MsaD
     }
 
     @Override
-    public MsaCode applyStep(final HttpClient httpClient, final StepMsaDeviceCode.MsaDeviceCode msaDeviceCode) throws Exception {
-        MinecraftAuth.LOGGER.info("Waiting for MSA login via device code...");
+    public MsaCode applyStep(final ILogger logger, final HttpClient httpClient, final StepMsaDeviceCode.MsaDeviceCode msaDeviceCode) throws Exception {
+        logger.info("Waiting for MSA login via device code...");
 
         final long start = System.currentTimeMillis();
         while (!msaDeviceCode.isExpired() && System.currentTimeMillis() - start <= this.timeout) {
@@ -67,7 +67,7 @@ public class StepMsaDeviceCodeMsaCode extends MsaCodeStep<StepMsaDeviceCode.MsaD
                         JsonUtil.getStringOr(obj, "refresh_token", null),
                         msaCode
                 );
-                MinecraftAuth.LOGGER.info("Got MSA Token, expires: " + Instant.ofEpochMilli(msaCode.msaToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+                logger.info("Got MSA Token, expires: " + Instant.ofEpochMilli(msaCode.msaToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
                 return msaCode;
             } catch (MsaRequestException e) {
                 if (e.getResponse().getStatusCode() == StatusCodes.BAD_REQUEST && e.getError().equals("authorization_pending")) {

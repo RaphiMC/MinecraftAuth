@@ -21,9 +21,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.utils.URLWrapper;
-import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.InitialPreparationStep;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 import java.net.ServerSocket;
 import java.net.URL;
@@ -44,8 +44,8 @@ public class StepLocalWebServer extends InitialPreparationStep<StepLocalWebServe
     }
 
     @Override
-    public LocalWebServer applyStep(final HttpClient httpClient, final LocalWebServerCallback localWebServerCallback) throws Exception {
-        MinecraftAuth.LOGGER.info("Creating URL for MSA login via local webserver...");
+    public LocalWebServer applyStep(final ILogger logger, final HttpClient httpClient, final LocalWebServerCallback localWebServerCallback) throws Exception {
+        logger.info("Creating URL for MSA login via local webserver...");
 
         if (localWebServerCallback == null) {
             throw new IllegalStateException("Missing StepLocalWebServer.LocalWebServerCallback input");
@@ -65,7 +65,7 @@ public class StepLocalWebServer extends InitialPreparationStep<StepLocalWebServe
                     localPort,
                     this.applicationDetails
             );
-            MinecraftAuth.LOGGER.info("Created local webserver MSA authentication URL: " + localWebServer.getAuthenticationUrl());
+            logger.info("Created local webserver MSA authentication URL: " + localWebServer.getAuthenticationUrl());
             localWebServerCallback.callback.accept(localWebServer);
             return localWebServer;
         }

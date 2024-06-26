@@ -27,12 +27,12 @@ import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.constants.Headers;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
-import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MinecraftResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
 import net.raphimc.minecraftauth.util.CryptUtil;
 import net.raphimc.minecraftauth.util.JsonContent;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -56,8 +56,8 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     }
 
     @Override
-    public MCChain applyStep(final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
-        MinecraftAuth.LOGGER.info("Authenticating with Minecraft Services...");
+    public MCChain applyStep(final ILogger logger, final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
+        logger.info("Authenticating with Minecraft Services...");
 
         final KeyPairGenerator secp384r1 = KeyPairGenerator.getInstance("EC");
         secp384r1.initialize(new ECGenParameterSpec("secp384r1"));
@@ -87,7 +87,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         final String displayName = (String) extraData.get("displayName");
 
         if (!extraData.containsKey("titleId")) {
-            MinecraftAuth.LOGGER.warn("Minecraft chain does not contain titleId! You might get kicked from some servers");
+            logger.warn("Minecraft chain does not contain titleId! You might get kicked from some servers");
         }
 
         final MCChain mcChain = new MCChain(
@@ -100,7 +100,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
                 displayName,
                 xblXsts
         );
-        MinecraftAuth.LOGGER.info("Got MC Chain, name: " + mcChain.displayName + ", uuid: " + mcChain.id + ", xuid: " + mcChain.xuid);
+        logger.info("Got MC Chain, name: " + mcChain.displayName + ", uuid: " + mcChain.id + ", xuid: " + mcChain.xuid);
         return mcChain;
     }
 

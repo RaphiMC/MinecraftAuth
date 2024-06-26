@@ -23,9 +23,9 @@ import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.HttpResponse;
 import net.lenni0451.commons.httpclient.constants.StatusCodes;
 import net.lenni0451.commons.httpclient.utils.URLWrapper;
-import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.exception.MsaRequestException;
 import net.raphimc.minecraftauth.step.AbstractStep;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -48,8 +48,8 @@ public class StepLocalWebServerMsaCode extends MsaCodeStep<StepLocalWebServer.Lo
 
     @Override
     @SneakyThrows
-    public MsaCode applyStep(final HttpClient httpClient, final StepLocalWebServer.LocalWebServer localWebServer) throws Exception {
-        MinecraftAuth.LOGGER.info("Waiting for MSA login via local webserver...");
+    public MsaCode applyStep(final ILogger logger, final HttpClient httpClient, final StepLocalWebServer.LocalWebServer localWebServer) throws Exception {
+        logger.info("Waiting for MSA login via local webserver...");
 
         final CompletableFuture<MsaCode> msaCodeFuture = new CompletableFuture<>();
         final HttpServer httpServer = HttpServer.create(new InetSocketAddress(localWebServer.getPort()), 0);
@@ -84,7 +84,7 @@ public class StepLocalWebServerMsaCode extends MsaCodeStep<StepLocalWebServer.Lo
         try {
             final MsaCode msaCode = msaCodeFuture.get(this.timeout, TimeUnit.MILLISECONDS);
             httpServer.stop(0);
-            MinecraftAuth.LOGGER.info("Got MSA Code");
+            logger.info("Got MSA Code");
             return msaCode;
         } catch (TimeoutException e) {
             httpServer.stop(0);

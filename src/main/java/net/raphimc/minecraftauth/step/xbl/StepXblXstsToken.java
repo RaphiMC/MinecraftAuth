@@ -24,7 +24,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
-import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.XblResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.session.StepFullXblSession;
@@ -32,6 +31,7 @@ import net.raphimc.minecraftauth.step.xbl.session.StepInitialXblSession;
 import net.raphimc.minecraftauth.util.CryptUtil;
 import net.raphimc.minecraftauth.util.JsonContent;
 import net.raphimc.minecraftauth.util.JsonUtil;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.time.Instant;
@@ -57,8 +57,8 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
     }
 
     @Override
-    public XblXstsToken applyStep(final HttpClient httpClient, final StepFullXblSession.FullXblSession fullXblSession) throws Exception {
-        MinecraftAuth.LOGGER.info("Requesting XSTS Token...");
+    public XblXstsToken applyStep(final ILogger logger, final HttpClient httpClient, final StepFullXblSession.FullXblSession fullXblSession) throws Exception {
+        logger.info("Requesting XSTS Token...");
 
         final JsonObject postData = new JsonObject();
         final JsonObject properties = new JsonObject();
@@ -83,7 +83,7 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
         final JsonObject obj = httpClient.execute(postRequest, new XblResponseHandler());
 
         final XblXstsToken xblXstsToken = XblXstsToken.fromMicrosoftJson(obj, fullXblSession);
-        MinecraftAuth.LOGGER.info("Got XSTS Token, expires: " + Instant.ofEpochMilli(xblXstsToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info("Got XSTS Token, expires: " + Instant.ofEpochMilli(xblXstsToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return xblXstsToken;
     }
 

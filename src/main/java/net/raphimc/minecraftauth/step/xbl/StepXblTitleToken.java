@@ -22,12 +22,12 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
-import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.XblResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.session.StepInitialXblSession;
 import net.raphimc.minecraftauth.util.CryptUtil;
 import net.raphimc.minecraftauth.util.JsonContent;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.time.Instant;
@@ -42,8 +42,8 @@ public class StepXblTitleToken extends AbstractStep<StepInitialXblSession.Initia
     }
 
     @Override
-    public XblTitleToken applyStep(final HttpClient httpClient, final StepInitialXblSession.InitialXblSession initialXblSession) throws Exception {
-        MinecraftAuth.LOGGER.info("Authenticating title with Xbox Live...");
+    public XblTitleToken applyStep(final ILogger logger, final HttpClient httpClient, final StepInitialXblSession.InitialXblSession initialXblSession) throws Exception {
+        logger.info("Authenticating title with Xbox Live...");
 
         if (initialXblSession.getXblDeviceToken() == null) {
             throw new IllegalStateException("An XBL Device Token is needed for Title authentication");
@@ -70,7 +70,7 @@ public class StepXblTitleToken extends AbstractStep<StepInitialXblSession.Initia
         final JsonObject obj = httpClient.execute(postRequest, new XblResponseHandler());
 
         final XblTitleToken xblTitleToken = XblTitleToken.fromMicrosoftJson(obj, initialXblSession);
-        MinecraftAuth.LOGGER.info("Got XBL Title Token, expires: " + Instant.ofEpochMilli(xblTitleToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info("Got XBL Title Token, expires: " + Instant.ofEpochMilli(xblTitleToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return xblTitleToken;
     }
 

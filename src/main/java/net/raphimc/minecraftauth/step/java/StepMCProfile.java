@@ -23,10 +23,10 @@ import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.constants.Headers;
 import net.lenni0451.commons.httpclient.requests.impl.GetRequest;
-import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MinecraftResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.UuidUtil;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 import java.util.UUID;
 
@@ -39,8 +39,8 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
     }
 
     @Override
-    public MCProfile applyStep(final HttpClient httpClient, final StepMCToken.MCToken mcToken) throws Exception {
-        MinecraftAuth.LOGGER.info("Getting profile...");
+    public MCProfile applyStep(final ILogger logger, final HttpClient httpClient, final StepMCToken.MCToken mcToken) throws Exception {
+        logger.info("Getting profile...");
 
         final GetRequest getRequest = new GetRequest(MINECRAFT_PROFILE_URL);
         getRequest.setHeader(Headers.AUTHORIZATION, mcToken.getTokenType() + " " + mcToken.getAccessToken());
@@ -52,7 +52,7 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
                 obj.get("skins").getAsJsonArray().get(0).getAsJsonObject().get("url").getAsString(),
                 mcToken
         );
-        MinecraftAuth.LOGGER.info("Got MC Profile, name: " + mcProfile.name + ", uuid: " + mcProfile.id);
+        logger.info("Got MC Profile, name: " + mcProfile.name + ", uuid: " + mcProfile.id);
         return mcProfile;
     }
 

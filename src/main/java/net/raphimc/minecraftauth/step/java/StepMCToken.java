@@ -22,11 +22,11 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
-import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MinecraftResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
 import net.raphimc.minecraftauth.util.JsonContent;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -40,8 +40,8 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     }
 
     @Override
-    public MCToken applyStep(final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
-        MinecraftAuth.LOGGER.info("Authenticating with Minecraft Services...");
+    public MCToken applyStep(final ILogger logger, final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
+        logger.info("Authenticating with Minecraft Services...");
 
         final JsonObject postData = new JsonObject();
         postData.addProperty("platform", "PC_LAUNCHER");
@@ -57,7 +57,7 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
                 System.currentTimeMillis() + obj.get("expires_in").getAsLong() * 1000,
                 xblXsts
         );
-        MinecraftAuth.LOGGER.info("Got MC Token, expires: " + Instant.ofEpochMilli(mcToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info("Got MC Token, expires: " + Instant.ofEpochMilli(mcToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return mcToken;
     }
 

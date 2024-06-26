@@ -22,6 +22,7 @@ import net.lenni0451.commons.httpclient.HttpClient;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
 import net.raphimc.minecraftauth.step.xbl.session.StepFullXblSession;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 public class StepXblXstsToFullXblSession extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepFullXblSession.FullXblSession> {
 
@@ -30,14 +31,14 @@ public class StepXblXstsToFullXblSession extends AbstractStep<StepXblXstsToken.X
     }
 
     @Override
-    public StepFullXblSession.FullXblSession applyStep(final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
+    public StepFullXblSession.FullXblSession applyStep(final ILogger logger, final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
         return new FullXblSessionWrapper(xblXsts);
     }
 
     @Override
-    public StepFullXblSession.FullXblSession refresh(final HttpClient httpClient, final StepFullXblSession.FullXblSession fullXblSession) throws Exception {
+    public StepFullXblSession.FullXblSession refresh(final ILogger logger, final HttpClient httpClient, final StepFullXblSession.FullXblSession fullXblSession) throws Exception {
         final FullXblSessionWrapper fullXblSessionWrapper = (FullXblSessionWrapper) fullXblSession;
-        return new FullXblSessionWrapper(this.prevStep.refresh(httpClient, fullXblSessionWrapper.xblXsts));
+        return new FullXblSessionWrapper(this.prevStep.refresh(logger, httpClient, fullXblSessionWrapper.xblXsts));
     }
 
     @Override

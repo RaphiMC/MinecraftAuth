@@ -18,8 +18,8 @@
 package net.raphimc.minecraftauth.step.msa;
 
 import net.lenni0451.commons.httpclient.HttpClient;
-import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 public class StepRefreshTokenMsaCode extends MsaCodeStep<StepRefreshTokenMsaCode.RefreshToken> {
 
@@ -33,8 +33,8 @@ public class StepRefreshTokenMsaCode extends MsaCodeStep<StepRefreshTokenMsaCode
     }
 
     @Override
-    public MsaCode applyStep(final HttpClient httpClient, final RefreshToken refreshToken) throws Exception {
-        MinecraftAuth.LOGGER.info("Using externally supplied refresh token...");
+    public MsaCode applyStep(final ILogger logger, final HttpClient httpClient, final RefreshToken refreshToken) throws Exception {
+        logger.info("Using externally supplied refresh token...");
 
         if (refreshToken == null) {
             throw new IllegalStateException("Missing StepRefreshTokenMsaCode.RefreshToken input");
@@ -42,7 +42,7 @@ public class StepRefreshTokenMsaCode extends MsaCodeStep<StepRefreshTokenMsaCode
 
         final MsaCode msaCode = new MsaCode(null, this.applicationDetails);
         msaCode.msaToken = new StepMsaToken.MsaToken(0, null, refreshToken.refreshToken, msaCode);
-        msaCode.msaToken = this.stepMsaToken.refresh(httpClient, msaCode.msaToken);
+        msaCode.msaToken = this.stepMsaToken.refresh(logger, httpClient, msaCode.msaToken);
         return msaCode;
     }
 

@@ -22,11 +22,11 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
-import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.MinecraftEduServicesResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.msa.StepMsaToken;
 import net.raphimc.minecraftauth.util.JsonContent;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 public class StepEduJWT extends AbstractStep<StepMsaToken.MsaToken, StepEduJWT.EduJWT> {
 
@@ -52,8 +52,8 @@ public class StepEduJWT extends AbstractStep<StepMsaToken.MsaToken, StepEduJWT.E
     }
 
     @Override
-    public EduJWT applyStep(final HttpClient httpClient, final StepMsaToken.MsaToken msaToken) throws Exception {
-        MinecraftAuth.LOGGER.info("Authenticating with Minecraft Education Services...");
+    public EduJWT applyStep(final ILogger logger, final HttpClient httpClient, final StepMsaToken.MsaToken msaToken) throws Exception {
+        logger.info("Authenticating with Minecraft Education Services...");
 
         final JsonObject postData = new JsonObject();
         postData.addProperty("accessToken", msaToken.getAccessToken());
@@ -71,7 +71,7 @@ public class StepEduJWT extends AbstractStep<StepMsaToken.MsaToken, StepEduJWT.E
                 obj.get("response").getAsString(),
                 msaToken
         );
-        MinecraftAuth.LOGGER.info("Got Edu JWT");
+        logger.info("Got Edu JWT");
         return eduJwt;
     }
 

@@ -22,13 +22,13 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
-import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.responsehandler.XblResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.session.StepFullXblSession;
 import net.raphimc.minecraftauth.step.xbl.session.StepInitialXblSession;
 import net.raphimc.minecraftauth.util.CryptUtil;
 import net.raphimc.minecraftauth.util.JsonContent;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -47,8 +47,8 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
     }
 
     @Override
-    public StepXblSisuAuthentication.XblSisuTokens applyStep(final HttpClient httpClient, final StepInitialXblSession.InitialXblSession initialXblSession) throws Exception {
-        MinecraftAuth.LOGGER.info("Authenticating with Xbox Live using SISU...");
+    public StepXblSisuAuthentication.XblSisuTokens applyStep(final ILogger logger, final HttpClient httpClient, final StepInitialXblSession.InitialXblSession initialXblSession) throws Exception {
+        logger.info("Authenticating with Xbox Live using SISU...");
 
         if (initialXblSession.getXblDeviceToken() == null) {
             throw new IllegalStateException("An XBL Device Token is needed for SISU authentication");
@@ -82,7 +82,7 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
                 xblXstsToken,
                 initialXblSession
         );
-        MinecraftAuth.LOGGER.info("Got XBL User+Title+XSTS Token, expires: " + Instant.ofEpochMilli(xblSisuTokens.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info("Got XBL User+Title+XSTS Token, expires: " + Instant.ofEpochMilli(xblSisuTokens.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return xblSisuTokens;
     }
 

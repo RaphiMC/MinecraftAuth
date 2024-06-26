@@ -19,6 +19,8 @@ package net.raphimc.minecraftauth.step;
 
 import com.google.gson.JsonObject;
 import net.lenni0451.commons.httpclient.HttpClient;
+import net.raphimc.minecraftauth.MinecraftAuth;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O extends AbstractStep.StepResult<?>> {
 
@@ -30,18 +32,30 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
         this.prevStep = prevStep;
     }
 
-    public abstract O applyStep(final HttpClient httpClient, final I prevResult) throws Exception;
+    public final O applyStep(final HttpClient httpClient, final I prevResult) throws Exception {
+        return this.applyStep(MinecraftAuth.LOGGER, httpClient, prevResult);
+    }
 
-    public O refresh(final HttpClient httpClient, final O result) throws Exception {
+    public final O refresh(final HttpClient httpClient, final O result) throws Exception {
+        return this.refresh(MinecraftAuth.LOGGER, httpClient, result);
+    }
+
+    public final O getFromInput(final HttpClient httpClient, final InitialInput input) throws Exception {
+        return this.getFromInput(MinecraftAuth.LOGGER, httpClient, input);
+    }
+
+    public abstract O applyStep(final ILogger logger, final HttpClient httpClient, final I prevResult) throws Exception;
+
+    public O refresh(final ILogger logger, final HttpClient httpClient, final O result) throws Exception {
         if (!result.isExpired()) {
             return result;
         }
 
-        return this.applyStep(httpClient, this.prevStep != null ? this.prevStep.refresh(httpClient, (I) result.prevResult()) : null);
+        return this.applyStep(logger, httpClient, this.prevStep != null ? this.prevStep.refresh(logger, httpClient, (I) result.prevResult()) : null);
     }
 
-    public O getFromInput(final HttpClient httpClient, final InitialInput input) throws Exception {
-        return this.applyStep(httpClient, this.prevStep != null ? this.prevStep.getFromInput(httpClient, input) : (I) input);
+    public O getFromInput(final ILogger logger, final HttpClient httpClient, final InitialInput input) throws Exception {
+        return this.applyStep(logger, httpClient, this.prevStep != null ? this.prevStep.getFromInput(logger, httpClient, input) : (I) input);
     }
 
     public abstract O fromJson(final JsonObject json);
