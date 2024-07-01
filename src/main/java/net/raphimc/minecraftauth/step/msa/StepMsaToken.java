@@ -87,15 +87,17 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
         final Map<String, String> postData = new HashMap<>();
         postData.put("client_id", applicationDetails.getClientId());
         postData.put("scope", applicationDetails.getScope());
+        if (applicationDetails.getClientSecret() != null) {
+            postData.put("client_secret", applicationDetails.getClientSecret());
+        }
         postData.put("grant_type", type);
         if (type.equals("refresh_token")) {
             postData.put("refresh_token", codeOrRefreshToken);
-        } else {
+        } else if (type.equals("authorization_code")) {
             postData.put("code", codeOrRefreshToken);
             postData.put("redirect_uri", applicationDetails.getRedirectUri());
-        }
-        if (applicationDetails.getClientSecret() != null) {
-            postData.put("client_secret", applicationDetails.getClientSecret());
+        } else {
+            throw new IllegalArgumentException("Invalid type: " + type);
         }
 
         final PostRequest postRequest = new PostRequest(applicationDetails.getOAuthEnvironment().getTokenUrl());

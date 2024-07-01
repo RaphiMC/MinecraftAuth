@@ -52,8 +52,8 @@ public class StepMsaDeviceCodeMsaCode extends MsaCodeStep<StepMsaDeviceCode.MsaD
         while (!msaDeviceCode.isExpired() && System.currentTimeMillis() - start <= this.timeout) {
             final Map<String, String> postData = new HashMap<>();
             postData.put("client_id", msaDeviceCode.getApplicationDetails().getClientId());
-            postData.put("device_code", msaDeviceCode.getDeviceCode());
             postData.put("grant_type", "device_code");
+            postData.put("device_code", msaDeviceCode.getDeviceCode());
 
             final PostRequest postRequest = new PostRequest(msaDeviceCode.getApplicationDetails().getOAuthEnvironment().getTokenUrl());
             postRequest.setContent(new URLEncodedFormContent(postData));
