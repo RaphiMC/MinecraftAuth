@@ -122,7 +122,7 @@ public class MinecraftAuth {
 
     public static class MsaTokenBuilder {
 
-        private MsaCodeStep.ApplicationDetails applicationDetails = new MsaCodeStep.ApplicationDetails(MicrosoftConstants.JAVA_TITLE_ID, MicrosoftConstants.SCOPE1, null, null, OAuthEnvironment.LIVE);
+        private AbstractStep.ApplicationDetails applicationDetails = new AbstractStep.ApplicationDetails(MicrosoftConstants.JAVA_TITLE_ID, MicrosoftConstants.SCOPE1, null, null, OAuthEnvironment.LIVE);
         private int timeout = 120;
 
         private AbstractStep<?, MsaCodeStep.MsaCode> msaCodeStep;
@@ -260,12 +260,11 @@ public class MinecraftAuth {
         }
 
         /**
-         * Uses the specified custom MSA code step to get an MSA token.<br>
-         * An example of a custom MSA code step is {@link StepRefreshTokenMsaCode}, which can be used to migrate existing refresh tokens to MinecraftAuth token chains.
+         * Uses the specified custom MSA code step to get an MSA token.
          *
          * @return The builder
          */
-        public InitialXblSessionBuilder customMsaCodeStep(final Function<MsaCodeStep.ApplicationDetails, AbstractStep<?, MsaCodeStep.MsaCode>> msaCodeStepProvider) {
+        public InitialXblSessionBuilder customMsaCodeStep(final Function<AbstractStep.ApplicationDetails, AbstractStep<?, MsaCodeStep.MsaCode>> msaCodeStepProvider) {
             this.msaCodeStep = msaCodeStepProvider.apply(this.applicationDetails);
 
             return new InitialXblSessionBuilder(this);

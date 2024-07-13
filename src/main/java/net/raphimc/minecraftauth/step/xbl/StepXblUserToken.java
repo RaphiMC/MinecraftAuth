@@ -49,7 +49,7 @@ public class StepXblUserToken extends AbstractStep<StepInitialXblSession.Initial
         final JsonObject properties = new JsonObject();
         properties.addProperty("AuthMethod", "RPS");
         properties.addProperty("SiteName", "user.auth.xboxlive.com");
-        properties.addProperty("RpsTicket", (initialXblSession.getMsaToken().getMsaCode().getApplicationDetails().isTitleClientId() ? "t=" : "d=") + initialXblSession.getMsaToken().getAccessToken());
+        properties.addProperty("RpsTicket", (this.applicationDetails.isTitleClientId() ? "t=" : "d=") + initialXblSession.getMsaToken().getAccessToken());
         if (initialXblSession.getXblDeviceToken() != null) {
             properties.add("ProofKey", CryptUtil.getProofKey(initialXblSession.getXblDeviceToken().getPublicKey()));
         }

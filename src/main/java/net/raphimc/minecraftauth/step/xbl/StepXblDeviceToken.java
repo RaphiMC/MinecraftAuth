@@ -45,7 +45,7 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
     private final String deviceType;
 
     public StepXblDeviceToken(final String deviceType) {
-        super("xblDeviceToken", null);
+        super("xblDeviceToken");
 
         this.deviceType = deviceType;
     }

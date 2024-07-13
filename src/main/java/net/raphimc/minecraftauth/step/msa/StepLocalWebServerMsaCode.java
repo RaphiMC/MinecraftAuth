@@ -69,7 +69,7 @@ public class StepLocalWebServerMsaCode extends MsaCodeStep<StepLocalWebServer.Lo
                 httpExchange.getResponseBody().write(response);
                 httpExchange.close();
 
-                msaCodeFuture.complete(new MsaCode(parameters.get("code"), localWebServer.getApplicationDetails()));
+                msaCodeFuture.complete(new MsaCode(parameters.get("code")));
             } catch (Throwable e) {
                 final byte[] response = ("Login failed. Error message: " + e.getMessage()).getBytes(StandardCharsets.UTF_8);
                 httpExchange.sendResponseHeaders(StatusCodes.INTERNAL_SERVER_ERROR, response.length);

@@ -48,7 +48,7 @@ public class StepXblTitleToken extends AbstractStep<StepInitialXblSession.Initia
         if (initialXblSession.getXblDeviceToken() == null) {
             throw new IllegalStateException("An XBL Device Token is needed for Title authentication");
         }
-        if (!initialXblSession.getMsaToken().getMsaCode().getApplicationDetails().isTitleClientId()) {
+        if (!this.applicationDetails.isTitleClientId()) {
             throw new IllegalStateException("A Title Client ID is needed for Title authentication");
         }
 

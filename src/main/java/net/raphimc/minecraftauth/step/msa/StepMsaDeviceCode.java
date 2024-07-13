@@ -25,7 +25,6 @@ import net.lenni0451.commons.httpclient.content.impl.URLEncodedFormContent;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
 import net.raphimc.minecraftauth.responsehandler.MsaResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
-import net.raphimc.minecraftauth.step.InitialPreparationStep;
 import net.raphimc.minecraftauth.util.OAuthEnvironment;
 import net.raphimc.minecraftauth.util.logging.ILogger;
 
@@ -37,12 +36,8 @@ import java.util.function.Consumer;
 
 public class StepMsaDeviceCode extends InitialPreparationStep<StepMsaDeviceCode.MsaDeviceCodeCallback, StepMsaDeviceCode.MsaDeviceCode> {
 
-    private final MsaCodeStep.ApplicationDetails applicationDetails;
-
-    public StepMsaDeviceCode(final MsaCodeStep.ApplicationDetails applicationDetails) {
-        super("msaDeviceCode");
-
-        this.applicationDetails = applicationDetails;
+    public StepMsaDeviceCode(final ApplicationDetails applicationDetails) {
+        super("msaDeviceCode", applicationDetails);
     }
 
     @Override
@@ -69,8 +64,7 @@ public class StepMsaDeviceCode extends InitialPreparationStep<StepMsaDeviceCode.
                 obj.get("interval").getAsLong() * 1000,
                 obj.get("device_code").getAsString(),
                 obj.get("user_code").getAsString(),
-                obj.get("verification_uri").getAsString(),
-                this.applicationDetails
+                obj.get("verification_uri").getAsString()
         );
         logger.info("Got MSA device code, expires: " + Instant.ofEpochMilli(msaDeviceCode.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         msaDeviceCodeCallback.callback.accept(msaDeviceCode);
@@ -86,7 +80,6 @@ public class StepMsaDeviceCode extends InitialPreparationStep<StepMsaDeviceCode.
         String deviceCode;
         String userCode;
         String verificationUri;
-        MsaCodeStep.ApplicationDetails applicationDetails;
 
         @Override
         public boolean isExpired() {

@@ -18,18 +18,40 @@
 package net.raphimc.minecraftauth.step;
 
 import com.google.gson.JsonObject;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
+import lombok.With;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.raphimc.minecraftauth.MinecraftAuth;
+import net.raphimc.minecraftauth.util.OAuthEnvironment;
+import net.raphimc.minecraftauth.util.UuidUtil;
 import net.raphimc.minecraftauth.util.logging.ILogger;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O extends AbstractStep.StepResult<?>> {
 
     public final String name;
+    public final ApplicationDetails applicationDetails;
     protected final AbstractStep<?, I> prevStep;
+
+    public AbstractStep(final String name) {
+        this.name = name;
+        this.applicationDetails = null;
+        this.prevStep = null;
+    }
 
     public AbstractStep(final String name, final AbstractStep<?, I> prevStep) {
         this.name = name;
+        this.applicationDetails = prevStep.applicationDetails;
         this.prevStep = prevStep;
+    }
+
+    public AbstractStep(final String name, final ApplicationDetails applicationDetails) {
+        this.name = name;
+        this.applicationDetails = applicationDetails;
+        this.prevStep = null;
     }
 
     public final O applyStep(final HttpClient httpClient, final I prevResult) throws Exception {
@@ -91,6 +113,33 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
         @Override
         public boolean isExpired() {
             throw new UnsupportedOperationException();
+        }
+
+    }
+
+    @Value
+    @With
+    @EqualsAndHashCode(callSuper = false)
+    public static class ApplicationDetails {
+
+        String clientId;
+        String scope;
+        String clientSecret;
+        String redirectUri;
+        OAuthEnvironment oAuthEnvironment;
+
+        public boolean isTitleClientId() {
+            return !UuidUtil.isDashedUuid(this.clientId);
+        }
+
+        public Map<String, String> getOAuthParameters() {
+            final Map<String, String> parameters = new HashMap<>();
+            parameters.put("client_id", this.clientId);
+            parameters.put("scope", this.scope);
+            parameters.put("redirect_uri", this.redirectUri);
+            parameters.put("response_type", "code");
+            parameters.put("response_mode", "query");
+            return parameters;
         }
 
     }

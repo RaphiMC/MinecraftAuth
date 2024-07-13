@@ -46,13 +46,11 @@ import java.util.function.BiConsumer;
 
 public class StepJfxWebViewMsaCode extends MsaCodeStep<StepJfxWebViewMsaCode.JavaFxWebView> {
 
-    private final ApplicationDetails applicationDetails;
     private final int timeout;
 
     public StepJfxWebViewMsaCode(final ApplicationDetails applicationDetails, final int timeout) {
-        super(null);
+        super(applicationDetails);
 
-        this.applicationDetails = applicationDetails;
         this.timeout = timeout;
     }
 
@@ -97,7 +95,7 @@ public class StepJfxWebViewMsaCode extends MsaCodeStep<StepJfxWebViewMsaCode.Jav
                             throw new IllegalStateException("Could not extract MSA Code from response url");
                         }
 
-                        msaCodeFuture.complete(new MsaCode(parameters.get("code"), this.applicationDetails));
+                        msaCodeFuture.complete(new MsaCode(parameters.get("code")));
                     }
                 } catch (Throwable e) {
                     msaCodeFuture.completeExceptionally(e);

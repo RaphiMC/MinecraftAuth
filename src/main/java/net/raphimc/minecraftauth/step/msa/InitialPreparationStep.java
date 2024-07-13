@@ -15,16 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.minecraftauth.step;
+package net.raphimc.minecraftauth.step.msa;
 
 import com.google.gson.JsonObject;
 import net.lenni0451.commons.httpclient.HttpClient;
+import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.logging.ILogger;
 
 public abstract class InitialPreparationStep<I extends AbstractStep.InitialInput, O extends AbstractStep.InitialInput> extends AbstractStep<I, O> {
 
-    public InitialPreparationStep(final String name) {
-        super(name, null);
+    public InitialPreparationStep(final String name, final ApplicationDetails applicationDetails) {
+        super(name, applicationDetails);
     }
 
     @Override

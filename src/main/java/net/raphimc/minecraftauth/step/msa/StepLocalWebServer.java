@@ -22,7 +22,6 @@ import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.utils.URLWrapper;
 import net.raphimc.minecraftauth.step.AbstractStep;
-import net.raphimc.minecraftauth.step.InitialPreparationStep;
 import net.raphimc.minecraftauth.util.logging.ILogger;
 
 import java.net.ServerSocket;
@@ -31,16 +30,12 @@ import java.util.function.Consumer;
 
 public class StepLocalWebServer extends InitialPreparationStep<StepLocalWebServer.LocalWebServerCallback, StepLocalWebServer.LocalWebServer> {
 
-    private final MsaCodeStep.ApplicationDetails applicationDetails;
-
-    public StepLocalWebServer(final MsaCodeStep.ApplicationDetails applicationDetails) {
-        super("localWebServer");
+    public StepLocalWebServer(final ApplicationDetails applicationDetails) {
+        super("localWebServer", applicationDetails);
 
         if (applicationDetails.getRedirectUri().endsWith("/")) {
             throw new IllegalArgumentException("Redirect URI must not end with a slash");
         }
-
-        this.applicationDetails = applicationDetails;
     }
 
     @Override
@@ -62,8 +57,7 @@ public class StepLocalWebServer extends InitialPreparationStep<StepLocalWebServe
 
             final LocalWebServer localWebServer = new LocalWebServer(
                     authenticationUrl.toString(),
-                    localPort,
-                    this.applicationDetails
+                    localPort
             );
             logger.info("Created local webserver MSA authentication URL: " + localWebServer.getAuthenticationUrl());
             localWebServerCallback.callback.accept(localWebServer);
@@ -77,13 +71,6 @@ public class StepLocalWebServer extends InitialPreparationStep<StepLocalWebServe
 
         String authenticationUrl;
         int port;
-        MsaCodeStep.ApplicationDetails applicationDetails;
-
-        public LocalWebServer(final String authenticationUrl, final int port, final MsaCodeStep.ApplicationDetails applicationDetails) {
-            this.authenticationUrl = authenticationUrl;
-            this.port = port;
-            this.applicationDetails = applicationDetails.withRedirectUri(applicationDetails.getRedirectUri() + ":" + port);
-        }
 
     }
 

@@ -45,12 +45,8 @@ import java.util.Optional;
 
 public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.MsaCredentials> {
 
-    private final ApplicationDetails applicationDetails;
-
     public StepCredentialsMsaCode(final ApplicationDetails applicationDetails) {
-        super(null);
-
-        this.applicationDetails = applicationDetails;
+        super(applicationDetails);
     }
 
     @Override
@@ -162,7 +158,7 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
             return parameters.get("code");
         });
 
-        final MsaCode msaCode = new MsaCode(code, this.applicationDetails);
+        final MsaCode msaCode = new MsaCode(code);
         logger.info("Got MSA Code");
         return msaCode;
     }

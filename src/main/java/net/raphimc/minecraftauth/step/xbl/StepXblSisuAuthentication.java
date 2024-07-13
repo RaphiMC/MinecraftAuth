@@ -53,14 +53,14 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
         if (initialXblSession.getXblDeviceToken() == null) {
             throw new IllegalStateException("An XBL Device Token is needed for SISU authentication");
         }
-        if (!initialXblSession.getMsaToken().getMsaCode().getApplicationDetails().isTitleClientId()) {
+        if (!this.applicationDetails.isTitleClientId()) {
             throw new IllegalStateException("A Title Client ID is needed for SISU authentication");
         }
 
         final JsonObject postData = new JsonObject();
         postData.addProperty("AccessToken", "t=" + initialXblSession.getMsaToken().getAccessToken());
         postData.addProperty("DeviceToken", initialXblSession.getXblDeviceToken().getToken());
-        postData.addProperty("AppId", initialXblSession.getMsaToken().getMsaCode().getApplicationDetails().getClientId());
+        postData.addProperty("AppId", this.applicationDetails.getClientId());
         postData.add("ProofKey", CryptUtil.getProofKey(initialXblSession.getXblDeviceToken().getPublicKey()));
         postData.addProperty("SiteName", "user.auth.xboxlive.com");
         postData.addProperty("RelyingParty", this.relyingParty);

@@ -60,6 +60,16 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
     }
 
     @Override
+    public MsaToken getFromInput(final ILogger logger, final HttpClient httpClient, final InitialInput input) throws Exception {
+        if (input instanceof RefreshToken) {
+            final RefreshToken refreshToken = (RefreshToken) input;
+            return this.apply(logger, httpClient, "refresh_token", refreshToken.getRefreshToken(), new MsaCodeStep.MsaCode(null));
+        } else {
+            return super.getFromInput(logger, httpClient, input);
+        }
+    }
+
+    @Override
     public MsaToken fromJson(final JsonObject json) {
         final MsaCodeStep.MsaCode msaCode = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         return new MsaToken(
@@ -81,26 +91,25 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
     }
 
     private MsaToken apply(final ILogger logger, final HttpClient httpClient, final String type, final String codeOrRefreshToken, final MsaCodeStep.MsaCode msaCode) throws Exception {
-        final MsaCodeStep.ApplicationDetails applicationDetails = msaCode.getApplicationDetails();
         logger.info("Getting MSA Token...");
 
         final Map<String, String> postData = new HashMap<>();
-        postData.put("client_id", applicationDetails.getClientId());
-        postData.put("scope", applicationDetails.getScope());
-        if (applicationDetails.getClientSecret() != null) {
-            postData.put("client_secret", applicationDetails.getClientSecret());
+        postData.put("client_id", this.applicationDetails.getClientId());
+        postData.put("scope", this.applicationDetails.getScope());
+        if (this.applicationDetails.getClientSecret() != null) {
+            postData.put("client_secret", this.applicationDetails.getClientSecret());
         }
         postData.put("grant_type", type);
         if (type.equals("refresh_token")) {
             postData.put("refresh_token", codeOrRefreshToken);
         } else if (type.equals("authorization_code")) {
             postData.put("code", codeOrRefreshToken);
-            postData.put("redirect_uri", applicationDetails.getRedirectUri());
+            postData.put("redirect_uri", this.applicationDetails.getRedirectUri());
         } else {
             throw new IllegalArgumentException("Invalid type: " + type);
         }
 
-        final PostRequest postRequest = new PostRequest(applicationDetails.getOAuthEnvironment().getTokenUrl());
+        final PostRequest postRequest = new PostRequest(this.applicationDetails.getOAuthEnvironment().getTokenUrl());
         postRequest.setContent(new URLEncodedFormContent(postData));
         final JsonObject obj = httpClient.execute(postRequest, new MsaResponseHandler());
 
@@ -132,6 +141,14 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
         public boolean isExpired() {
             return this.expireTimeMs <= System.currentTimeMillis();
         }
+
+    }
+
+    @Value
+    @EqualsAndHashCode(callSuper = false)
+    public static class RefreshToken extends AbstractStep.InitialInput {
+
+        String refreshToken;
 
     }
 
