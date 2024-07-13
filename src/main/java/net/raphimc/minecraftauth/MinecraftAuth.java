@@ -102,6 +102,14 @@ public class MinecraftAuth {
             .deviceCode()
             .msaTokenStep, "1.20.80", 671, "Windows Desktop Build (Win32)(x64)");
 
+    @ApiStatus.Experimental
+    public static final AbstractStep<?, ? extends StepXblXstsToken.XblXsts<?>> BEDROCK_XBL_DEVICE_CODE_LOGIN = builder()
+            .withClientId(MicrosoftConstants.BEDROCK_ANDROID_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
+            .deviceCode()
+            .withDeviceToken("Android")
+            .sisuTitleAuthentication(MicrosoftConstants.XBL_XSTS_RELYING_PARTY)
+            .xblXstsTokenStep;
+
     public static MsaTokenBuilder builder() {
         return new MsaTokenBuilder();
     }
