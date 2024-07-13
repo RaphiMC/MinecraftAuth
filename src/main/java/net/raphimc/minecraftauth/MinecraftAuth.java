@@ -103,7 +103,8 @@ public class MinecraftAuth {
             .msaTokenStep, "1.20.80", 671, "Windows Desktop Build (Win32)(x64)");
 
     @ApiStatus.Experimental
-    public static final AbstractStep<?, ? extends StepXblXstsToken.XblXsts<?>> BEDROCK_XBL_DEVICE_CODE_LOGIN = builder()
+    @SuppressWarnings("unchecked")
+    public static final AbstractStep<?, StepXblSisuAuthentication.XblSisuTokens> BEDROCK_XBL_DEVICE_CODE_LOGIN = (AbstractStep<?, StepXblSisuAuthentication.XblSisuTokens>) builder()
             .withClientId(MicrosoftConstants.BEDROCK_ANDROID_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
             .deviceCode()
             .withDeviceToken("Android")
@@ -270,6 +271,7 @@ public class MinecraftAuth {
         /**
          * Uses the specified custom MSA code step to get an MSA token.
          *
+         * @param msaCodeStepProvider The custom MSA code step provider
          * @return The builder
          */
         public InitialXblSessionBuilder customMsaCodeStep(final Function<AbstractStep.ApplicationDetails, AbstractStep<?, MsaCodeStep.MsaCode>> msaCodeStepProvider) {
