@@ -3,7 +3,6 @@ plugins {
     id "maven-publish"
     id "signing"
     id "net.raphimc.class-token-replacer" version "1.1.2"
-    id "io.freefair.lombok" version "8.6"
 }
 
 base {
@@ -24,6 +23,7 @@ repositories {
 }
 
 dependencies {
+    compileOnly(annotationProcessor("org.projectlombok:lombok:1.18.34"))
     compileOnly "org.jetbrains:annotations:24.1.0"
     compileOnly sourceSets.javaFxStub.output
 
@@ -54,11 +54,6 @@ jar {
     from("LICENSE") {
         rename { "${it}_${project.name ?: rootProject.name}" }
     }
-}
-
-sourcesJar {
-    from delombok
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 artifacts {
