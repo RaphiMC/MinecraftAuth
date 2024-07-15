@@ -38,6 +38,7 @@ import net.raphimc.minecraftauth.util.logging.ILogger;
 
 import java.io.StringReader;
 import java.net.CookieManager;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -99,7 +100,7 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
             case MICROSOFT_ONLINE_COMMON:
             case MICROSOFT_ONLINE_CONSUMERS: {
                 urlPost = config.get("urlPost").getAsString();
-                urlPost = new URLWrapper(urlPost).setProtocol(authenticationUrl.getProtocol()).setHost(authenticationUrl.getHost()).toURL().toString();
+                urlPost = new URLWrapper(new URI(urlPost)).setProtocol(authenticationUrl.getProtocol()).setHost(authenticationUrl.getHost()).toURL().toString();
                 final String sFT = config.get("sFT").getAsString();
                 final String sFTName = config.get("sFTName").getAsString();
                 final String sCtx = config.get("sCtx").getAsString();

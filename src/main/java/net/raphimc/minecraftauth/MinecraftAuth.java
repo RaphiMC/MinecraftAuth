@@ -100,7 +100,7 @@ public class MinecraftAuth {
     public static final AbstractStep<?, StepEduJWT.EduJWT> EDU_DEVICE_CODE_LOGIN = new StepEduJWT(builder()
             .withClientId(MicrosoftConstants.EDU_CLIENT_ID).withScope("https://meeservices.minecraft.net/.default offline_access").withOAuthEnvironment(OAuthEnvironment.MICROSOFT_ONLINE_COMMON)
             .deviceCode()
-            .msaTokenStep, "1.20.80", 671, "Windows Desktop Build (Win32)(x64)");
+            .msaTokenStep, "1.20.13", 594);
 
     @ApiStatus.Experimental
     @SuppressWarnings("unchecked")

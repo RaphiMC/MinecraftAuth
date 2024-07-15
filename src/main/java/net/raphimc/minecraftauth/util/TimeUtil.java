@@ -29,6 +29,7 @@ import java.time.format.DateTimeFormatter;
 public class TimeUtil {
 
     private static Duration CLIENT_TIME_OFFSET = null;
+    public static final int MAX_JWT_CLOCK_SKEW = 60;
 
     /**
      * Gets the time offset between the client and the microsoft server. This is used to calculate the correct time for authentication and signatures.
