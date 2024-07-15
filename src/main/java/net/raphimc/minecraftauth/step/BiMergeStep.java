@@ -39,7 +39,7 @@ public abstract class BiMergeStep<I1 extends AbstractStep.StepResult<?>, I2 exte
 
     @Override
     public O refresh(final ILogger logger, final HttpClient httpClient, final O result) throws Exception {
-        if (!result.isExpired()) {
+        if (!result.isExpiredOrOutdated()) {
             return result;
         }
 
@@ -61,7 +61,12 @@ public abstract class BiMergeStep<I1 extends AbstractStep.StepResult<?>, I2 exte
 
         @Override
         public boolean isExpired() {
-            return super.isExpired() || (this.prevResult2() != null && this.prevResult2().isExpired());
+            return (this.prevResult() != null && this.prevResult().isExpired()) || (this.prevResult2() != null && this.prevResult2().isExpired());
+        }
+
+        @Override
+        public boolean isExpiredOrOutdated() {
+            return (this.prevResult() != null && this.prevResult().isExpiredOrOutdated()) || (this.prevResult2() != null && this.prevResult2().isExpiredOrOutdated());
         }
 
     }

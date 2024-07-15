@@ -104,6 +104,16 @@ public class StepEduJWT extends AbstractStep<StepMsaToken.MsaToken, StepEduJWT.E
             return this.msaToken;
         }
 
+        @Override
+        public boolean isExpired() {
+            return true; // TODO: Implement
+        }
+
+        @Override
+        public boolean isExpiredOrOutdated() {
+            return true;
+        }
+
     }
 
 }

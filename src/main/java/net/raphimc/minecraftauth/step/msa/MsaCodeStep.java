@@ -75,6 +75,11 @@ public abstract class MsaCodeStep<I extends AbstractStep.InitialInput> extends A
             this.code = code;
         }
 
+        @Override
+        public boolean isExpired() {
+            return true; // MsaCode can only be used one time and can't be refreshed
+        }
+
     }
 
 }

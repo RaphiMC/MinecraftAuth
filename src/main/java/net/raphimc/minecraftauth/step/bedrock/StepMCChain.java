@@ -22,8 +22,9 @@ import com.google.gson.JsonObject;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import lombok.EqualsAndHashCode;
-import lombok.Value;
+import lombok.*;
+import lombok.experimental.NonFinal;
+import lombok.experimental.PackagePrivate;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.constants.Headers;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
@@ -33,6 +34,7 @@ import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
 import net.raphimc.minecraftauth.util.CryptUtil;
 import net.raphimc.minecraftauth.util.JsonContent;
 import net.raphimc.minecraftauth.util.logging.ILogger;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -146,9 +148,62 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         String displayName;
         StepXblXstsToken.XblXsts<?> xblXsts;
 
+        @ApiStatus.Internal
+        @Getter(AccessLevel.NONE)
+        @Setter(AccessLevel.NONE)
+        @PackagePrivate
+        @NonFinal
+        @ToString.Exclude
+        @EqualsAndHashCode.Exclude
+        long lastExpireCheckTimeMs;
+
+        @ApiStatus.Internal
+        @Getter(AccessLevel.NONE)
+        @Setter(AccessLevel.NONE)
+        @PackagePrivate
+        @NonFinal
+        @ToString.Exclude
+        @EqualsAndHashCode.Exclude
+        boolean lastExpireCheckResult;
+
+        public MCChain(final ECPublicKey publicKey, final ECPrivateKey privateKey, final String mojangJwt, final String identityJwt, final String xuid, final UUID id, final String displayName, final StepXblXstsToken.XblXsts<?> xblXsts) {
+            this.publicKey = publicKey;
+            this.privateKey = privateKey;
+            this.mojangJwt = mojangJwt;
+            this.identityJwt = identityJwt;
+            this.xuid = xuid;
+            this.id = id;
+            this.displayName = displayName;
+            this.xblXsts = xblXsts;
+        }
+
         @Override
         protected StepXblXstsToken.XblXsts<?> prevResult() {
             return this.xblXsts;
+        }
+
+        @Override
+        public boolean isExpired() {
+            // Cache the result for 1 second because it's expensive to check
+            if (System.currentTimeMillis() - this.lastExpireCheckTimeMs < 1000) {
+                return this.lastExpireCheckResult;
+            }
+
+            this.lastExpireCheckTimeMs = System.currentTimeMillis();
+            try {
+                final Jws<Claims> mojangJwt = Jwts.parser().clockSkewSeconds(CLOCK_SKEW).verifyWith(MOJANG_PUBLIC_KEY).build().parseSignedClaims(this.mojangJwt);
+                final ECPublicKey mojangJwtPublicKey = CryptUtil.publicKeyEcFromBase64(mojangJwt.getPayload().get("identityPublicKey", String.class));
+                Jwts.parser().clockSkewSeconds(CLOCK_SKEW).verifyWith(mojangJwtPublicKey).build().parseSignedClaims(this.identityJwt);
+                this.lastExpireCheckResult = false;
+            } catch (Throwable e) { // Any error -> The jwts are expired or invalid
+                this.lastExpireCheckResult = true;
+            }
+            return this.lastExpireCheckResult;
+        }
+
+        @Override
+        public boolean isExpiredOrOutdated() {
+            return true;
         }
 
     }

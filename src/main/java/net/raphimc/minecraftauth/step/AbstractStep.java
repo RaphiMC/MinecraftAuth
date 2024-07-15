@@ -58,22 +58,22 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
         return this.applyStep(MinecraftAuth.LOGGER, httpClient, prevResult);
     }
 
+    public abstract O applyStep(final ILogger logger, final HttpClient httpClient, final I prevResult) throws Exception;
+
     public final O refresh(final HttpClient httpClient, final O result) throws Exception {
         return this.refresh(MinecraftAuth.LOGGER, httpClient, result);
     }
 
-    public final O getFromInput(final HttpClient httpClient, final InitialInput input) throws Exception {
-        return this.getFromInput(MinecraftAuth.LOGGER, httpClient, input);
-    }
-
-    public abstract O applyStep(final ILogger logger, final HttpClient httpClient, final I prevResult) throws Exception;
-
     public O refresh(final ILogger logger, final HttpClient httpClient, final O result) throws Exception {
-        if (!result.isExpired()) {
+        if (!result.isExpiredOrOutdated()) {
             return result;
         }
 
         return this.applyStep(logger, httpClient, this.prevStep != null ? this.prevStep.refresh(logger, httpClient, (I) result.prevResult()) : null);
+    }
+
+    public final O getFromInput(final HttpClient httpClient, final InitialInput input) throws Exception {
+        return this.getFromInput(MinecraftAuth.LOGGER, httpClient, input);
     }
 
     public O getFromInput(final ILogger logger, final HttpClient httpClient, final InitialInput input) throws Exception {
@@ -88,8 +88,25 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
 
         protected abstract P prevResult();
 
-        public boolean isExpired() {
-            return true;
+        /**
+         * Checks if this result is expired.<br>
+         * Results that have no expire time returned by their API are never considered expired.<br>
+         * If you want to minimize the amount of HTTP requests, you should only call {@link AbstractStep#refresh} if this method returns true.<br>
+         * For certain use cases, like joining a Minecraft server, you want to make sure that the data is up-to-date, even if it is not expired yet. See {@link StepResult#isExpiredOrOutdated}.
+         *
+         * @return true if this result is expired
+         */
+        public abstract boolean isExpired();
+
+        /**
+         * Checks if this result is expired or potentially outdated.<br>
+         * Results that have no expire time returned by their API are always considered outdated.<br>
+         * If you want the data in the result to be up-to-date, you should call {@link AbstractStep#refresh} if this method returns true.<br>
+         *
+         * @return true if this result is potentially outdated or expired
+         */
+        public boolean isExpiredOrOutdated() {
+            return this.isExpired();
         }
 
     }

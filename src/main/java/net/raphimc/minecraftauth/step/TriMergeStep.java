@@ -39,7 +39,7 @@ public abstract class TriMergeStep<I1 extends AbstractStep.StepResult<?>, I2 ext
 
     @Override
     public O refresh(final ILogger logger, final HttpClient httpClient, final O result) throws Exception {
-        if (!result.isExpired()) {
+        if (!result.isExpiredOrOutdated()) {
             return result;
         }
 
@@ -64,6 +64,11 @@ public abstract class TriMergeStep<I1 extends AbstractStep.StepResult<?>, I2 ext
         @Override
         public boolean isExpired() {
             return super.isExpired() || (this.prevResult3() != null && this.prevResult3().isExpired());
+        }
+
+        @Override
+        public boolean isExpiredOrOutdated() {
+            return super.isExpiredOrOutdated() || (this.prevResult3() != null && this.prevResult3().isExpiredOrOutdated());
         }
 
     }

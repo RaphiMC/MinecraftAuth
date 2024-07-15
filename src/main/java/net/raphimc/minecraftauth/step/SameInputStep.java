@@ -52,7 +52,7 @@ public interface SameInputStep<I1 extends AbstractStep.StepResult<?>, O extends 
     default <I2 extends AbstractStep.StepResult<?>> I2 refreshSecondaryStepChain(final ILogger logger, final HttpClient httpClient, final I1 prevResult1, AbstractStep.StepResult<?> prevResult2, final List<AbstractStep<?, ?>> steps1UntilSameInput, final List<AbstractStep<?, ?>> steps2UntilSameInput) throws Exception {
         int count = 1;
         while (count < steps2UntilSameInput.size()) {
-            if (prevResult2.isExpired()) {
+            if (prevResult2.isExpiredOrOutdated()) {
                 prevResult2 = prevResult2.prevResult();
                 count++;
             } else {

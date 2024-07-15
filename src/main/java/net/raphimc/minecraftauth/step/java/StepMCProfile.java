@@ -91,6 +91,16 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
             return this.mcToken;
         }
 
+        @Override
+        public boolean isExpired() {
+            return this.prevResult().isExpired();
+        }
+
+        @Override
+        public boolean isExpiredOrOutdated() {
+            return true;
+        }
+
     }
 
 }

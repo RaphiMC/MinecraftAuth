@@ -40,7 +40,7 @@ public abstract class SameInputBiMergeStep<I1 extends AbstractStep.StepResult<?>
 
     @Override
     public O refresh(final ILogger logger, final HttpClient httpClient, final O result) throws Exception {
-        if (!result.isExpired()) {
+        if (!result.isExpiredOrOutdated()) {
             return result;
         }
 
