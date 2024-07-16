@@ -37,7 +37,7 @@ public class StepFullXblSession extends SameInputBiMergeStep<StepXblUserToken.Xb
     }
 
     @Override
-    public FullXblSession execute(final ILogger logger, final HttpClient httpClient, final StepXblUserToken.XblUserToken xblUserToken, final StepXblTitleToken.XblTitleToken xblTitleToken) throws Exception {
+    protected FullXblSession execute(final ILogger logger, final HttpClient httpClient, final StepXblUserToken.XblUserToken xblUserToken, final StepXblTitleToken.XblTitleToken xblTitleToken) throws Exception {
         return new FullXblSession(xblUserToken, xblTitleToken);
     }
 

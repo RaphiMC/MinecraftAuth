@@ -31,11 +31,11 @@ public abstract class TriMergeStep<I1 extends AbstractStep.StepResult<?>, I2 ext
     }
 
     @Override
-    public final O execute(final ILogger logger, final HttpClient httpClient, final I1 prevResult1, final I2 prevResult2) throws Exception {
-        return this.execute(logger, httpClient, prevResult1, prevResult2, null);
+    protected final O execute(final ILogger logger, final HttpClient httpClient, final I1 prevResult1, final I2 prevResult2) throws Exception {
+        throw new UnsupportedOperationException();
     }
 
-    public abstract O execute(final ILogger logger, final HttpClient httpClient, final I1 prevResult1, final I2 prevResult2, final I3 prevResult3) throws Exception;
+    protected abstract O execute(final ILogger logger, final HttpClient httpClient, final I1 prevResult1, final I2 prevResult2, final I3 prevResult3) throws Exception;
 
     @Override
     public O refresh(final ILogger logger, final HttpClient httpClient, final O result) throws Exception {

@@ -48,7 +48,7 @@ public class StepLocalWebServerMsaCode extends MsaCodeStep<StepLocalWebServer.Lo
 
     @Override
     @SneakyThrows
-    public MsaCode execute(final ILogger logger, final HttpClient httpClient, final StepLocalWebServer.LocalWebServer localWebServer) throws Exception {
+    protected MsaCode execute(final ILogger logger, final HttpClient httpClient, final StepLocalWebServer.LocalWebServer localWebServer) throws Exception {
         logger.info("Waiting for MSA login via local webserver...");
 
         final CompletableFuture<MsaCode> msaCodeFuture = new CompletableFuture<>();

@@ -54,7 +54,7 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
         this.prevStep = null;
     }
 
-    public abstract O execute(final ILogger logger, final HttpClient httpClient, final I prevResult) throws Exception;
+    protected abstract O execute(final ILogger logger, final HttpClient httpClient, final I prevResult) throws Exception;
 
     public final O refresh(final HttpClient httpClient, final O result) throws Exception {
         return this.refresh(MinecraftAuth.LOGGER, httpClient, result);

@@ -35,7 +35,7 @@ public class StepFullJavaSession extends SameInputBiMergeStep<StepMCProfile.MCPr
     }
 
     @Override
-    public FullJavaSession execute(final ILogger logger, final HttpClient httpClient, final StepMCProfile.MCProfile mcProfile, final StepPlayerCertificates.PlayerCertificates playerCertificates) throws Exception {
+    protected FullJavaSession execute(final ILogger logger, final HttpClient httpClient, final StepMCProfile.MCProfile mcProfile, final StepPlayerCertificates.PlayerCertificates playerCertificates) throws Exception {
         return new FullJavaSession(mcProfile, playerCertificates);
     }
 

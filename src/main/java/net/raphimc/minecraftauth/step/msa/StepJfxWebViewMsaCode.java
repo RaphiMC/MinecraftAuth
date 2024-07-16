@@ -56,7 +56,7 @@ public class StepJfxWebViewMsaCode extends MsaCodeStep<StepJfxWebViewMsaCode.Jav
 
     @Override
     @SneakyThrows
-    public MsaCode execute(final ILogger logger, final HttpClient httpClient, final JavaFxWebView javaFxWebViewCallback) throws Exception {
+    protected MsaCode execute(final ILogger logger, final HttpClient httpClient, final JavaFxWebView javaFxWebViewCallback) throws Exception {
         logger.info("Opening JavaFX WebView window for MSA login...");
 
         final JFXPanel jfxPanel = new JFXPanel();

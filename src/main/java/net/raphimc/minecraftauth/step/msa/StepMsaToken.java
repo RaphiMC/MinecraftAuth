@@ -40,7 +40,7 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
     }
 
     @Override
-    public MsaToken execute(final ILogger logger, final HttpClient httpClient, final MsaCodeStep.MsaCode msaCode) throws Exception {
+    protected MsaToken execute(final ILogger logger, final HttpClient httpClient, final MsaCodeStep.MsaCode msaCode) throws Exception {
         if (msaCode.msaToken != null) {
             return msaCode.msaToken;
         }

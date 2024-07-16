@@ -47,7 +47,7 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
     }
 
     @Override
-    public PlayerCertificates execute(final ILogger logger, final HttpClient httpClient, final StepMCToken.MCToken mcToken) throws Exception {
+    protected PlayerCertificates execute(final ILogger logger, final HttpClient httpClient, final StepMCToken.MCToken mcToken) throws Exception {
         logger.info("Getting player certificates...");
 
         final PostRequest postRequest = new PostRequest(PLAYER_CERTIFICATES_URL);

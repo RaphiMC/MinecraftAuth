@@ -39,7 +39,7 @@ public class StepLocalWebServer extends InitialPreparationStep<StepLocalWebServe
     }
 
     @Override
-    public LocalWebServer execute(final ILogger logger, final HttpClient httpClient, final LocalWebServerCallback localWebServerCallback) throws Exception {
+    protected LocalWebServer execute(final ILogger logger, final HttpClient httpClient, final LocalWebServerCallback localWebServerCallback) throws Exception {
         logger.info("Creating URL for MSA login via local webserver...");
 
         if (localWebServerCallback == null) {

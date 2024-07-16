@@ -59,7 +59,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     }
 
     @Override
-    public MCChain execute(final ILogger logger, final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
+    protected MCChain execute(final ILogger logger, final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
         logger.info("Authenticating with Minecraft Services...");
 
         final KeyPairGenerator secp384r1 = KeyPairGenerator.getInstance("EC");

@@ -41,7 +41,7 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
     }
 
     @Override
-    public PlayFabToken execute(final ILogger logger, final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
+    protected PlayFabToken execute(final ILogger logger, final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
         logger.info("Authenticating with PlayFab...");
 
         final JsonObject postData = new JsonObject();

@@ -39,7 +39,7 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
     }
 
     @Override
-    public MCProfile execute(final ILogger logger, final HttpClient httpClient, final StepMCToken.MCToken mcToken) throws Exception {
+    protected MCProfile execute(final ILogger logger, final HttpClient httpClient, final StepMCToken.MCToken mcToken) throws Exception {
         logger.info("Getting profile...");
 
         final GetRequest getRequest = new GetRequest(MINECRAFT_PROFILE_URL);

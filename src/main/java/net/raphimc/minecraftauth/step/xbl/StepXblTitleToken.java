@@ -42,7 +42,7 @@ public class StepXblTitleToken extends AbstractStep<StepInitialXblSession.Initia
     }
 
     @Override
-    public XblTitleToken execute(final ILogger logger, final HttpClient httpClient, final StepInitialXblSession.InitialXblSession initialXblSession) throws Exception {
+    protected XblTitleToken execute(final ILogger logger, final HttpClient httpClient, final StepInitialXblSession.InitialXblSession initialXblSession) throws Exception {
         logger.info("Authenticating title with Xbox Live...");
 
         if (initialXblSession.getXblDeviceToken() == null) {

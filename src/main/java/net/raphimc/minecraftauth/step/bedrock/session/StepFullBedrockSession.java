@@ -36,7 +36,7 @@ public class StepFullBedrockSession extends SameInputTriMergeStep<StepMCChain.MC
     }
 
     @Override
-    public FullBedrockSession execute(final ILogger logger, final HttpClient httpClient, final StepMCChain.MCChain mcChain, final StepPlayFabToken.PlayFabToken playFabToken, final StepXblXstsToken.XblXsts<?> realmsXsts) throws Exception {
+    protected FullBedrockSession execute(final ILogger logger, final HttpClient httpClient, final StepMCChain.MCChain mcChain, final StepPlayFabToken.PlayFabToken playFabToken, final StepXblXstsToken.XblXsts<?> realmsXsts) throws Exception {
         return new FullBedrockSession(mcChain, playFabToken, realmsXsts);
     }
 

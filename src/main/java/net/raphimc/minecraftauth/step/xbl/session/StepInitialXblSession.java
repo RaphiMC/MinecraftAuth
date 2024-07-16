@@ -34,7 +34,7 @@ public class StepInitialXblSession extends BiMergeStep<StepMsaToken.MsaToken, St
     }
 
     @Override
-    public InitialXblSession execute(final ILogger logger, final HttpClient httpClient, final StepMsaToken.MsaToken msaToken, final StepXblDeviceToken.XblDeviceToken xblDeviceToken) throws Exception {
+    protected InitialXblSession execute(final ILogger logger, final HttpClient httpClient, final StepMsaToken.MsaToken msaToken, final StepXblDeviceToken.XblDeviceToken xblDeviceToken) throws Exception {
         return new InitialXblSession(msaToken, xblDeviceToken);
     }
 

@@ -31,11 +31,11 @@ public abstract class BiMergeStep<I1 extends AbstractStep.StepResult<?>, I2 exte
     }
 
     @Override
-    public final O execute(final ILogger logger, final HttpClient httpClient, final I1 prevResult) throws Exception {
-        return this.execute(logger, httpClient, prevResult, null);
+    protected final O execute(final ILogger logger, final HttpClient httpClient, final I1 prevResult) throws Exception {
+        throw new UnsupportedOperationException();
     }
 
-    public abstract O execute(final ILogger logger, final HttpClient httpClient, final I1 prevResult1, final I2 prevResult2) throws Exception;
+    protected abstract O execute(final ILogger logger, final HttpClient httpClient, final I1 prevResult1, final I2 prevResult2) throws Exception;
 
     @Override
     public O refresh(final ILogger logger, final HttpClient httpClient, final O result) throws Exception {
