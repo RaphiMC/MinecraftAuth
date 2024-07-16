@@ -197,6 +197,18 @@ public class MinecraftAuth {
         }
 
         /**
+         * Sets the application details
+         *
+         * @param applicationDetails The application details
+         * @return The builder
+         */
+        public MsaTokenBuilder withApplicationDetails(final AbstractStep.ApplicationDetails applicationDetails) {
+            this.applicationDetails = applicationDetails;
+
+            return this;
+        }
+
+        /**
          * Sets the timeout of the device code or local webserver auth flow
          *
          * @param timeout The timeout in seconds
