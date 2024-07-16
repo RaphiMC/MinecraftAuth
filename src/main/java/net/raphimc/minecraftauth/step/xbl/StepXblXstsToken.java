@@ -58,7 +58,7 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
 
     @Override
     protected XblXstsToken execute(final ILogger logger, final HttpClient httpClient, final StepFullXblSession.FullXblSession fullXblSession) throws Exception {
-        logger.info("Requesting XSTS Token...");
+        logger.info(this, "Requesting XSTS Token...");
 
         final JsonObject postData = new JsonObject();
         final JsonObject properties = new JsonObject();
@@ -83,7 +83,7 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
         final JsonObject obj = httpClient.execute(postRequest, new XblResponseHandler());
 
         final XblXstsToken xblXstsToken = XblXstsToken.fromMicrosoftJson(obj, fullXblSession);
-        logger.info("Got XSTS Token, expires: " + Instant.ofEpochMilli(xblXstsToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info(this, "Got XSTS Token, expires: " + Instant.ofEpochMilli(xblXstsToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return xblXstsToken;
     }
 

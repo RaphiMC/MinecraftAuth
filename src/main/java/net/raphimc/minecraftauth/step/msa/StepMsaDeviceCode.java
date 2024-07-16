@@ -42,7 +42,7 @@ public class StepMsaDeviceCode extends InitialPreparationStep<StepMsaDeviceCode.
 
     @Override
     protected MsaDeviceCode execute(final ILogger logger, final HttpClient httpClient, final MsaDeviceCodeCallback msaDeviceCodeCallback) throws Exception {
-        logger.info("Getting device code for MSA login...");
+        logger.info(this, "Getting device code for MSA login...");
 
         if (msaDeviceCodeCallback == null) {
             throw new IllegalStateException("Missing StepMsaDeviceCode.MsaDeviceCodeCallback input");
@@ -66,7 +66,7 @@ public class StepMsaDeviceCode extends InitialPreparationStep<StepMsaDeviceCode.
                 obj.get("user_code").getAsString(),
                 obj.get("verification_uri").getAsString()
         );
-        logger.info("Got MSA device code, expires: " + Instant.ofEpochMilli(msaDeviceCode.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info(this, "Got MSA device code, expires: " + Instant.ofEpochMilli(msaDeviceCode.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         msaDeviceCodeCallback.callback.accept(msaDeviceCode);
         return msaDeviceCode;
     }

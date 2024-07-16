@@ -43,7 +43,7 @@ public class StepXblTitleToken extends AbstractStep<StepInitialXblSession.Initia
 
     @Override
     protected XblTitleToken execute(final ILogger logger, final HttpClient httpClient, final StepInitialXblSession.InitialXblSession initialXblSession) throws Exception {
-        logger.info("Authenticating title with Xbox Live...");
+        logger.info(this, "Authenticating title with Xbox Live...");
 
         if (initialXblSession.getXblDeviceToken() == null) {
             throw new IllegalStateException("An XBL Device Token is needed for Title authentication");
@@ -70,7 +70,7 @@ public class StepXblTitleToken extends AbstractStep<StepInitialXblSession.Initia
         final JsonObject obj = httpClient.execute(postRequest, new XblResponseHandler());
 
         final XblTitleToken xblTitleToken = XblTitleToken.fromMicrosoftJson(obj, initialXblSession);
-        logger.info("Got XBL Title Token, expires: " + Instant.ofEpochMilli(xblTitleToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info(this, "Got XBL Title Token, expires: " + Instant.ofEpochMilli(xblTitleToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return xblTitleToken;
     }
 

@@ -40,7 +40,7 @@ public class StepLocalWebServer extends InitialPreparationStep<StepLocalWebServe
 
     @Override
     protected LocalWebServer execute(final ILogger logger, final HttpClient httpClient, final LocalWebServerCallback localWebServerCallback) throws Exception {
-        logger.info("Creating URL for MSA login via local webserver...");
+        logger.info(this, "Creating URL for MSA login via local webserver...");
 
         if (localWebServerCallback == null) {
             throw new IllegalStateException("Missing StepLocalWebServer.LocalWebServerCallback input");
@@ -59,7 +59,7 @@ public class StepLocalWebServer extends InitialPreparationStep<StepLocalWebServe
                     authenticationUrl.toString(),
                     localPort
             );
-            logger.info("Created local webserver MSA authentication URL: " + localWebServer.getAuthenticationUrl());
+            logger.info(this, "Created local webserver MSA authentication URL: " + localWebServer.getAuthenticationUrl());
             localWebServerCallback.callback.accept(localWebServer);
             return localWebServer;
         }

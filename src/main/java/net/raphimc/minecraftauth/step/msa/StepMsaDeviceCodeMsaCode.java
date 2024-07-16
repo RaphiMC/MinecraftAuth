@@ -46,7 +46,7 @@ public class StepMsaDeviceCodeMsaCode extends MsaCodeStep<StepMsaDeviceCode.MsaD
 
     @Override
     protected MsaCode execute(final ILogger logger, final HttpClient httpClient, final StepMsaDeviceCode.MsaDeviceCode msaDeviceCode) throws Exception {
-        logger.info("Waiting for MSA login via device code...");
+        logger.info(this, "Waiting for MSA login via device code...");
 
         final long start = System.currentTimeMillis();
         while (!msaDeviceCode.isExpired() && System.currentTimeMillis() - start <= this.timeout) {
@@ -67,7 +67,7 @@ public class StepMsaDeviceCodeMsaCode extends MsaCodeStep<StepMsaDeviceCode.MsaD
                         JsonUtil.getStringOr(obj, "refresh_token", null),
                         msaCode
                 );
-                logger.info("Got MSA Token, expires: " + Instant.ofEpochMilli(msaCode.msaToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+                logger.info(this, "Got MSA Token, expires: " + Instant.ofEpochMilli(msaCode.msaToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
                 return msaCode;
             } catch (MsaRequestException e) {
                 if (e.getResponse().getStatusCode() == StatusCodes.BAD_REQUEST && e.getError().equals("authorization_pending")) {

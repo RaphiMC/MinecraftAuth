@@ -42,7 +42,7 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
 
     @Override
     protected PlayFabToken execute(final ILogger logger, final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
-        logger.info("Authenticating with PlayFab...");
+        logger.info(this, "Authenticating with PlayFab...");
 
         final JsonObject postData = new JsonObject();
         postData.addProperty("CreateAccount", true);
@@ -82,7 +82,7 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
                 data.get("PlayFabId").getAsString(),
                 xblXsts
         );
-        logger.info("Got PlayFab Token, expires: " + Instant.ofEpochMilli(playFabToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info(this, "Got PlayFab Token, expires: " + Instant.ofEpochMilli(playFabToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return playFabToken;
     }
 

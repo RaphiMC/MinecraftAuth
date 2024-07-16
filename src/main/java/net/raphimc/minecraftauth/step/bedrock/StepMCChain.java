@@ -60,7 +60,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
 
     @Override
     protected MCChain execute(final ILogger logger, final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
-        logger.info("Authenticating with Minecraft Services...");
+        logger.info(this, "Authenticating with Minecraft Services...");
 
         final KeyPairGenerator secp384r1 = KeyPairGenerator.getInstance("EC");
         secp384r1.initialize(new ECGenParameterSpec("secp384r1"));
@@ -90,7 +90,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         final String displayName = (String) extraData.get("displayName");
 
         if (!extraData.containsKey("titleId")) {
-            logger.warn("Minecraft chain does not contain titleId! You might get kicked from some servers");
+            logger.warn(this, "Minecraft chain does not contain titleId! You might get kicked from some servers");
         }
 
         final MCChain mcChain = new MCChain(
@@ -103,7 +103,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
                 displayName,
                 xblXsts
         );
-        logger.info("Got MC Chain, name: " + mcChain.displayName + ", uuid: " + mcChain.id + ", xuid: " + mcChain.xuid);
+        logger.info(this, "Got MC Chain, name: " + mcChain.displayName + ", uuid: " + mcChain.id + ", xuid: " + mcChain.xuid);
         return mcChain;
     }
 

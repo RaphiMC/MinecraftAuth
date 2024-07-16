@@ -49,7 +49,7 @@ public class StepLocalWebServerMsaCode extends MsaCodeStep<StepLocalWebServer.Lo
     @Override
     @SneakyThrows
     protected MsaCode execute(final ILogger logger, final HttpClient httpClient, final StepLocalWebServer.LocalWebServer localWebServer) throws Exception {
-        logger.info("Waiting for MSA login via local webserver...");
+        logger.info(this, "Waiting for MSA login via local webserver...");
 
         final CompletableFuture<MsaCode> msaCodeFuture = new CompletableFuture<>();
         final HttpServer httpServer = HttpServer.create(new InetSocketAddress(localWebServer.getPort()), 0);
@@ -84,7 +84,7 @@ public class StepLocalWebServerMsaCode extends MsaCodeStep<StepLocalWebServer.Lo
         try {
             final MsaCode msaCode = msaCodeFuture.get(this.timeout, TimeUnit.MILLISECONDS);
             httpServer.stop(0);
-            logger.info("Got MSA Code");
+            logger.info(this, "Got MSA Code");
             return msaCode;
         } catch (TimeoutException e) {
             httpServer.stop(0);

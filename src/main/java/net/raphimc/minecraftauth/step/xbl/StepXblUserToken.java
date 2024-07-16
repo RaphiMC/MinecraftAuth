@@ -43,7 +43,7 @@ public class StepXblUserToken extends AbstractStep<StepInitialXblSession.Initial
 
     @Override
     protected XblUserToken execute(final ILogger logger, final HttpClient httpClient, final StepInitialXblSession.InitialXblSession initialXblSession) throws Exception {
-        logger.info("Authenticating user with Xbox Live...");
+        logger.info(this, "Authenticating user with Xbox Live...");
 
         final JsonObject postData = new JsonObject();
         final JsonObject properties = new JsonObject();
@@ -66,7 +66,7 @@ public class StepXblUserToken extends AbstractStep<StepInitialXblSession.Initial
         final JsonObject obj = httpClient.execute(postRequest, new XblResponseHandler());
 
         final XblUserToken xblUserToken = XblUserToken.fromMicrosoftJson(obj, initialXblSession);
-        logger.info("Got XBL User Token, expires: " + Instant.ofEpochMilli(xblUserToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info(this, "Got XBL User Token, expires: " + Instant.ofEpochMilli(xblUserToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return xblUserToken;
     }
 

@@ -52,7 +52,7 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
 
     @Override
     protected XblDeviceToken execute(final ILogger logger, final HttpClient httpClient, final StepResult<?> prevResult) throws Exception {
-        logger.info("Authenticating device with Xbox Live...");
+        logger.info(this, "Authenticating device with Xbox Live...");
 
         final UUID id = UUID.randomUUID();
         final KeyPairGenerator secp256r1 = KeyPairGenerator.getInstance("EC");
@@ -86,7 +86,7 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
                 obj.get("Token").getAsString(),
                 obj.getAsJsonObject("DisplayClaims").getAsJsonObject("xdi").get("did").getAsString()
         );
-        logger.info("Got XBL Device Token, expires: " + Instant.ofEpochMilli(xblDeviceToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info(this, "Got XBL Device Token, expires: " + Instant.ofEpochMilli(xblDeviceToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return xblDeviceToken;
     }
 

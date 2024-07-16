@@ -40,7 +40,7 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
 
     @Override
     protected MCProfile execute(final ILogger logger, final HttpClient httpClient, final StepMCToken.MCToken mcToken) throws Exception {
-        logger.info("Getting profile...");
+        logger.info(this, "Getting profile...");
 
         final GetRequest getRequest = new GetRequest(MINECRAFT_PROFILE_URL);
         getRequest.setHeader(Headers.AUTHORIZATION, mcToken.getTokenType() + " " + mcToken.getAccessToken());
@@ -52,7 +52,7 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
                 obj.get("skins").getAsJsonArray().get(0).getAsJsonObject().get("url").getAsString(),
                 mcToken
         );
-        logger.info("Got MC Profile, name: " + mcProfile.name + ", uuid: " + mcProfile.id);
+        logger.info(this, "Got MC Profile, name: " + mcProfile.name + ", uuid: " + mcProfile.id);
         return mcProfile;
     }
 

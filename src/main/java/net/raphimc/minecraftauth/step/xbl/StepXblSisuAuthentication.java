@@ -48,7 +48,7 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
 
     @Override
     protected StepXblSisuAuthentication.XblSisuTokens execute(final ILogger logger, final HttpClient httpClient, final StepInitialXblSession.InitialXblSession initialXblSession) throws Exception {
-        logger.info("Authenticating with Xbox Live using SISU...");
+        logger.info(this, "Authenticating with Xbox Live using SISU...");
 
         if (initialXblSession.getXblDeviceToken() == null) {
             throw new IllegalStateException("An XBL Device Token is needed for SISU authentication");
@@ -82,7 +82,7 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
                 xblXstsToken,
                 initialXblSession
         );
-        logger.info("Got XBL User+Title+XSTS Token, expires: " + Instant.ofEpochMilli(xblSisuTokens.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info(this, "Got XBL User+Title+XSTS Token, expires: " + Instant.ofEpochMilli(xblSisuTokens.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return xblSisuTokens;
     }
 

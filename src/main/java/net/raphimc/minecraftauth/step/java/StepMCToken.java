@@ -41,7 +41,7 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
 
     @Override
     protected MCToken execute(final ILogger logger, final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
-        logger.info("Authenticating with Minecraft Services...");
+        logger.info(this, "Authenticating with Minecraft Services...");
 
         final JsonObject postData = new JsonObject();
         postData.addProperty("platform", "PC_LAUNCHER");
@@ -57,7 +57,7 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
                 System.currentTimeMillis() + obj.get("expires_in").getAsLong() * 1000,
                 xblXsts
         );
-        logger.info("Got MC Token, expires: " + Instant.ofEpochMilli(mcToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info(this, "Got MC Token, expires: " + Instant.ofEpochMilli(mcToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return mcToken;
     }
 

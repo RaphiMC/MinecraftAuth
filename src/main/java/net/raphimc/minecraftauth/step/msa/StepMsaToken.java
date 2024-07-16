@@ -91,7 +91,7 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
     }
 
     private MsaToken execute(final ILogger logger, final HttpClient httpClient, final String type, final String codeOrRefreshToken, final MsaCodeStep.MsaCode msaCode) throws Exception {
-        logger.info("Getting MSA Token...");
+        logger.info(this, "Getting MSA Token...");
 
         final Map<String, String> postData = new HashMap<>();
         postData.put("client_id", this.applicationDetails.getClientId());
@@ -119,7 +119,7 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
                 JsonUtil.getStringOr(obj, "refresh_token", null),
                 msaCode
         );
-        logger.info("Got MSA Token, expires: " + Instant.ofEpochMilli(msaToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info(this, "Got MSA Token, expires: " + Instant.ofEpochMilli(msaToken.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return msaToken;
     }
 

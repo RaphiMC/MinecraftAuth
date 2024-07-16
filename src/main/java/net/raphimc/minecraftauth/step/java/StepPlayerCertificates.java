@@ -48,7 +48,7 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
 
     @Override
     protected PlayerCertificates execute(final ILogger logger, final HttpClient httpClient, final StepMCToken.MCToken mcToken) throws Exception {
-        logger.info("Getting player certificates...");
+        logger.info(this, "Getting player certificates...");
 
         final PostRequest postRequest = new PostRequest(PLAYER_CERTIFICATES_URL);
         postRequest.setContent(new StringContent(ContentTypes.APPLICATION_JSON, ""));
@@ -76,7 +76,7 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
                 obj.has("publicKeySignature") ? Base64.getMimeDecoder().decode(obj.get("publicKeySignature").getAsString()) : new byte[0],
                 mcToken
         );
-        logger.info("Got player certificates, expires: " + Instant.ofEpochMilli(playerCertificates.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
+        logger.info(this, "Got player certificates, expires: " + Instant.ofEpochMilli(playerCertificates.getExpireTimeMs()).atZone(ZoneId.systemDefault()));
         return playerCertificates;
     }
 

@@ -52,7 +52,7 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
 
     @Override
     protected MsaCode execute(final ILogger logger, final HttpClient httpClient, final MsaCredentials msaCredentials) throws Exception {
-        logger.info("Trying to get MSA Code using email and password...");
+        logger.info(this, "Trying to get MSA Code using email and password...");
 
         if (msaCredentials == null) {
             throw new IllegalStateException("Missing StepCredentialsMsaCode.MsaCredentials input");
@@ -160,7 +160,7 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
         });
 
         final MsaCode msaCode = new MsaCode(code);
-        logger.info("Got MSA Code");
+        logger.info(this, "Got MSA Code");
         return msaCode;
     }
 

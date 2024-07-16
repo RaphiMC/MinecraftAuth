@@ -17,11 +17,25 @@
  */
 package net.raphimc.minecraftauth.util.logging;
 
+import net.raphimc.minecraftauth.step.AbstractStep;
+
 public interface ILogger {
+
+    default void info(final AbstractStep<?, ?> step, final String message) {
+        this.info(message);
+    }
 
     void info(final String message);
 
+    default void warn(final AbstractStep<?, ?> step, final String message) {
+        this.warn(message);
+    }
+
     void warn(final String message);
+
+    default void error(final AbstractStep<?, ?> step, final String message) {
+        this.error(message);
+    }
 
     void error(final String message);
 

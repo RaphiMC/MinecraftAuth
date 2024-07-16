@@ -57,7 +57,7 @@ public class StepJfxWebViewMsaCode extends MsaCodeStep<StepJfxWebViewMsaCode.Jav
     @Override
     @SneakyThrows
     protected MsaCode execute(final ILogger logger, final HttpClient httpClient, final JavaFxWebView javaFxWebViewCallback) throws Exception {
-        logger.info("Opening JavaFX WebView window for MSA login...");
+        logger.info(this, "Opening JavaFX WebView window for MSA login...");
 
         final JFXPanel jfxPanel = new JFXPanel();
         final URL authenticationUrl = new URLWrapper(this.applicationDetails.getOAuthEnvironment().getAuthorizeUrl()).wrapQuery().addQueries(this.applicationDetails.getOAuthParameters()).apply().toURL();
@@ -113,7 +113,7 @@ public class StepJfxWebViewMsaCode extends MsaCodeStep<StepJfxWebViewMsaCode.Jav
         try {
             final MsaCode msaCode = msaCodeFuture.get(this.timeout, TimeUnit.MILLISECONDS);
             window.dispose();
-            logger.info("Got MSA Code");
+            logger.info(this, "Got MSA Code");
             return msaCode;
         } catch (TimeoutException e) {
             window.dispose();
