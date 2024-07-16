@@ -27,9 +27,9 @@ import java.util.List;
 
 public interface SameInputStep<I1 extends AbstractStep.StepResult<?>, O extends AbstractStep.StepResult<?>> {
 
-    O fromRawJson(final JsonObject json);
+    O fromUnoptimizedJson(final JsonObject json);
 
-    JsonObject toRawJson(final O result);
+    JsonObject toUnoptimizedJson(final O result);
 
     default <I2 extends AbstractStep.StepResult<?>> I2 executeSecondaryStepChain(final ILogger logger, final HttpClient httpClient, final I1 prevResult1, final List<AbstractStep<?, ?>> steps1UntilSameInput, final List<AbstractStep<?, ?>> steps2UntilSameInput) throws Exception {
         if (steps2UntilSameInput.isEmpty()) {

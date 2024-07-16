@@ -57,16 +57,16 @@ public abstract class SameInputBiMergeStep<I1 extends AbstractStep.StepResult<?>
     }
 
     @Override
-    public JsonObject toJson(final O result) {
-        final JsonObject json = this.toRawJson(result);
-        this.removeDuplicateStepResultsFromJson(json, this.steps2UntilSameInput);
-        return json;
+    public final O fromJson(final JsonObject json) {
+        this.insertDuplicateStepResultsIntoJson(json, this.steps1UntilSameInput, this.steps2UntilSameInput);
+        return this.fromUnoptimizedJson(json);
     }
 
     @Override
-    public O fromJson(final JsonObject json) {
-        this.insertDuplicateStepResultsIntoJson(json, this.steps1UntilSameInput, this.steps2UntilSameInput);
-        return this.fromRawJson(json);
+    public final JsonObject toJson(final O result) {
+        final JsonObject json = this.toUnoptimizedJson(result);
+        this.removeDuplicateStepResultsFromJson(json, this.steps2UntilSameInput);
+        return json;
     }
 
 }

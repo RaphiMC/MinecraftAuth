@@ -31,7 +31,7 @@ public abstract class TriMergeStep<I1 extends AbstractStep.StepResult<?>, I2 ext
     }
 
     @Override
-    public O execute(final ILogger logger, final HttpClient httpClient, final I1 prevResult1, final I2 prevResult2) throws Exception {
+    public final O execute(final ILogger logger, final HttpClient httpClient, final I1 prevResult1, final I2 prevResult2) throws Exception {
         return this.execute(logger, httpClient, prevResult1, prevResult2, null);
     }
 

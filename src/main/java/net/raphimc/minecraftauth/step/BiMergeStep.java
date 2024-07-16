@@ -31,7 +31,7 @@ public abstract class BiMergeStep<I1 extends AbstractStep.StepResult<?>, I2 exte
     }
 
     @Override
-    public O execute(final ILogger logger, final HttpClient httpClient, final I1 prevResult) throws Exception {
+    public final O execute(final ILogger logger, final HttpClient httpClient, final I1 prevResult) throws Exception {
         return this.execute(logger, httpClient, prevResult, null);
     }
 

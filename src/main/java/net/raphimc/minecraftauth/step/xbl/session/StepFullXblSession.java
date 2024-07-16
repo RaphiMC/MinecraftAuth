@@ -42,14 +42,14 @@ public class StepFullXblSession extends SameInputBiMergeStep<StepXblUserToken.Xb
     }
 
     @Override
-    public FullXblSession fromRawJson(final JsonObject json) {
+    public FullXblSession fromUnoptimizedJson(final JsonObject json) {
         final StepXblUserToken.XblUserToken xblUserToken = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         final StepXblTitleToken.XblTitleToken xblTitleToken = this.prevStep2 != null ? this.prevStep2.fromJson(json.getAsJsonObject(this.prevStep2.name)) : null;
         return new FullXblSession(xblUserToken, xblTitleToken);
     }
 
     @Override
-    public JsonObject toRawJson(final FullXblSession fullXblSession) {
+    public JsonObject toUnoptimizedJson(final FullXblSession fullXblSession) {
         final JsonObject json = new JsonObject();
         if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(fullXblSession.xblUserToken));
         if (this.prevStep2 != null) json.add(this.prevStep2.name, this.prevStep2.toJson(fullXblSession.xblTitleToken));

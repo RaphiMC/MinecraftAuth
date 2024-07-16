@@ -40,14 +40,14 @@ public class StepFullJavaSession extends SameInputBiMergeStep<StepMCProfile.MCPr
     }
 
     @Override
-    public FullJavaSession fromRawJson(final JsonObject json) {
+    public FullJavaSession fromUnoptimizedJson(final JsonObject json) {
         final StepMCProfile.MCProfile mcProfile = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         final StepPlayerCertificates.PlayerCertificates playerCertificates = this.prevStep2 != null ? this.prevStep2.fromJson(json.getAsJsonObject(this.prevStep2.name)) : null;
         return new FullJavaSession(mcProfile, playerCertificates);
     }
 
     @Override
-    public JsonObject toRawJson(final FullJavaSession fullJavaSession) {
+    public JsonObject toUnoptimizedJson(final FullJavaSession fullJavaSession) {
         final JsonObject json = new JsonObject();
         if (this.prevStep != null) json.add(this.prevStep.name, this.prevStep.toJson(fullJavaSession.mcProfile));
         if (this.prevStep2 != null) json.add(this.prevStep2.name, this.prevStep2.toJson(fullJavaSession.playerCertificates));
