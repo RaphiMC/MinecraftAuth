@@ -31,7 +31,7 @@ public class StepXblXstsToFullXblSession extends AbstractStep<StepXblXstsToken.X
     }
 
     @Override
-    public StepFullXblSession.FullXblSession applyStep(final ILogger logger, final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
+    public StepFullXblSession.FullXblSession execute(final ILogger logger, final HttpClient httpClient, final StepXblXstsToken.XblXsts<?> xblXsts) throws Exception {
         return new FullXblSessionWrapper(xblXsts);
     }
 

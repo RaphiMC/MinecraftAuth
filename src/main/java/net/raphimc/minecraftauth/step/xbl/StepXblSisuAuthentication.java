@@ -47,7 +47,7 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
     }
 
     @Override
-    public StepXblSisuAuthentication.XblSisuTokens applyStep(final ILogger logger, final HttpClient httpClient, final StepInitialXblSession.InitialXblSession initialXblSession) throws Exception {
+    public StepXblSisuAuthentication.XblSisuTokens execute(final ILogger logger, final HttpClient httpClient, final StepInitialXblSession.InitialXblSession initialXblSession) throws Exception {
         logger.info("Authenticating with Xbox Live using SISU...");
 
         if (initialXblSession.getXblDeviceToken() == null) {

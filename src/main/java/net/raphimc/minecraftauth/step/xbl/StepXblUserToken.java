@@ -42,7 +42,7 @@ public class StepXblUserToken extends AbstractStep<StepInitialXblSession.Initial
     }
 
     @Override
-    public XblUserToken applyStep(final ILogger logger, final HttpClient httpClient, final StepInitialXblSession.InitialXblSession initialXblSession) throws Exception {
+    public XblUserToken execute(final ILogger logger, final HttpClient httpClient, final StepInitialXblSession.InitialXblSession initialXblSession) throws Exception {
         logger.info("Authenticating user with Xbox Live...");
 
         final JsonObject postData = new JsonObject();

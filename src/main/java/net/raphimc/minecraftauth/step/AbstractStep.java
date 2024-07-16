@@ -54,11 +54,7 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
         this.prevStep = null;
     }
 
-    public final O applyStep(final HttpClient httpClient, final I prevResult) throws Exception {
-        return this.applyStep(MinecraftAuth.LOGGER, httpClient, prevResult);
-    }
-
-    public abstract O applyStep(final ILogger logger, final HttpClient httpClient, final I prevResult) throws Exception;
+    public abstract O execute(final ILogger logger, final HttpClient httpClient, final I prevResult) throws Exception;
 
     public final O refresh(final HttpClient httpClient, final O result) throws Exception {
         return this.refresh(MinecraftAuth.LOGGER, httpClient, result);
@@ -69,7 +65,7 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
             return result;
         }
 
-        return this.applyStep(logger, httpClient, this.prevStep != null ? this.prevStep.refresh(logger, httpClient, (I) result.prevResult()) : null);
+        return this.execute(logger, httpClient, this.prevStep != null ? this.prevStep.refresh(logger, httpClient, (I) result.prevResult()) : null);
     }
 
     public final O getFromInput(final HttpClient httpClient, final InitialInput input) throws Exception {
@@ -77,7 +73,7 @@ public abstract class AbstractStep<I extends AbstractStep.StepResult<?>, O exten
     }
 
     public O getFromInput(final ILogger logger, final HttpClient httpClient, final InitialInput input) throws Exception {
-        return this.applyStep(logger, httpClient, this.prevStep != null ? this.prevStep.getFromInput(logger, httpClient, input) : (I) input);
+        return this.execute(logger, httpClient, this.prevStep != null ? this.prevStep.getFromInput(logger, httpClient, input) : (I) input);
     }
 
     public abstract O fromJson(final JsonObject json);

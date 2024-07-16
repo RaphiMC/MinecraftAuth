@@ -31,11 +31,11 @@ public abstract class TriMergeStep<I1 extends AbstractStep.StepResult<?>, I2 ext
     }
 
     @Override
-    public O applyStep(final HttpClient httpClient, final I1 prevResult1, final I2 prevResult2) throws Exception {
-        return this.applyStep(httpClient, prevResult1, prevResult2, null);
+    public O execute(final ILogger logger, final HttpClient httpClient, final I1 prevResult1, final I2 prevResult2) throws Exception {
+        return this.execute(logger, httpClient, prevResult1, prevResult2, null);
     }
 
-    public abstract O applyStep(final HttpClient httpClient, final I1 prevResult1, final I2 prevResult2, final I3 prevResult3) throws Exception;
+    public abstract O execute(final ILogger logger, final HttpClient httpClient, final I1 prevResult1, final I2 prevResult2, final I3 prevResult3) throws Exception;
 
     @Override
     public O refresh(final ILogger logger, final HttpClient httpClient, final O result) throws Exception {
@@ -46,7 +46,7 @@ public abstract class TriMergeStep<I1 extends AbstractStep.StepResult<?>, I2 ext
         final I1 prevResult1 = this.prevStep.refresh(logger, httpClient, result.prevResult());
         final I2 prevResult2 = this.prevStep2 != null ? this.prevStep2.refresh(logger, httpClient, result.prevResult2()) : null;
         final I3 prevResult3 = this.prevStep3 != null ? this.prevStep3.refresh(logger, httpClient, result.prevResult3()) : null;
-        return this.applyStep(httpClient, prevResult1, prevResult2, prevResult3);
+        return this.execute(logger, httpClient, prevResult1, prevResult2, prevResult3);
     }
 
     @Override
@@ -54,7 +54,7 @@ public abstract class TriMergeStep<I1 extends AbstractStep.StepResult<?>, I2 ext
         final I1 prevResult1 = this.prevStep.getFromInput(logger, httpClient, input);
         final I2 prevResult2 = this.prevStep2 != null ? this.prevStep2.getFromInput(logger, httpClient, input) : null;
         final I3 prevResult3 = this.prevStep3 != null ? this.prevStep3.getFromInput(logger, httpClient, input) : null;
-        return this.applyStep(httpClient, prevResult1, prevResult2, prevResult3);
+        return this.execute(logger, httpClient, prevResult1, prevResult2, prevResult3);
     }
 
     public abstract static class StepResult<P1 extends AbstractStep.StepResult<?>, P2 extends AbstractStep.StepResult<?>, P3 extends AbstractStep.StepResult<?>> extends BiMergeStep.StepResult<P1, P2> {

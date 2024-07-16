@@ -46,14 +46,14 @@ public abstract class SameInputBiMergeStep<I1 extends AbstractStep.StepResult<?>
 
         final I1 prevResult1 = this.prevStep.refresh(logger, httpClient, result.prevResult());
         final I2 prevResult2 = this.refreshSecondaryStepChain(logger, httpClient, prevResult1, result.prevResult2(), this.steps1UntilSameInput, this.steps2UntilSameInput);
-        return this.applyStep(httpClient, prevResult1, prevResult2);
+        return this.execute(logger, httpClient, prevResult1, prevResult2);
     }
 
     @Override
     public O getFromInput(final ILogger logger, final HttpClient httpClient, final InitialInput input) throws Exception {
         final I1 prevResult1 = this.prevStep.getFromInput(logger, httpClient, input);
-        final I2 prevResult2 = this.applySecondaryStepChain(logger, httpClient, prevResult1, this.steps1UntilSameInput, this.steps2UntilSameInput);
-        return this.applyStep(httpClient, prevResult1, prevResult2);
+        final I2 prevResult2 = this.executeSecondaryStepChain(logger, httpClient, prevResult1, this.steps1UntilSameInput, this.steps2UntilSameInput);
+        return this.execute(logger, httpClient, prevResult1, prevResult2);
     }
 
     @Override

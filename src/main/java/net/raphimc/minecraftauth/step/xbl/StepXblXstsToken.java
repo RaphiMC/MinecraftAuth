@@ -57,7 +57,7 @@ public class StepXblXstsToken extends AbstractStep<StepFullXblSession.FullXblSes
     }
 
     @Override
-    public XblXstsToken applyStep(final ILogger logger, final HttpClient httpClient, final StepFullXblSession.FullXblSession fullXblSession) throws Exception {
+    public XblXstsToken execute(final ILogger logger, final HttpClient httpClient, final StepFullXblSession.FullXblSession fullXblSession) throws Exception {
         logger.info("Requesting XSTS Token...");
 
         final JsonObject postData = new JsonObject();

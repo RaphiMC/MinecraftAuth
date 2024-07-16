@@ -50,7 +50,7 @@ public class StepEduJWT extends AbstractStep<StepMsaToken.MsaToken, StepEduJWT.E
     }
 
     @Override
-    public EduJWT applyStep(final ILogger logger, final HttpClient httpClient, final StepMsaToken.MsaToken msaToken) throws Exception {
+    public EduJWT execute(final ILogger logger, final HttpClient httpClient, final StepMsaToken.MsaToken msaToken) throws Exception {
         logger.info("Authenticating with Minecraft Education Services...");
 
         final JsonObject postData = new JsonObject();

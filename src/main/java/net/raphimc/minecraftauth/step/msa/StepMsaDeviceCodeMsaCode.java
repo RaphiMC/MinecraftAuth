@@ -45,7 +45,7 @@ public class StepMsaDeviceCodeMsaCode extends MsaCodeStep<StepMsaDeviceCode.MsaD
     }
 
     @Override
-    public MsaCode applyStep(final ILogger logger, final HttpClient httpClient, final StepMsaDeviceCode.MsaDeviceCode msaDeviceCode) throws Exception {
+    public MsaCode execute(final ILogger logger, final HttpClient httpClient, final StepMsaDeviceCode.MsaDeviceCode msaDeviceCode) throws Exception {
         logger.info("Waiting for MSA login via device code...");
 
         final long start = System.currentTimeMillis();

@@ -40,12 +40,12 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
     }
 
     @Override
-    public MsaToken applyStep(final ILogger logger, final HttpClient httpClient, final MsaCodeStep.MsaCode msaCode) throws Exception {
+    public MsaToken execute(final ILogger logger, final HttpClient httpClient, final MsaCodeStep.MsaCode msaCode) throws Exception {
         if (msaCode.msaToken != null) {
             return msaCode.msaToken;
         }
 
-        return this.apply(logger, httpClient, "authorization_code", msaCode.getCode(), msaCode);
+        return this.execute(logger, httpClient, "authorization_code", msaCode.getCode(), msaCode);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
         if (!msaToken.isExpired()) {
             return msaToken;
         } else if (msaToken.getRefreshToken() != null) {
-            return this.apply(logger, httpClient, "refresh_token", msaToken.getRefreshToken(), msaToken.getMsaCode());
+            return this.execute(logger, httpClient, "refresh_token", msaToken.getRefreshToken(), msaToken.getMsaCode());
         } else {
             return super.refresh(logger, httpClient, msaToken);
         }
@@ -63,7 +63,7 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
     public MsaToken getFromInput(final ILogger logger, final HttpClient httpClient, final InitialInput input) throws Exception {
         if (input instanceof RefreshToken) {
             final RefreshToken refreshToken = (RefreshToken) input;
-            return this.apply(logger, httpClient, "refresh_token", refreshToken.getRefreshToken(), new MsaCodeStep.MsaCode(null));
+            return this.execute(logger, httpClient, "refresh_token", refreshToken.getRefreshToken(), new MsaCodeStep.MsaCode(null));
         } else {
             return super.getFromInput(logger, httpClient, input);
         }
@@ -90,7 +90,7 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
         return json;
     }
 
-    private MsaToken apply(final ILogger logger, final HttpClient httpClient, final String type, final String codeOrRefreshToken, final MsaCodeStep.MsaCode msaCode) throws Exception {
+    private MsaToken execute(final ILogger logger, final HttpClient httpClient, final String type, final String codeOrRefreshToken, final MsaCodeStep.MsaCode msaCode) throws Exception {
         logger.info("Getting MSA Token...");
 
         final Map<String, String> postData = new HashMap<>();

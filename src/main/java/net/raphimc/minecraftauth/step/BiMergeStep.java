@@ -31,11 +31,11 @@ public abstract class BiMergeStep<I1 extends AbstractStep.StepResult<?>, I2 exte
     }
 
     @Override
-    public O applyStep(final ILogger logger, final HttpClient httpClient, final I1 prevResult) throws Exception {
-        return this.applyStep(httpClient, prevResult, null);
+    public O execute(final ILogger logger, final HttpClient httpClient, final I1 prevResult) throws Exception {
+        return this.execute(logger, httpClient, prevResult, null);
     }
 
-    public abstract O applyStep(final HttpClient httpClient, final I1 prevResult1, final I2 prevResult2) throws Exception;
+    public abstract O execute(final ILogger logger, final HttpClient httpClient, final I1 prevResult1, final I2 prevResult2) throws Exception;
 
     @Override
     public O refresh(final ILogger logger, final HttpClient httpClient, final O result) throws Exception {
@@ -45,14 +45,14 @@ public abstract class BiMergeStep<I1 extends AbstractStep.StepResult<?>, I2 exte
 
         final I1 prevResult1 = this.prevStep.refresh(logger, httpClient, result.prevResult());
         final I2 prevResult2 = this.prevStep2 != null ? this.prevStep2.refresh(logger, httpClient, result.prevResult2()) : null;
-        return this.applyStep(httpClient, prevResult1, prevResult2);
+        return this.execute(logger, httpClient, prevResult1, prevResult2);
     }
 
     @Override
     public O getFromInput(final ILogger logger, final HttpClient httpClient, final InitialInput input) throws Exception {
         final I1 prevResult1 = this.prevStep.getFromInput(logger, httpClient, input);
         final I2 prevResult2 = this.prevStep2 != null ? this.prevStep2.getFromInput(logger, httpClient, input) : null;
-        return this.applyStep(httpClient, prevResult1, prevResult2);
+        return this.execute(logger, httpClient, prevResult1, prevResult2);
     }
 
     public abstract static class StepResult<P1 extends AbstractStep.StepResult<?>, P2 extends AbstractStep.StepResult<?>> extends AbstractStep.StepResult<P1> {

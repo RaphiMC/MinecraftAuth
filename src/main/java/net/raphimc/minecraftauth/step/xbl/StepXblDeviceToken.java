@@ -51,7 +51,7 @@ public class StepXblDeviceToken extends AbstractStep<AbstractStep.StepResult<?>,
     }
 
     @Override
-    public XblDeviceToken applyStep(final ILogger logger, final HttpClient httpClient, final StepResult<?> prevResult) throws Exception {
+    public XblDeviceToken execute(final ILogger logger, final HttpClient httpClient, final StepResult<?> prevResult) throws Exception {
         logger.info("Authenticating device with Xbox Live...");
 
         final UUID id = UUID.randomUUID();

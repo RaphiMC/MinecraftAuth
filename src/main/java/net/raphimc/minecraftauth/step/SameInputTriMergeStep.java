@@ -56,15 +56,15 @@ public abstract class SameInputTriMergeStep<I1 extends AbstractStep.StepResult<?
         final I1 prevResult1 = this.prevStep.refresh(logger, httpClient, result.prevResult());
         final I2 prevResult2 = this.refreshSecondaryStepChain(logger, httpClient, prevResult1, result.prevResult2(), this.steps1UntilSameInput, this.steps2UntilSameInput);
         final I3 prevResult3 = this.refreshSecondaryStepChain(logger, httpClient, prevResult1, result.prevResult3(), this.steps1UntilSameInput, this.steps3UntilSameInput);
-        return this.applyStep(httpClient, prevResult1, prevResult2, prevResult3);
+        return this.execute(logger, httpClient, prevResult1, prevResult2, prevResult3);
     }
 
     @Override
     public O getFromInput(final ILogger logger, final HttpClient httpClient, final InitialInput input) throws Exception {
         final I1 prevResult1 = this.prevStep.getFromInput(logger, httpClient, input);
-        final I2 prevResult2 = this.applySecondaryStepChain(logger, httpClient, prevResult1, this.steps1UntilSameInput, this.steps2UntilSameInput);
-        final I3 prevResult3 = this.applySecondaryStepChain(logger, httpClient, prevResult1, this.steps1UntilSameInput, this.steps3UntilSameInput);
-        return this.applyStep(httpClient, prevResult1, prevResult2, prevResult3);
+        final I2 prevResult2 = this.executeSecondaryStepChain(logger, httpClient, prevResult1, this.steps1UntilSameInput, this.steps2UntilSameInput);
+        final I3 prevResult3 = this.executeSecondaryStepChain(logger, httpClient, prevResult1, this.steps1UntilSameInput, this.steps3UntilSameInput);
+        return this.execute(logger, httpClient, prevResult1, prevResult2, prevResult3);
     }
 
     @Override

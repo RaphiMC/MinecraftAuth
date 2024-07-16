@@ -41,7 +41,7 @@ public class StepMsaDeviceCode extends InitialPreparationStep<StepMsaDeviceCode.
     }
 
     @Override
-    public MsaDeviceCode applyStep(final ILogger logger, final HttpClient httpClient, final MsaDeviceCodeCallback msaDeviceCodeCallback) throws Exception {
+    public MsaDeviceCode execute(final ILogger logger, final HttpClient httpClient, final MsaDeviceCodeCallback msaDeviceCodeCallback) throws Exception {
         logger.info("Getting device code for MSA login...");
 
         if (msaDeviceCodeCallback == null) {

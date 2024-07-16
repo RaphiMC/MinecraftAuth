@@ -25,6 +25,7 @@ import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.BiMergeStep;
 import net.raphimc.minecraftauth.step.msa.StepMsaToken;
 import net.raphimc.minecraftauth.step.xbl.StepXblDeviceToken;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 public class StepInitialXblSession extends BiMergeStep<StepMsaToken.MsaToken, StepXblDeviceToken.XblDeviceToken, StepInitialXblSession.InitialXblSession> {
 
@@ -33,7 +34,7 @@ public class StepInitialXblSession extends BiMergeStep<StepMsaToken.MsaToken, St
     }
 
     @Override
-    public InitialXblSession applyStep(final HttpClient httpClient, final StepMsaToken.MsaToken msaToken, final StepXblDeviceToken.XblDeviceToken xblDeviceToken) throws Exception {
+    public InitialXblSession execute(final ILogger logger, final HttpClient httpClient, final StepMsaToken.MsaToken msaToken, final StepXblDeviceToken.XblDeviceToken xblDeviceToken) throws Exception {
         return new InitialXblSession(msaToken, xblDeviceToken);
     }
 

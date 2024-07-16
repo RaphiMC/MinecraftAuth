@@ -51,7 +51,7 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
     }
 
     @Override
-    public MsaCode applyStep(final ILogger logger, final HttpClient httpClient, final MsaCredentials msaCredentials) throws Exception {
+    public MsaCode execute(final ILogger logger, final HttpClient httpClient, final MsaCredentials msaCredentials) throws Exception {
         logger.info("Trying to get MSA Code using email and password...");
 
         if (msaCredentials == null) {

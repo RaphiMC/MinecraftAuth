@@ -28,6 +28,7 @@ import net.raphimc.minecraftauth.step.BiMergeStep;
 import net.raphimc.minecraftauth.step.SameInputBiMergeStep;
 import net.raphimc.minecraftauth.step.xbl.StepXblTitleToken;
 import net.raphimc.minecraftauth.step.xbl.StepXblUserToken;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 public class StepFullXblSession extends SameInputBiMergeStep<StepXblUserToken.XblUserToken, StepXblTitleToken.XblTitleToken, StepFullXblSession.FullXblSession> {
 
@@ -36,7 +37,7 @@ public class StepFullXblSession extends SameInputBiMergeStep<StepXblUserToken.Xb
     }
 
     @Override
-    public FullXblSession applyStep(final HttpClient httpClient, final StepXblUserToken.XblUserToken xblUserToken, final StepXblTitleToken.XblTitleToken xblTitleToken) throws Exception {
+    public FullXblSession execute(final ILogger logger, final HttpClient httpClient, final StepXblUserToken.XblUserToken xblUserToken, final StepXblTitleToken.XblTitleToken xblTitleToken) throws Exception {
         return new FullXblSession(xblUserToken, xblTitleToken);
     }
 

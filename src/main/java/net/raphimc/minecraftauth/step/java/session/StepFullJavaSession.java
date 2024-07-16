@@ -26,6 +26,7 @@ import net.raphimc.minecraftauth.step.BiMergeStep;
 import net.raphimc.minecraftauth.step.SameInputBiMergeStep;
 import net.raphimc.minecraftauth.step.java.StepMCProfile;
 import net.raphimc.minecraftauth.step.java.StepPlayerCertificates;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 public class StepFullJavaSession extends SameInputBiMergeStep<StepMCProfile.MCProfile, StepPlayerCertificates.PlayerCertificates, StepFullJavaSession.FullJavaSession> {
 
@@ -34,7 +35,7 @@ public class StepFullJavaSession extends SameInputBiMergeStep<StepMCProfile.MCPr
     }
 
     @Override
-    public FullJavaSession applyStep(final HttpClient httpClient, final StepMCProfile.MCProfile mcProfile, final StepPlayerCertificates.PlayerCertificates playerCertificates) throws Exception {
+    public FullJavaSession execute(final ILogger logger, final HttpClient httpClient, final StepMCProfile.MCProfile mcProfile, final StepPlayerCertificates.PlayerCertificates playerCertificates) throws Exception {
         return new FullJavaSession(mcProfile, playerCertificates);
     }
 

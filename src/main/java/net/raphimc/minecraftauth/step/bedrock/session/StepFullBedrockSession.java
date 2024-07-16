@@ -27,6 +27,7 @@ import net.raphimc.minecraftauth.step.TriMergeStep;
 import net.raphimc.minecraftauth.step.bedrock.StepMCChain;
 import net.raphimc.minecraftauth.step.bedrock.StepPlayFabToken;
 import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
+import net.raphimc.minecraftauth.util.logging.ILogger;
 
 public class StepFullBedrockSession extends SameInputTriMergeStep<StepMCChain.MCChain, StepPlayFabToken.PlayFabToken, StepXblXstsToken.XblXsts<?>, StepFullBedrockSession.FullBedrockSession> {
 
@@ -35,7 +36,7 @@ public class StepFullBedrockSession extends SameInputTriMergeStep<StepMCChain.MC
     }
 
     @Override
-    public FullBedrockSession applyStep(final HttpClient httpClient, final StepMCChain.MCChain mcChain, final StepPlayFabToken.PlayFabToken playFabToken, final StepXblXstsToken.XblXsts<?> realmsXsts) throws Exception {
+    public FullBedrockSession execute(final ILogger logger, final HttpClient httpClient, final StepMCChain.MCChain mcChain, final StepPlayFabToken.PlayFabToken playFabToken, final StepXblXstsToken.XblXsts<?> realmsXsts) throws Exception {
         return new FullBedrockSession(mcChain, playFabToken, realmsXsts);
     }
 
