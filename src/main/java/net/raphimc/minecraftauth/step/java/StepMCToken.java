@@ -52,6 +52,7 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         final JsonObject obj = httpClient.execute(postRequest, new MinecraftResponseHandler());
 
         final MCToken mcToken = new MCToken(
+                obj.get("username").getAsString(),
                 obj.get("access_token").getAsString(),
                 obj.get("token_type").getAsString(),
                 System.currentTimeMillis() + obj.get("expires_in").getAsLong() * 1000,
@@ -65,6 +66,7 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     public MCToken fromJson(final JsonObject json) {
         final StepXblXstsToken.XblXsts<?> xblXsts = this.prevStep != null ? this.prevStep.fromJson(json.getAsJsonObject(this.prevStep.name)) : null;
         return new MCToken(
+                json.get("username").getAsString(),
                 json.get("accessToken").getAsString(),
                 json.get("tokenType").getAsString(),
                 json.get("expireTimeMs").getAsLong(),
@@ -75,6 +77,7 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     @Override
     public JsonObject toJson(final MCToken mcToken) {
         final JsonObject json = new JsonObject();
+        json.addProperty("username", mcToken.username);
         json.addProperty("accessToken", mcToken.accessToken);
         json.addProperty("tokenType", mcToken.tokenType);
         json.addProperty("expireTimeMs", mcToken.expireTimeMs);
@@ -86,6 +89,7 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     @EqualsAndHashCode(callSuper = false)
     public static class MCToken extends AbstractStep.StepResult<StepXblXstsToken.XblXsts<?>> {
 
+        String username;
         String accessToken;
         String tokenType;
         long expireTimeMs;
