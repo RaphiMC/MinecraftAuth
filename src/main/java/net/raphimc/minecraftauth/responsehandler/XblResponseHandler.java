@@ -39,7 +39,10 @@ public class XblResponseHandler extends JsonHttpResponseHandler {
     }
 
     @Override
-    protected void handleJsonError(final HttpResponse response, final JsonObject obj) {
+    protected void handleJsonError(final HttpResponse response, final JsonObject obj) throws IOException {
+        if (obj.has("XErr")) {
+            throw new XblRequestException(response, obj.get("XErr").getAsLong());
+        }
     }
 
 }
