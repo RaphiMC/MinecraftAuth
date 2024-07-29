@@ -29,14 +29,14 @@ public class XblRequestException extends ApiHttpRequestException {
     public static final Map<Long, String> ERROR_CODES = new HashMap<>();
 
     static {
-        ERROR_CODES.put(2148916227L, "Your account was banned by Xbox for violating one or more Community Standards for Xbox and is unable to be used.");
+        ERROR_CODES.put(2148916227L, "Your account was banned by Xbox for violating one or more Community Standards for Xbox.");
         ERROR_CODES.put(2148916229L, "Your account is currently restricted and your guardian has not given you permission to play online. Login to https://account.microsoft.com/family/ and have your guardian change your permissions.");
-        ERROR_CODES.put(2148916233L, "Your account currently does not have an Xbox profile. Please create one at https://signup.live.com/signup");
-        ERROR_CODES.put(2148916234L, "Your account has not accepted Xbox's Terms of Service. Please login and accept them.");
-        ERROR_CODES.put(2148916235L, "Your account resides in a region that Xbox has not authorized use from. Xbox has blocked your attempt at logging in.");
+        ERROR_CODES.put(2148916233L, "Your account doesn't have an Xbox profile. Please create one at https://www.xbox.com/live");
+        ERROR_CODES.put(2148916234L, "Your account has not accepted Xbox's Terms of Service. Please login at https://www.xbox.com/live and accept them.");
+        ERROR_CODES.put(2148916235L, "Your account is from a country where Xbox Live is not available/banned.");
         ERROR_CODES.put(2148916236L, "Your account requires proof of age. Please login to https://login.live.com/login.srf and provide proof of age.");
         ERROR_CODES.put(2148916237L, "Your account has reached the its limit for playtime. Your account has been blocked from logging in.");
-        ERROR_CODES.put(2148916238L, "The account date of birth is under 18 years and cannot proceed unless the account is added to a family by an adult.");
+        ERROR_CODES.put(2148916238L, "Your account is a child (under 18) and cannot proceed unless the account is added to a Family by an adult.");
     }
 
     private final long errorCode;
