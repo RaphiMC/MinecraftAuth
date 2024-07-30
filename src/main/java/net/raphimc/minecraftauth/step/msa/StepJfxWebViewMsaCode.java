@@ -145,6 +145,7 @@ public class StepJfxWebViewMsaCode extends MsaCodeStep<StepJfxWebViewMsaCode.Jav
             this.openCallback = (window, webView) -> window.setVisible(true);
             this.closeCallback = JFrame::dispose;
         }
+
     }
 
     public static class UserClosedWindowException extends Exception {
