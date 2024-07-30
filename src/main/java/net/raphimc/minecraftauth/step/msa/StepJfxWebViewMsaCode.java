@@ -21,6 +21,7 @@ import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.web.WebView;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 import lombok.Value;
@@ -43,6 +44,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class StepJfxWebViewMsaCode extends MsaCodeStep<StepJfxWebViewMsaCode.JavaFxWebView> {
 
@@ -112,27 +114,37 @@ public class StepJfxWebViewMsaCode extends MsaCodeStep<StepJfxWebViewMsaCode.Jav
 
         try {
             final MsaCode msaCode = msaCodeFuture.get(this.timeout, TimeUnit.MILLISECONDS);
-            window.dispose();
             logger.info(this, "Got MSA Code");
             return msaCode;
         } catch (TimeoutException e) {
-            window.dispose();
             throw new TimeoutException("MSA login timed out");
         } catch (ExecutionException e) {
-            window.dispose();
             if (e.getCause() != null) {
                 throw e.getCause();
             } else {
                 throw e;
             }
+        } finally {
+            if (javaFxWebViewCallback == null) {
+                window.dispose();
+            } else {
+                javaFxWebViewCallback.closeCallback.accept(window);
+            }
         }
     }
 
     @Value
+    @AllArgsConstructor
     @EqualsAndHashCode(callSuper = false)
     public static class JavaFxWebView extends AbstractStep.InitialInput {
 
-        BiConsumer<JFrame, WebView> openCallback = (window, webView) -> window.setVisible(true);
+        BiConsumer<JFrame, WebView> openCallback;
+        Consumer<JFrame> closeCallback;
+
+        public JavaFxWebView() {
+            this.openCallback = (window, webView) -> window.setVisible(true);
+            this.closeCallback = JFrame::dispose;
+        }
 
     }
 
