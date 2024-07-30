@@ -57,6 +57,7 @@ public abstract class MsaCodeStep<I extends AbstractStep.InitialInput> extends A
     }
 
     @Value
+    @RequiredArgsConstructor
     @EqualsAndHashCode(callSuper = false)
     public static class MsaCode extends AbstractStep.FirstStepResult {
 
@@ -70,10 +71,6 @@ public abstract class MsaCodeStep<I extends AbstractStep.InitialInput> extends A
         @ToString.Exclude
         @EqualsAndHashCode.Exclude
         StepMsaToken.MsaToken msaToken; // Used in device code flow
-
-        public MsaCode(final String code) {
-            this.code = code;
-        }
 
         @Override
         public boolean isExpired() {

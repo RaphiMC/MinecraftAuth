@@ -18,8 +18,8 @@
 package net.raphimc.minecraftauth.step.xbl.session;
 
 import com.google.gson.JsonObject;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.experimental.NonFinal;
 import net.lenni0451.commons.httpclient.HttpClient;
@@ -58,7 +58,7 @@ public class StepFullXblSession extends SameInputBiMergeStep<StepXblUserToken.Xb
 
     @Value
     @NonFinal
-    @AllArgsConstructor
+    @RequiredArgsConstructor
     @EqualsAndHashCode(callSuper = false)
     public static class FullXblSession extends BiMergeStep.StepResult<StepXblUserToken.XblUserToken, StepXblTitleToken.XblTitleToken> {
 

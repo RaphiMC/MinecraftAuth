@@ -137,6 +137,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
     }
 
     @Value
+    @RequiredArgsConstructor
     @EqualsAndHashCode(callSuper = false)
     public static class MCChain extends AbstractStep.StepResult<StepXblXstsToken.XblXsts<?>> {
 
@@ -166,17 +167,6 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
         @ToString.Exclude
         @EqualsAndHashCode.Exclude
         boolean lastExpireCheckResult;
-
-        public MCChain(final ECPublicKey publicKey, final ECPrivateKey privateKey, final String mojangJwt, final String identityJwt, final String xuid, final UUID id, final String displayName, final StepXblXstsToken.XblXsts<?> xblXsts) {
-            this.publicKey = publicKey;
-            this.privateKey = privateKey;
-            this.mojangJwt = mojangJwt;
-            this.identityJwt = identityJwt;
-            this.xuid = xuid;
-            this.id = id;
-            this.displayName = displayName;
-            this.xblXsts = xblXsts;
-        }
 
         @Override
         protected StepXblXstsToken.XblXsts<?> prevResult() {
