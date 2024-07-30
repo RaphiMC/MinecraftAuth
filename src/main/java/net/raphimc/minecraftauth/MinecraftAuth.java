@@ -38,8 +38,9 @@ import net.raphimc.minecraftauth.step.xbl.session.StepFullXblSession;
 import net.raphimc.minecraftauth.step.xbl.session.StepInitialXblSession;
 import net.raphimc.minecraftauth.util.MicrosoftConstants;
 import net.raphimc.minecraftauth.util.OAuthEnvironment;
-import net.raphimc.minecraftauth.util.logging.ConsoleLogger;
 import net.raphimc.minecraftauth.util.logging.ILogger;
+import net.raphimc.minecraftauth.util.logging.LazyLogger;
+import net.raphimc.minecraftauth.util.logging.Slf4jConsoleLogger;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Function;
@@ -49,7 +50,7 @@ public class MinecraftAuth {
     public static final String VERSION = "${version}";
     public static final String IMPL_VERSION = "${impl_version}";
 
-    public static ILogger LOGGER = new ConsoleLogger();
+    public static ILogger LOGGER = new LazyLogger(Slf4jConsoleLogger::new);
     public static String USER_AGENT = "MinecraftAuth/" + VERSION;
 
     public static final AbstractStep<?, StepFullJavaSession.FullJavaSession> JAVA_DEVICE_CODE_LOGIN = builder()

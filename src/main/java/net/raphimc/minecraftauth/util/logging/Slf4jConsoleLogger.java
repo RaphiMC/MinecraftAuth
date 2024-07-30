@@ -20,28 +20,31 @@ package net.raphimc.minecraftauth.util.logging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Deprecated
-public class ConsoleLogger implements ILogger {
+public class Slf4jConsoleLogger implements ILogger {
 
-    @Deprecated
-    public static final Logger LOGGER = LoggerFactory.getLogger("MinecraftAuth");
+    private final Logger logger;
 
-    @Deprecated
-    @Override
-    public void info(String message) {
-        LOGGER.info(message);
+    public Slf4jConsoleLogger() {
+        this(LoggerFactory.getLogger("MinecraftAuth"));
     }
 
-    @Deprecated
-    @Override
-    public void warn(String message) {
-        LOGGER.warn(message);
+    public Slf4jConsoleLogger(final Logger logger) {
+        this.logger = logger;
     }
 
-    @Deprecated
     @Override
-    public void error(String message) {
-        LOGGER.error(message);
+    public void info(final String message) {
+        this.logger.info(message);
+    }
+
+    @Override
+    public void warn(final String message) {
+        this.logger.warn(message);
+    }
+
+    @Override
+    public void error(final String message) {
+        this.logger.error(message);
     }
 
 }
