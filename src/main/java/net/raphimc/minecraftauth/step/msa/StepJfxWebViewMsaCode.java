@@ -61,10 +61,10 @@ public class StepJfxWebViewMsaCode extends MsaCodeStep<StepJfxWebViewMsaCode.Jav
     protected MsaCode execute(final ILogger logger, final HttpClient httpClient, final JavaFxWebView javaFxWebViewCallback) throws Exception {
         logger.info(this, "Opening JavaFX WebView window for MSA login...");
 
-        final JFXPanel jfxPanel = new JFXPanel();
         final URL authenticationUrl = new URLWrapper(this.applicationDetails.getOAuthEnvironment().getAuthorizeUrl()).wrapQuery().addQueries(this.applicationDetails.getOAuthParameters()).apply().toURL();
         final CompletableFuture<MsaCode> msaCodeFuture = new CompletableFuture<>();
 
+        final JFXPanel jfxPanel = new JFXPanel();
         final JFrame window = new JFrame("MinecraftAuth - Microsoft Login");
         window.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         window.setSize(800, 600);
@@ -108,7 +108,7 @@ public class StepJfxWebViewMsaCode extends MsaCodeStep<StepJfxWebViewMsaCode.Jav
             if (javaFxWebViewCallback == null) {
                 window.setVisible(true);
             } else {
-                javaFxWebViewCallback.openCallback.accept(window, webView);
+                javaFxWebViewCallback.openCallback.accept(window);
             }
         });
 
@@ -138,16 +138,20 @@ public class StepJfxWebViewMsaCode extends MsaCodeStep<StepJfxWebViewMsaCode.Jav
     @EqualsAndHashCode(callSuper = false)
     public static class JavaFxWebView extends AbstractStep.InitialInput {
 
-        BiConsumer<JFrame, WebView> openCallback;
+        Consumer<JFrame> openCallback;
         Consumer<JFrame> closeCallback;
 
         public JavaFxWebView() {
-            this.openCallback = (window, webView) -> window.setVisible(true);
+            this.openCallback = window -> window.setVisible(true);
             this.closeCallback = JFrame::dispose;
         }
 
-        public JavaFxWebView(final Consumer<JFrame> openCallback, final Consumer<JFrame> closeCallback) {
-            this.openCallback = (window, webview) -> openCallback.accept(window);
+        @Deprecated
+        public JavaFxWebView(final BiConsumer<JFrame, WebView> openCallback, final Consumer<JFrame> closeCallback) {
+            this.openCallback = window -> {
+                final WebView webView = (WebView) ((JFXPanel) window.getContentPane()).getScene().getRoot();
+                openCallback.accept(window, webView);
+            };
             this.closeCallback = closeCallback;
         }
 

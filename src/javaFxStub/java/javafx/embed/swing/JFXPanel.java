@@ -23,6 +23,8 @@ import javax.swing.*;
 
 public class JFXPanel extends JComponent {
 
+    public native Scene getScene();
+
     public native void setScene(final Scene scene);
 
 }

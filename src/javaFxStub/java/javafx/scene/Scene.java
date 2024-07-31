@@ -22,4 +22,6 @@ public class Scene {
     public Scene(final Parent root, final double width, final double height) {
     }
 
+    public native Parent getRoot();
+
 }
