@@ -17,6 +17,7 @@
  */
 package net.raphimc.minecraftauth;
 
+import lombok.SneakyThrows;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.RetryHandler;
 import net.lenni0451.commons.httpclient.constants.ContentTypes;
@@ -43,6 +44,7 @@ import net.raphimc.minecraftauth.util.logging.LazyLogger;
 import net.raphimc.minecraftauth.util.logging.Slf4jConsoleLogger;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.lang.reflect.Constructor;
 import java.util.function.Function;
 
 public class MinecraftAuth {
@@ -255,12 +257,16 @@ public class MinecraftAuth {
          *
          * @return The builder
          */
+        @SneakyThrows
         public InitialXblSessionBuilder javaFxWebView() {
             if (this.applicationDetails.getRedirectUri() == null) {
                 this.applicationDetails = this.applicationDetails.withRedirectUri(this.applicationDetails.getOAuthEnvironment().getNativeClientUrl());
             }
 
-            this.msaCodeStep = new StepJfxWebViewMsaCode(this.applicationDetails, this.timeout * 1000);
+            // Don't reference the constructor directly to prevent Spigot from loading JavaFX classes when not needed
+            // Spigot's class remapper is crappy and loads classes even when the method isn't ever called
+            final Constructor<?> constructor = StepJfxWebViewMsaCode.class.getConstructor(AbstractStep.ApplicationDetails.class, int.class);
+            this.msaCodeStep = (AbstractStep<?, MsaCodeStep.MsaCode>) constructor.newInstance(this.applicationDetails, this.timeout * 1000);
 
             return new InitialXblSessionBuilder(this);
         }
