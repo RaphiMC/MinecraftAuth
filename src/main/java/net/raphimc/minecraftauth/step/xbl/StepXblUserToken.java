@@ -128,7 +128,7 @@ public class StepXblUserToken extends AbstractStep<StepInitialXblSession.Initial
 
         @Override
         public boolean isExpired() {
-            return this.expireTimeMs <= System.currentTimeMillis();
+            return this.expireTimeMs <= System.currentTimeMillis() || this.prevResult().isExpired();
         }
 
     }

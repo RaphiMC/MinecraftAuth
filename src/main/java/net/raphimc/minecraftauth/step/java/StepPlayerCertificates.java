@@ -123,7 +123,7 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
 
         @Override
         public boolean isExpired() {
-            return this.expireTimeMs <= System.currentTimeMillis();
+            return this.expireTimeMs <= System.currentTimeMillis() || this.prevResult().isExpired();
         }
 
     }

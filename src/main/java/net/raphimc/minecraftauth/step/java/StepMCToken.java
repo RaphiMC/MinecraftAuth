@@ -98,7 +98,7 @@ public class StepMCToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
 
         @Override
         public boolean isExpired() {
-            return this.expireTimeMs <= System.currentTimeMillis();
+            return this.expireTimeMs <= System.currentTimeMillis() || this.prevResult().isExpired();
         }
 
     }

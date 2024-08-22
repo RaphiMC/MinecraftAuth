@@ -152,12 +152,12 @@ public class StepXblSisuAuthentication extends AbstractStep<StepInitialXblSessio
 
         @Override
         public boolean isExpired() {
-            return this.userToken.isExpired() || this.titleToken.isExpired() || this.xstsToken.isExpired();
+            return this.userToken.isExpired() || this.titleToken.isExpired() || this.xstsToken.isExpired() || this.prevResult().isExpired();
         }
 
         @Override
         public boolean isExpiredOrOutdated() {
-            return this.userToken.isExpiredOrOutdated() || this.titleToken.isExpiredOrOutdated() || this.xstsToken.isExpiredOrOutdated();
+            return this.userToken.isExpiredOrOutdated() || this.titleToken.isExpiredOrOutdated() || this.xstsToken.isExpiredOrOutdated() || this.prevResult().isExpiredOrOutdated();
         }
 
     }

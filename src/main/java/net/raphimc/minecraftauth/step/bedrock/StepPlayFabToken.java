@@ -129,7 +129,7 @@ public class StepPlayFabToken extends AbstractStep<StepXblXstsToken.XblXsts<?>, 
 
         @Override
         public boolean isExpired() {
-            return this.expireTimeMs <= System.currentTimeMillis();
+            return this.expireTimeMs <= System.currentTimeMillis() || this.prevResult().isExpired();
         }
 
     }

@@ -175,6 +175,10 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
 
         @Override
         public boolean isExpired() {
+            if (this.prevResult().isExpired()) {
+                return true;
+            }
+
             // Cache the result for 1 second because it's expensive to check
             if (System.currentTimeMillis() - this.lastExpireCheckTimeMs < 1000) {
                 return this.lastExpireCheckResult;

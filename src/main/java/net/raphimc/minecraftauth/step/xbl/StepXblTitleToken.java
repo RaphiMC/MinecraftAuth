@@ -132,7 +132,7 @@ public class StepXblTitleToken extends AbstractStep<StepInitialXblSession.Initia
 
         @Override
         public boolean isExpired() {
-            return this.expireTimeMs <= System.currentTimeMillis();
+            return this.expireTimeMs <= System.currentTimeMillis() || this.prevResult().isExpired();
         }
 
     }
