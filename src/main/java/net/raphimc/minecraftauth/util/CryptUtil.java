@@ -31,10 +31,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -124,7 +121,21 @@ public class CryptUtil {
         data = new DataOutputStream(header);
         data.writeInt(1); // Policy Version
         data.writeLong(windowsTimestamp); // Timestamp
-        data.write(Jwts.SIG.ES256.digest(new DefaultSecureRequest<>(new ByteArrayInputStream(signatureContent.toByteArray()), null, null, privateKey))); // Signature
+
+        try {
+            byte[] signature;
+            try { // Java 9+ only
+                final Signature ecdsaSignature = Signature.getInstance("SHA256withECDSAinP1363Format");
+                ecdsaSignature.initSign(privateKey);
+                ecdsaSignature.update(signatureContent.toByteArray());
+                signature = ecdsaSignature.sign();
+            } catch (NoSuchAlgorithmException e) { // Fallback for Java 8
+                signature = Jwts.SIG.ES256.digest(new DefaultSecureRequest<>(new ByteArrayInputStream(signatureContent.toByteArray()), null, null, privateKey));
+            }
+            data.write(signature); // Signature
+        } catch (Throwable e) {
+            throw new RuntimeException("Could not sign request", e);
+        }
 
         return new HttpHeader("Signature", Base64.getEncoder().encodeToString(header.toByteArray()));
     }
