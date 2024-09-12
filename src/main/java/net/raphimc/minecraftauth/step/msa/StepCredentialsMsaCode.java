@@ -167,15 +167,23 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
     private JsonObject extractConfig(final String html) {
         switch (this.applicationDetails.getOAuthEnvironment()) {
             case LIVE: {
-                final JsonReader jsonReader = new JsonReader(new StringReader(html.substring(html.indexOf("var ServerData = ") + 17)));
-                jsonReader.setLenient(true);
-                return JsonUtil.GSON.fromJson(jsonReader, JsonObject.class);
+                try {
+                    final JsonReader jsonReader = new JsonReader(new StringReader(html.substring(html.indexOf("var ServerData = ") + 17)));
+                    jsonReader.setLenient(true);
+                    return JsonUtil.GSON.fromJson(jsonReader, JsonObject.class);
+                } catch (Throwable e) {
+                    throw new IllegalStateException("Could not extract config from html. This most likely indicates that the login was not successful", e);
+                }
             }
             case MICROSOFT_ONLINE_COMMON:
             case MICROSOFT_ONLINE_CONSUMERS: {
-                final JsonReader jsonReader = new JsonReader(new StringReader(html.substring(html.indexOf("$Config=") + 8)));
-                jsonReader.setLenient(true);
-                return JsonUtil.GSON.fromJson(jsonReader, JsonObject.class);
+                try {
+                    final JsonReader jsonReader = new JsonReader(new StringReader(html.substring(html.indexOf("$Config=") + 8)));
+                    jsonReader.setLenient(true);
+                    return JsonUtil.GSON.fromJson(jsonReader, JsonObject.class);
+                } catch (Throwable e) {
+                    throw new IllegalStateException("Could not extract config from html. This most likely indicates that the login was not successful", e);
+                }
             }
             default:
                 throw new IllegalStateException("Unsupported OAuthEnvironment: " + this.applicationDetails.getOAuthEnvironment());
