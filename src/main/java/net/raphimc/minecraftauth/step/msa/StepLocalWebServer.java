@@ -48,16 +48,18 @@ public class StepLocalWebServer extends InitialPreparationStep<StepLocalWebServe
 
         try (final ServerSocket localServer = new ServerSocket(0)) {
             final int localPort = localServer.getLocalPort();
+            final String customRedirectUri = this.applicationDetails.getRedirectUri() + ":" + localPort;
 
             final URL authenticationUrl = new URLWrapper(this.applicationDetails.getOAuthEnvironment().getAuthorizeUrl()).wrapQuery()
                     .addQueries(this.applicationDetails.getOAuthParameters())
-                    .setQuery("redirect_uri", this.applicationDetails.getRedirectUri() + ":" + localPort)
+                    .setQuery("redirect_uri", customRedirectUri)
                     .setQuery("prompt", "select_account")
                     .apply().toURL();
 
             final LocalWebServer localWebServer = new LocalWebServer(
                     authenticationUrl.toString(),
-                    localPort
+                    localPort,
+                    customRedirectUri
             );
             logger.info(this, "Created local webserver MSA authentication URL: " + localWebServer.getAuthenticationUrl());
             localWebServerCallback.callback.accept(localWebServer);
@@ -71,6 +73,7 @@ public class StepLocalWebServer extends InitialPreparationStep<StepLocalWebServe
 
         String authenticationUrl;
         int port;
+        String customRedirectUri;
 
     }
 

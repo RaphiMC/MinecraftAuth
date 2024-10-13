@@ -72,6 +72,15 @@ public abstract class MsaCodeStep<I extends AbstractStep.InitialInput> extends A
         @EqualsAndHashCode.Exclude
         StepMsaToken.MsaToken msaToken; // Used in device code flow
 
+        @ApiStatus.Internal
+        @Getter(AccessLevel.NONE)
+        @Setter(AccessLevel.NONE)
+        @PackagePrivate
+        @NonFinal
+        @ToString.Exclude
+        @EqualsAndHashCode.Exclude
+        String customRedirectUri; // Used in local webserver flow
+
         @Override
         public boolean isExpired() {
             return true; // MsaCode can only be used one time and can't be refreshed

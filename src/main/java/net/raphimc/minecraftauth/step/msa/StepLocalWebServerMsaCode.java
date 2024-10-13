@@ -83,6 +83,7 @@ public class StepLocalWebServerMsaCode extends MsaCodeStep<StepLocalWebServer.Lo
 
         try {
             final MsaCode msaCode = msaCodeFuture.get(this.timeout, TimeUnit.MILLISECONDS);
+            msaCode.customRedirectUri = localWebServer.getCustomRedirectUri();
             httpServer.stop(0);
             logger.info(this, "Got MSA Code");
             return msaCode;

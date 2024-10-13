@@ -104,7 +104,11 @@ public class StepMsaToken extends AbstractStep<MsaCodeStep.MsaCode, StepMsaToken
             postData.put("refresh_token", codeOrRefreshToken);
         } else if (type.equals("authorization_code")) {
             postData.put("code", codeOrRefreshToken);
-            postData.put("redirect_uri", this.applicationDetails.getRedirectUri());
+            if (msaCode.customRedirectUri != null) {
+                postData.put("redirect_uri", msaCode.customRedirectUri);
+            } else {
+                postData.put("redirect_uri", this.applicationDetails.getRedirectUri());
+            }
         } else {
             throw new IllegalArgumentException("Invalid type: " + type);
         }
