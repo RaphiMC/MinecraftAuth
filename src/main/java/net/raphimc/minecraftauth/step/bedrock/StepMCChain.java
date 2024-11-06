@@ -19,9 +19,6 @@ package net.raphimc.minecraftauth.step.bedrock;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
 import lombok.*;
 import lombok.experimental.NonFinal;
 import lombok.experimental.PackagePrivate;
@@ -33,6 +30,7 @@ import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
 import net.raphimc.minecraftauth.util.CryptUtil;
 import net.raphimc.minecraftauth.util.JsonContent;
+import net.raphimc.minecraftauth.util.JwtUtil;
 import net.raphimc.minecraftauth.util.logging.ILogger;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -44,8 +42,6 @@ import java.security.spec.ECGenParameterSpec;
 import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
-
-import static net.raphimc.minecraftauth.util.TimeUtil.MAX_JWT_CLOCK_SKEW;
 
 public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepMCChain.MCChain> {
 
@@ -80,11 +76,11 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
             throw new IllegalStateException("Invalid chain size");
         }
 
-        final Jws<Claims> mojangJwt = Jwts.parser().clockSkewSeconds(MAX_JWT_CLOCK_SKEW).verifyWith(MOJANG_PUBLIC_KEY).build().parseSignedClaims(chain.get(0).getAsString());
-        final ECPublicKey mojangJwtPublicKey = CryptUtil.publicKeyEcFromBase64(mojangJwt.getPayload().get("identityPublicKey", String.class));
-        final Jws<Claims> identityJwt = Jwts.parser().clockSkewSeconds(MAX_JWT_CLOCK_SKEW).verifyWith(mojangJwtPublicKey).build().parseSignedClaims(chain.get(1).getAsString());
+        final JwtUtil.Jwt mojangJwt = JwtUtil.parseSignedJwt(chain.get(0).getAsString(), MOJANG_PUBLIC_KEY);
+        final ECPublicKey mojangJwtPublicKey = CryptUtil.publicKeyEcFromBase64(mojangJwt.getClaim("identityPublicKey", String.class));
+        final JwtUtil.Jwt identityJwt = JwtUtil.parseSignedJwt(chain.get(1).getAsString(), mojangJwtPublicKey);
 
-        final Map<String, Object> extraData = identityJwt.getPayload().get("extraData", Map.class);
+        final Map<String, Object> extraData = identityJwt.getClaim("extraData", Map.class);
         final String xuid = (String) extraData.get("XUID");
         final UUID id = UUID.fromString((String) extraData.get("identity"));
         final String displayName = (String) extraData.get("displayName");
@@ -186,9 +182,9 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
 
             this.lastExpireCheckTimeMs = System.currentTimeMillis();
             try {
-                final Jws<Claims> mojangJwt = Jwts.parser().clockSkewSeconds(MAX_JWT_CLOCK_SKEW).verifyWith(MOJANG_PUBLIC_KEY).build().parseSignedClaims(this.mojangJwt);
-                final ECPublicKey mojangJwtPublicKey = CryptUtil.publicKeyEcFromBase64(mojangJwt.getPayload().get("identityPublicKey", String.class));
-                Jwts.parser().clockSkewSeconds(MAX_JWT_CLOCK_SKEW).verifyWith(mojangJwtPublicKey).build().parseSignedClaims(this.identityJwt);
+                final JwtUtil.Jwt mojangJwt = JwtUtil.parseSignedJwt(this.mojangJwt, MOJANG_PUBLIC_KEY);
+                final ECPublicKey mojangJwtPublicKey = CryptUtil.publicKeyEcFromBase64(mojangJwt.getClaim("identityPublicKey", String.class));
+                JwtUtil.parseSignedJwt(this.identityJwt, mojangJwtPublicKey);
                 this.lastExpireCheckResult = false;
             } catch (Throwable e) { // Any error -> The jwts are expired or invalid
                 this.lastExpireCheckResult = true;

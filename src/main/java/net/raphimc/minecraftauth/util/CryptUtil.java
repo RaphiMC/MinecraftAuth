@@ -18,14 +18,11 @@
 package net.raphimc.minecraftauth.util;
 
 import com.google.gson.JsonObject;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.impl.security.DefaultSecureRequest;
 import net.lenni0451.commons.httpclient.content.HttpContent;
 import net.lenni0451.commons.httpclient.model.HttpHeader;
 import net.lenni0451.commons.httpclient.requests.HttpContentRequest;
 import net.lenni0451.commons.httpclient.requests.HttpRequest;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -130,7 +127,7 @@ public class CryptUtil {
                 ecdsaSignature.update(signatureContent.toByteArray());
                 signature = ecdsaSignature.sign();
             } catch (NoSuchAlgorithmException e) { // Fallback for Java 8
-                signature = Jwts.SIG.ES256.digest(new DefaultSecureRequest<>(new ByteArrayInputStream(signatureContent.toByteArray()), null, null, privateKey));
+                signature = JwtUtil.signES256(privateKey, signatureContent.toByteArray());
             }
             data.write(signature); // Signature
         } catch (Throwable e) {
