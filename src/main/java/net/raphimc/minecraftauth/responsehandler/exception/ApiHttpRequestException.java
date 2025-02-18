@@ -17,13 +17,21 @@
  */
 package net.raphimc.minecraftauth.responsehandler.exception;
 
+import lombok.Getter;
 import net.lenni0451.commons.httpclient.HttpResponse;
 import net.lenni0451.commons.httpclient.exceptions.HttpRequestException;
 
+@Getter
 public class ApiHttpRequestException extends HttpRequestException {
+
+    private final String error;
+    private final String errorMessage;
 
     public ApiHttpRequestException(final HttpResponse response, final String error, final String errorMessage) {
         super(response, "status: " + response.getStatusCode() + " " + response.getStatusMessage() + ", error: " + error + ", error message: " + errorMessage);
+
+        this.error = error;
+        this.errorMessage = errorMessage;
     }
 
 }

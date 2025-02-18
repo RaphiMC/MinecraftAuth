@@ -21,13 +21,16 @@ import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.HttpResponse;
 import net.lenni0451.commons.httpclient.constants.Headers;
 import net.lenni0451.commons.httpclient.requests.impl.GetRequest;
 import net.raphimc.minecraftauth.responsehandler.MinecraftResponseHandler;
+import net.raphimc.minecraftauth.responsehandler.exception.MinecraftRequestException;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.util.UuidUtil;
 import net.raphimc.minecraftauth.util.logging.ILogger;
 
+import java.io.IOException;
 import java.util.UUID;
 
 public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfile.MCProfile> {
@@ -44,7 +47,20 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
 
         final GetRequest getRequest = new GetRequest(MINECRAFT_PROFILE_URL);
         getRequest.setHeader(Headers.AUTHORIZATION, mcToken.getTokenType() + " " + mcToken.getAccessToken());
-        final JsonObject obj = httpClient.execute(getRequest, new MinecraftResponseHandler());
+        final JsonObject obj = httpClient.execute(getRequest, new MinecraftResponseHandler() {
+            @Override
+            protected void handleJsonError(final HttpResponse response, final JsonObject obj) throws IOException {
+                try {
+                    super.handleJsonError(response, obj);
+                } catch (MinecraftRequestException e) {
+                    if (e.getResponse().getStatusCode() == 404) {
+                        throw new ProfileNotFoundException(e);
+                    } else {
+                        throw e;
+                    }
+                }
+            }
+        });
 
         final MCProfile mcProfile = new MCProfile(
                 UuidUtil.fromLenientString(obj.get("id").getAsString()),
@@ -99,6 +115,14 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
         @Override
         public boolean isExpiredOrOutdated() {
             return true;
+        }
+
+    }
+
+    public static class ProfileNotFoundException extends MinecraftRequestException {
+
+        public ProfileNotFoundException(final MinecraftRequestException exception) {
+            super(exception.getResponse(), exception.getError(), "Your account doesn't have a Minecraft profile. Please login to Minecraft and set up your profile.");
         }
 
     }

@@ -17,18 +17,12 @@
  */
 package net.raphimc.minecraftauth.responsehandler.exception;
 
-import lombok.Getter;
 import net.lenni0451.commons.httpclient.HttpResponse;
 
-@Getter
 public class MsaRequestException extends ApiHttpRequestException {
-
-    private final String error;
 
     public MsaRequestException(final HttpResponse response, final String error, final String errorMessage) {
         super(response, error, errorMessage);
-
-        this.error = error;
     }
 
 }

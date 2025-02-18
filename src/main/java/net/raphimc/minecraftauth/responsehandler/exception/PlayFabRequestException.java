@@ -17,18 +17,12 @@
  */
 package net.raphimc.minecraftauth.responsehandler.exception;
 
-import lombok.Getter;
 import net.lenni0451.commons.httpclient.HttpResponse;
 
-@Getter
 public class PlayFabRequestException extends ApiHttpRequestException {
-
-    private final String error;
 
     public PlayFabRequestException(final HttpResponse response, final String error, final String errorMessage) {
         super(response, error, errorMessage);
-
-        this.error = error;
     }
 
 }
