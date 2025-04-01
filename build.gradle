@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly(annotationProcessor("org.projectlombok:lombok:1.18.36"))
+    compileOnly(annotationProcessor("org.projectlombok:lombok:1.18.38"))
     compileOnly "org.jetbrains:annotations:26.0.2"
     compileOnly sourceSets.javaFxStub.output
 
