@@ -21,7 +21,7 @@ import lombok.SneakyThrows;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.RetryHandler;
 import net.lenni0451.commons.httpclient.constants.ContentTypes;
-import net.lenni0451.commons.httpclient.constants.Headers;
+import net.lenni0451.commons.httpclient.constants.HttpHeaders;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.BiMergeStep;
 import net.raphimc.minecraftauth.step.bedrock.StepMCChain;
@@ -127,9 +127,9 @@ public class MinecraftAuth {
                 .setCookieManager(null)
                 .setFollowRedirects(false)
                 .setRetryHandler(new RetryHandler(0, 50))
-                .setHeader(Headers.ACCEPT, ContentTypes.APPLICATION_JSON.toString())
-                .setHeader(Headers.ACCEPT_LANGUAGE, "en-US,en")
-                .setHeader(Headers.USER_AGENT, USER_AGENT);
+                .setHeader(HttpHeaders.ACCEPT, ContentTypes.APPLICATION_JSON.toString())
+                .setHeader(HttpHeaders.ACCEPT_LANGUAGE, "en-US,en")
+                .setHeader(HttpHeaders.USER_AGENT, USER_AGENT);
     }
 
     public static class MsaTokenBuilder {

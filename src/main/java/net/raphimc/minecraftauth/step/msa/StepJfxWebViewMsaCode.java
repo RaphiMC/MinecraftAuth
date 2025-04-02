@@ -27,7 +27,7 @@ import lombok.SneakyThrows;
 import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.HttpResponse;
-import net.lenni0451.commons.httpclient.constants.Headers;
+import net.lenni0451.commons.httpclient.constants.HttpHeaders;
 import net.lenni0451.commons.httpclient.utils.URLWrapper;
 import net.raphimc.minecraftauth.responsehandler.exception.MsaRequestException;
 import net.raphimc.minecraftauth.step.AbstractStep;
@@ -83,7 +83,7 @@ public class StepJfxWebViewMsaCode extends MsaCodeStep<StepJfxWebViewMsaCode.Jav
         Platform.runLater(() -> {
             final WebView webView = new WebView();
             webView.setContextMenuEnabled(false);
-            httpClient.getFirstHeader(Headers.USER_AGENT).ifPresent(s -> webView.getEngine().setUserAgent(s));
+            httpClient.getFirstHeader(HttpHeaders.USER_AGENT).ifPresent(s -> webView.getEngine().setUserAgent(s));
             webView.getEngine().load(authenticationUrl.toString());
             webView.getEngine().locationProperty().addListener((observable, oldValue, newValue) -> {
                 try {

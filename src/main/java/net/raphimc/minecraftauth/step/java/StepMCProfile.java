@@ -22,7 +22,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.HttpResponse;
-import net.lenni0451.commons.httpclient.constants.Headers;
+import net.lenni0451.commons.httpclient.constants.HttpHeaders;
 import net.lenni0451.commons.httpclient.requests.impl.GetRequest;
 import net.raphimc.minecraftauth.responsehandler.MinecraftResponseHandler;
 import net.raphimc.minecraftauth.responsehandler.exception.MinecraftRequestException;
@@ -46,7 +46,7 @@ public class StepMCProfile extends AbstractStep<StepMCToken.MCToken, StepMCProfi
         logger.info(this, "Getting profile...");
 
         final GetRequest getRequest = new GetRequest(MINECRAFT_PROFILE_URL);
-        getRequest.setHeader(Headers.AUTHORIZATION, mcToken.getTokenType() + " " + mcToken.getAccessToken());
+        getRequest.setHeader(HttpHeaders.AUTHORIZATION, mcToken.getTokenType() + " " + mcToken.getAccessToken());
         final JsonObject obj = httpClient.execute(getRequest, new MinecraftResponseHandler() {
             @Override
             protected void handleJsonError(final HttpResponse response, final JsonObject obj) throws IOException {

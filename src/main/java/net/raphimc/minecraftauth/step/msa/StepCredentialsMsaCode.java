@@ -24,7 +24,7 @@ import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.HttpResponse;
 import net.lenni0451.commons.httpclient.constants.ContentTypes;
-import net.lenni0451.commons.httpclient.constants.Headers;
+import net.lenni0451.commons.httpclient.constants.HttpHeaders;
 import net.lenni0451.commons.httpclient.constants.StatusCodes;
 import net.lenni0451.commons.httpclient.content.impl.URLEncodedFormContent;
 import net.lenni0451.commons.httpclient.exceptions.HttpRequestException;
@@ -66,7 +66,7 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
         final PostRequest loginPostRequest = this.prepareLoginPostRequest(httpClient, msaCredentials, cookieManager);
         final HttpResponse loginResponse = this.sendLoginRequest(httpClient, loginPostRequest);
 
-        final Optional<String> locationHeader = loginResponse.getFirstHeader(Headers.LOCATION);
+        final Optional<String> locationHeader = loginResponse.getFirstHeader(HttpHeaders.LOCATION);
         if (!locationHeader.isPresent()) {
             throw new IllegalStateException("Could not get redirect url");
         }
@@ -86,10 +86,10 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
 
         final GetRequest getRequest = new GetRequest(authenticationUrl);
         getRequest.setCookieManager(cookieManager);
-        getRequest.setHeader(Headers.ACCEPT, ContentTypes.TEXT_HTML.getMimeType());
+        getRequest.setHeader(HttpHeaders.ACCEPT, ContentTypes.TEXT_HTML.getMimeType());
         final JsonObject config = httpClient.execute(getRequest, response -> {
             if (response.getStatusCode() >= 300) {
-                final Optional<String> locationHeader = response.getFirstHeader(Headers.LOCATION);
+                final Optional<String> locationHeader = response.getFirstHeader(HttpHeaders.LOCATION);
                 if (locationHeader.isPresent()) {
                     final Map<String, String> parameters = new URLWrapper(locationHeader.get()).wrapQuery().getQueries();
                     if (parameters.containsKey("error") && parameters.containsKey("error_description")) {
@@ -141,7 +141,7 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
 
         final PostRequest postRequest = new PostRequest(urlPost);
         postRequest.setCookieManager(cookieManager);
-        postRequest.setHeader(Headers.ACCEPT, ContentTypes.TEXT_HTML.getMimeType());
+        postRequest.setHeader(HttpHeaders.ACCEPT, ContentTypes.TEXT_HTML.getMimeType());
         postRequest.setContent(new URLEncodedFormContent(postData));
         return postRequest;
     }
@@ -162,7 +162,7 @@ public class StepCredentialsMsaCode extends MsaCodeStep<StepCredentialsMsaCode.M
 
                 final GetRequest getRequest = new GetRequest(returnUrl);
                 getRequest.setCookieManager(request.getCookieManager());
-                getRequest.setHeader(Headers.ACCEPT, ContentTypes.TEXT_HTML.getMimeType());
+                getRequest.setHeader(HttpHeaders.ACCEPT, ContentTypes.TEXT_HTML.getMimeType());
                 return this.sendLoginRequest(httpClient, getRequest);
             } else {
                 final JsonObject errorConfig = this.extractConfig(loginResponse.getContentAsString());

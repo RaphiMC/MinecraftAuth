@@ -22,7 +22,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.constants.ContentTypes;
-import net.lenni0451.commons.httpclient.constants.Headers;
+import net.lenni0451.commons.httpclient.constants.HttpHeaders;
 import net.lenni0451.commons.httpclient.content.impl.StringContent;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
 import net.raphimc.minecraftauth.responsehandler.MinecraftResponseHandler;
@@ -52,7 +52,7 @@ public class StepPlayerCertificates extends AbstractStep<StepMCToken.MCToken, St
 
         final PostRequest postRequest = new PostRequest(PLAYER_CERTIFICATES_URL);
         postRequest.setContent(new StringContent(ContentTypes.APPLICATION_JSON, ""));
-        postRequest.setHeader(Headers.AUTHORIZATION, mcToken.getTokenType() + " " + mcToken.getAccessToken());
+        postRequest.setHeader(HttpHeaders.AUTHORIZATION, mcToken.getTokenType() + " " + mcToken.getAccessToken());
         final JsonObject obj = httpClient.execute(postRequest, new MinecraftResponseHandler());
         final JsonObject keyPair = obj.getAsJsonObject("keyPair");
 

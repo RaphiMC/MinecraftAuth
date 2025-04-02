@@ -20,7 +20,7 @@ package net.raphimc.minecraftauth.service.realms;
 import com.google.gson.JsonObject;
 import lombok.SneakyThrows;
 import net.lenni0451.commons.httpclient.HttpClient;
-import net.lenni0451.commons.httpclient.constants.Headers;
+import net.lenni0451.commons.httpclient.constants.HttpHeaders;
 import net.lenni0451.commons.httpclient.requests.HttpRequest;
 import net.lenni0451.commons.httpclient.requests.impl.DeleteRequest;
 import net.lenni0451.commons.httpclient.requests.impl.GetRequest;
@@ -91,7 +91,7 @@ public class BedrockRealmsService extends AbstractRealmsService {
 
     @Override
     protected void addRequestHeaders(final HttpRequest httpRequest) {
-        httpRequest.setHeader(Headers.AUTHORIZATION, "XBL3.0 x=" + this.realmsXsts.getServiceToken());
+        httpRequest.setHeader(HttpHeaders.AUTHORIZATION, "XBL3.0 x=" + this.realmsXsts.getServiceToken());
         httpRequest.setHeader("Client-Version", this.clientVersion);
     }
 

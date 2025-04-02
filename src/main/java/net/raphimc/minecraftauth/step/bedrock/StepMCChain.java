@@ -23,7 +23,7 @@ import lombok.*;
 import lombok.experimental.NonFinal;
 import lombok.experimental.PackagePrivate;
 import net.lenni0451.commons.httpclient.HttpClient;
-import net.lenni0451.commons.httpclient.constants.Headers;
+import net.lenni0451.commons.httpclient.constants.HttpHeaders;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
 import net.raphimc.minecraftauth.responsehandler.MinecraftResponseHandler;
 import net.raphimc.minecraftauth.step.AbstractStep;
@@ -69,7 +69,7 @@ public class StepMCChain extends AbstractStep<StepXblXstsToken.XblXsts<?>, StepM
 
         final PostRequest postRequest = new PostRequest(MINECRAFT_LOGIN_URL);
         postRequest.setContent(new JsonContent(postData));
-        postRequest.setHeader(Headers.AUTHORIZATION, "XBL3.0 x=" + xblXsts.getServiceToken());
+        postRequest.setHeader(HttpHeaders.AUTHORIZATION, "XBL3.0 x=" + xblXsts.getServiceToken());
         final JsonObject obj = httpClient.execute(postRequest, new MinecraftResponseHandler());
         final JsonArray chain = obj.getAsJsonArray("chain");
         if (chain.size() != 2) {

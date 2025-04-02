@@ -22,7 +22,7 @@ import com.google.gson.JsonObject;
 import lombok.SneakyThrows;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.lenni0451.commons.httpclient.constants.ContentTypes;
-import net.lenni0451.commons.httpclient.constants.Headers;
+import net.lenni0451.commons.httpclient.constants.HttpHeaders;
 import net.lenni0451.commons.httpclient.handler.ThrowingResponseHandler;
 import net.lenni0451.commons.httpclient.requests.HttpRequest;
 import net.lenni0451.commons.httpclient.requests.impl.GetRequest;
@@ -57,7 +57,7 @@ public abstract class AbstractRealmsService {
             public Boolean get() {
                 final GetRequest getRequest = new GetRequest(CLIENT_COMPATIBLE_URL.replace("$HOST", AbstractRealmsService.this.host));
                 getRequest.setCookieManager(AbstractRealmsService.this.cookieManager);
-                getRequest.setHeader(Headers.ACCEPT, ContentTypes.TEXT_PLAIN.getMimeType());
+                getRequest.setHeader(HttpHeaders.ACCEPT, ContentTypes.TEXT_PLAIN.getMimeType());
                 AbstractRealmsService.this.addRequestHeaders(getRequest);
                 final String response = AbstractRealmsService.this.httpClient.execute(getRequest, new ThrowingResponseHandler()).getContentAsString();
                 return response.equals("COMPATIBLE");
