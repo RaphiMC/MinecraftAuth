@@ -1,0 +1,33 @@
+plugins {
+    id "base.publishing-conventions"
+    id "base.maven-central-publishing"
+    id "base.lenni0451-maven-publishing"
+}
+
+publishing {
+    publications {
+        mavenJava {
+            pom {
+                name = "MinecraftAuth"
+                description = "Simple and easy to use Minecraft microsoft authentication library (Java and Bedrock)"
+                url = "https://github.com/RaphiMC/MinecraftAuth"
+                licenses {
+                    license {
+                        name = "LGPL-3.0 License"
+                        url = "https://github.com/RaphiMC/MinecraftAuth/blob/main/LICENSE"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "RK_01"
+                    }
+                }
+                scm {
+                    connection = "scm:git:git://github.com/RaphiMC/MinecraftAuth.git"
+                    developerConnection = "scm:git:ssh://github.com/RaphiMC/MinecraftAuth.git"
+                    url = "https://github.com/RaphiMC/MinecraftAuth.git"
+                }
+            }
+        }
+    }
+}

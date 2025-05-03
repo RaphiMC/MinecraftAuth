@@ -1,25 +1,13 @@
 plugins {
     id "java-library"
-    id "maven-publish"
-    id "signing"
+    id "base.base-conventions"
+    id "base.fill-build-constants"
+    id "minecraftauth.publishing-conventions"
     id "net.raphimc.class-token-replacer" version "1.1.4"
-}
-
-base {
-    java.toolchain.languageVersion = JavaLanguageVersion.of(8)
-    compileJava.options.encoding = compileTestJava.options.encoding = javadoc.options.encoding = "UTF-8"
-
-    group = project.maven_group ?: rootProject.maven_group
-    archivesName = project.maven_name ?: rootProject.maven_name
-    version = project.maven_version ?: rootProject.maven_version
 }
 
 sourceSets {
     javaFxStub // Java 11+ does not include JavaFX anymore, so the JavaFX stubs are needed for the compiler
-}
-
-repositories {
-    mavenCentral()
 }
 
 dependencies {
@@ -34,98 +22,4 @@ dependencies {
         exclude group: "com.google.code.gson", module: "gson"
     }
     api "org.slf4j:slf4j-api:2.0.17"
-}
-
-sourceSets {
-    main {
-        classTokenReplacer {
-            property("\${version}", project.version)
-            property("\${impl_version}", "git-${project.name}-${project.version}:${project.latestCommitHash().get()}")
-        }
-    }
-}
-
-java {
-    withSourcesJar()
-    withJavadocJar()
-}
-
-jar {
-    from("LICENSE") {
-        rename { "${it}_${project.name ?: rootProject.name}" }
-    }
-}
-
-artifacts {
-    archives javadocJar, sourcesJar
-}
-
-publishing {
-    repositories {
-        maven {
-            name = "reposilite"
-            url = "https://maven.lenni0451.net/" + (project.maven_version.endsWith("SNAPSHOT") ? "snapshots" : "releases")
-
-            credentials(PasswordCredentials)
-            authentication {
-                basic(BasicAuthentication)
-            }
-        }
-        maven {
-            name = "ossrh"
-            url = "https://s01.oss.sonatype.org/" + (project.maven_version.endsWith("SNAPSHOT") ? "content/repositories/snapshots/" : "service/local/staging/deploy/maven2/")
-
-            credentials(PasswordCredentials)
-            authentication {
-                basic(BasicAuthentication)
-            }
-        }
-    }
-    publications {
-        maven(MavenPublication) {
-            groupId = project.maven_group
-            artifactId = project.maven_name
-            version = project.maven_version
-
-            from components.java
-
-            pom {
-                name = "MinecraftAuth"
-                description = "Simple and easy to use Minecraft microsoft authentication library (Java and Bedrock)"
-                url = "https://github.com/RaphiMC/MinecraftAuth"
-                licenses {
-                    license {
-                        name = "LGPL-3.0 License"
-                        url = "https://github.com/RaphiMC/MinecraftAuth/blob/main/LICENSE"
-                    }
-                }
-                developers {
-                    developer {
-                        id = "RK_01"
-                    }
-                }
-                scm {
-                    connection = "scm:git:git://github.com/RaphiMC/MinecraftAuth.git"
-                    developerConnection = "scm:git:ssh://github.com/RaphiMC/MinecraftAuth.git"
-                    url = "https://github.com/RaphiMC/MinecraftAuth.git"
-                }
-            }
-        }
-    }
-}
-
-signing {
-    setRequired(false)
-    sign configurations.archives
-    sign publishing.publications.maven
-}
-
-project.tasks.withType(PublishToMavenRepository).forEach {
-    it.dependsOn(project.tasks.withType(Sign))
-}
-
-Provider<String> latestCommitHash() {
-    return providers.exec {
-        commandLine = ["git", "rev-parse", "--short", "HEAD"]
-    }.standardOutput.getAsText().map(String::trim)
 }

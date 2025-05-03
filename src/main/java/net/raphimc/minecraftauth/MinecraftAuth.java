@@ -50,7 +50,7 @@ import java.util.function.Function;
 public class MinecraftAuth {
 
     public static final String VERSION = "${version}";
-    public static final String IMPL_VERSION = "${impl_version}";
+    public static final String IMPL_VERSION = "${version}+${commit_hash}";
 
     public static ILogger LOGGER = new LazyLogger(Slf4jConsoleLogger::new);
     public static String USER_AGENT = "MinecraftAuth/" + VERSION;

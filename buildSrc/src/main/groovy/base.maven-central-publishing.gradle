@@ -1,0 +1,13 @@
+publishing {
+    repositories {
+        maven {
+            name = "ossrh"
+            url = "https://s01.oss.sonatype.org/" + (project.maven_version.endsWith("SNAPSHOT") ? "content/repositories/snapshots/" : "service/local/staging/deploy/maven2/")
+
+            credentials(PasswordCredentials)
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+    }
+}
