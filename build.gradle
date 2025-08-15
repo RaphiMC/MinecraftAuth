@@ -17,8 +17,8 @@ dependencies {
 
     api "net.lenni0451.commons:httpclient:1.7.1"
     api "com.google.code.gson:gson:2.13.1"
-    api "io.jsonwebtoken:jjwt-impl:0.12.6"
-    api("io.jsonwebtoken:jjwt-gson:0.12.6") {
+    api "io.jsonwebtoken:jjwt-impl:0.12.7"
+    api("io.jsonwebtoken:jjwt-gson:0.12.7") {
         exclude group: "com.google.code.gson", module: "gson"
     }
     api "org.slf4j:slf4j-api:2.0.17"
