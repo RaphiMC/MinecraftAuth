@@ -1,13 +1,35 @@
 publishing {
     repositories {
         maven {
-            name = "ossrh"
-            url = "https://s01.oss.sonatype.org/" + (project.maven_version.endsWith("SNAPSHOT") ? "content/repositories/snapshots/" : "service/local/staging/deploy/maven2/")
+            name = "central"
+            if (project.maven_version.endsWith("SNAPSHOT")) {
+                url = "https://central.sonatype.com/repository/maven-snapshots"
+            } else {
+                url = "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2"
+            }
 
             credentials(PasswordCredentials)
             authentication {
                 basic(BasicAuthentication)
             }
+        }
+    }
+}
+
+tasks.withType(PublishToMavenRepository).configureEach {
+    if (it.name.endsWith("ToCentralRepository")) {
+        def centralUsername = providers.gradleProperty("centralUsername")
+        def centralPassword = providers.gradleProperty("centralPassword")
+        def mavenGroup = it.publication.groupId
+        it.doLast {
+            def connection = URI.create("https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/$mavenGroup").toURL().openConnection() as HttpURLConnection
+            connection.setRequestMethod("POST")
+            connection.setRequestProperty("Authorization", "Basic " + "${centralUsername.get()}:${centralPassword.get()}".bytes.encodeBase64().toString())
+            connection.connect()
+            if (connection.getResponseCode() != 200) {
+                throw new GradleException("Failed to close staging repository: ${connection.getResponseCode()} ${connection.getResponseMessage()}")
+            }
+            connection.disconnect()
         }
     }
 }
