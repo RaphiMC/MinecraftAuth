@@ -12,7 +12,7 @@ sourceSets {
 
 dependencies {
     compileOnly(annotationProcessor("org.projectlombok:lombok:1.18.38"))
-    compileOnly "org.jetbrains:annotations:26.0.2"
+    compileOnly "org.jetbrains:annotations:26.0.2-1"
     compileOnly sourceSets.javaFxStub.output
 
     api "net.lenni0451.commons:httpclient:1.8.0"
