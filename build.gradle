@@ -15,7 +15,7 @@ dependencies {
     compileOnly "org.jetbrains:annotations:26.0.2-1"
     compileOnly sourceSets.javaFxStub.output
 
-    api "net.lenni0451.commons:httpclient:1.8.0"
+    api "net.lenni0451.commons:httpclient:1.9.0"
     api "com.google.code.gson:gson:2.13.2"
     api "io.jsonwebtoken:jjwt-impl:0.13.0"
     api("io.jsonwebtoken:jjwt-gson:0.13.0") {
