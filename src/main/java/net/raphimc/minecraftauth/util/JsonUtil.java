@@ -17,60 +17,38 @@
  */
 package net.raphimc.minecraftauth.util;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.lenni0451.commons.gson.elements.GsonObject;
+
+import java.security.KeyPair;
+import java.util.Base64;
 
 public class JsonUtil {
 
-    public static final Gson GSON = new Gson();
-
-    public static JsonElement parseString(final String json) {
-        return GSON.fromJson(json, JsonElement.class);
-    }
-
-    public static String getStringOr(final JsonObject obj, final String key, final String defaultValue) {
-        final JsonElement element = obj.get(key);
-        if (element != null && !element.isJsonNull()) {
-            return element.getAsString();
-        } else {
-            return defaultValue;
+    public static JsonObject encodeKeyPair(final KeyPair keyPair) {
+        if (keyPair.getPublic() == null || keyPair.getPrivate() == null) {
+            throw new IllegalArgumentException("KeyPair must contain both public and private key");
         }
-    }
-
-    public static boolean getBooleanOr(final JsonObject obj, final String key, final boolean defaultValue) {
-        final JsonElement element = obj.get(key);
-        if (element != null && !element.isJsonNull()) {
-            return element.getAsBoolean();
-        } else {
-            return defaultValue;
+        if (!keyPair.getPublic().getAlgorithm().equals(keyPair.getPrivate().getAlgorithm())) {
+            throw new IllegalArgumentException("Public and private key must use the same algorithm");
         }
+
+        final JsonObject json = new JsonObject();
+        json.addProperty("algorithm", keyPair.getPublic().getAlgorithm());
+        json.addProperty("publicKey", Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded()));
+        json.addProperty("privateKey", Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded()));
+        return json;
     }
 
-    public static int getIntOr(final JsonObject obj, final String key, final int defaultValue) {
-        final JsonElement element = obj.get(key);
-        if (element != null && !element.isJsonNull()) {
-            return element.getAsInt();
-        } else {
-            return defaultValue;
-        }
-    }
-
-    public static long getLongOr(final JsonObject obj, final String key, final long defaultValue) {
-        final JsonElement element = obj.get(key);
-        if (element != null && !element.isJsonNull()) {
-            return element.getAsLong();
-        } else {
-            return defaultValue;
-        }
-    }
-
-    public static JsonObject getObjectNonNull(final JsonObject obj, final String key) {
-        final JsonElement element = obj.get(key);
-        if (element != null && !element.isJsonNull()) {
-            return element.getAsJsonObject();
-        } else {
-            return new JsonObject();
+    public static KeyPair decodeKeyPair(final GsonObject json) {
+        final String algorithm = json.reqString("algorithm");
+        switch (algorithm) {
+            case "RSA":
+                return new KeyPair(CryptUtil.rsaPublicKeyFromBase64(json.reqString("publicKey")), CryptUtil.rsaPrivateKeyFromBase64(json.reqString("privateKey")));
+            case "EC":
+                return new KeyPair(CryptUtil.ecPublicKeyFromBase64(json.reqString("publicKey")), CryptUtil.ecPrivateKeyFromBase64(json.reqString("privateKey")));
+            default:
+                throw new IllegalArgumentException("Unsupported key algorithm: " + algorithm);
         }
     }
 

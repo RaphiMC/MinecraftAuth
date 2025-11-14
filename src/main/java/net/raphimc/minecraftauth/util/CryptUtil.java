@@ -17,26 +17,19 @@
  */
 package net.raphimc.minecraftauth.util;
 
-import com.google.gson.JsonObject;
-import net.lenni0451.commons.httpclient.content.HttpContent;
-import net.lenni0451.commons.httpclient.model.HttpHeader;
-import net.lenni0451.commons.httpclient.requests.HttpContentRequest;
-import net.lenni0451.commons.httpclient.requests.HttpRequest;
+import lombok.SneakyThrows;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.time.Instant;
+import java.util.Arrays;
 import java.util.Base64;
-import java.util.Optional;
 
 public class CryptUtil {
 
@@ -56,126 +49,117 @@ public class CryptUtil {
         }
     }
 
-    public static <T extends PublicKey> T publicKeyEcFromBase64(final String base64) {
+    public static ECPublicKey ecPublicKeyFromBase64(final String base64) {
+        return ecPublicKeyFromBytes(Base64.getDecoder().decode(base64));
+    }
+
+    public static ECPrivateKey ecPrivateKeyFromBase64(final String base64) {
+        return ecPrivateKeyFromBytes(Base64.getDecoder().decode(base64));
+    }
+
+    public static ECPublicKey ecPublicKeyFromBytes(final byte[] bytes) {
         try {
-            return (T) EC_KEYFACTORY.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(base64)));
+            return (ECPublicKey) EC_KEYFACTORY.generatePublic(new X509EncodedKeySpec(bytes));
         } catch (InvalidKeySpecException e) {
-            throw new RuntimeException("Could not decode base64 public key", e);
+            throw new RuntimeException("Could not decode public key", e);
         }
     }
 
-    public static <T extends PrivateKey> T privateKeyEcFromBase64(final String base64) {
+    public static ECPrivateKey ecPrivateKeyFromBytes(final byte[] bytes) {
         try {
-            return (T) EC_KEYFACTORY.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(base64)));
+            return (ECPrivateKey) EC_KEYFACTORY.generatePrivate(new PKCS8EncodedKeySpec(bytes));
         } catch (InvalidKeySpecException e) {
-            throw new RuntimeException("Could not decode base64 private key", e);
+            throw new RuntimeException("Could not decode private key", e);
         }
     }
 
-    public static <T extends PublicKey> T publicKeyRsaFromBase64(final String base64) {
+    public static RSAPublicKey rsaPublicKeyFromBase64(final String base64) {
+        return rsaPublicKeyFromBytes(Base64.getDecoder().decode(base64));
+    }
+
+    public static RSAPrivateKey rsaPrivateKeyFromBase64(final String base64) {
+        return rsaPrivateKeyFromBytes(Base64.getDecoder().decode(base64));
+    }
+
+    public static RSAPublicKey rsaPublicKeyFromBytes(final byte[] bytes) {
         try {
-            return (T) RSA_KEYFACTORY.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(base64)));
+            return (RSAPublicKey) RSA_KEYFACTORY.generatePublic(new X509EncodedKeySpec(bytes));
         } catch (InvalidKeySpecException e) {
-            throw new RuntimeException("Could not decode base64 public key", e);
+            throw new RuntimeException("Could not decode public key", e);
         }
     }
 
-    public static <T extends PrivateKey> T privateKeyRsaFromBase64(final String base64) {
+    public static RSAPrivateKey rsaPrivateKeyFromBytes(final byte[] bytes) {
         try {
-            return (T) RSA_KEYFACTORY.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(base64)));
+            return (RSAPrivateKey) RSA_KEYFACTORY.generatePrivate(new PKCS8EncodedKeySpec(bytes));
         } catch (InvalidKeySpecException e) {
-            throw new RuntimeException("Could not decode base64 private key", e);
+            throw new RuntimeException("Could not decode private key", e);
         }
     }
 
-    public static HttpHeader getSignatureHeader(final HttpRequest httpRequest, final ECPrivateKey privateKey) throws IOException {
-        final long windowsTimestamp = (Instant.now().plus(TimeUtil.getClientTimeOffset()).getEpochSecond() + 11644473600L) * 10000000L;
+    @SneakyThrows
+    public static KeyPair generateEcdsa256KeyPair() {
+        final KeyPairGenerator secp256r1 = KeyPairGenerator.getInstance("EC");
+        secp256r1.initialize(new ECGenParameterSpec("secp256r1"));
+        return secp256r1.generateKeyPair();
+    }
 
-        final ByteArrayOutputStream signatureContent = new ByteArrayOutputStream();
-        DataOutputStream data = new DataOutputStream(signatureContent);
-        data.writeInt(1); // Policy Version
-        data.writeByte(0); // 0 byte
-        data.writeLong(windowsTimestamp); // Timestamp
-        data.writeByte(0); // 0 byte
-        data.write(httpRequest.getMethod().getBytes(StandardCharsets.UTF_8)); // HTTP Method
-        data.writeByte(0); // 0 byte
-        data.write((httpRequest.getURL().getPath() + (httpRequest.getURL().getQuery() != null ? httpRequest.getURL().getQuery() : "")).getBytes(StandardCharsets.UTF_8));
-        data.writeByte(0); // 0 byte
-        final Optional<String> authorizationHeader = httpRequest.getFirstHeader("Authorization");
-        if (authorizationHeader.isPresent()) {
-            data.write(authorizationHeader.get().getBytes(StandardCharsets.UTF_8)); // Authorization Header
-        }
-        data.writeByte(0); // 0 byte
-        if (httpRequest instanceof HttpContentRequest) {
-            final HttpContent content = ((HttpContentRequest) httpRequest).getContent();
-            if (content != null) {
-                data.write(content.getAsBytes());
+    @SneakyThrows
+    public static KeyPair generateEcdsa384KeyPair() {
+        final KeyPairGenerator secp384r1 = KeyPairGenerator.getInstance("EC");
+        secp384r1.initialize(new ECGenParameterSpec("secp384r1"));
+        return secp384r1.generateKeyPair();
+    }
+
+    public static byte[] signSha256InP1363Format(final ECPrivateKey privateKey, final byte[] data) throws SignatureException, InvalidKeyException, NoSuchAlgorithmException {
+        try { // Java 9+
+            final Signature ecdsaSignature = Signature.getInstance("SHA256withECDSAinP1363Format");
+            ecdsaSignature.initSign(privateKey);
+            ecdsaSignature.update(data);
+            return ecdsaSignature.sign();
+        } catch (NoSuchAlgorithmException e) { // Fallback for Java 8
+            final Signature ecdsaSignature = Signature.getInstance("SHA256withECDSA");
+            ecdsaSignature.initSign(privateKey);
+            ecdsaSignature.update(data);
+            final byte[] derSignature = ecdsaSignature.sign();
+            if (derSignature[0] != 0x30) {
+                throw new IllegalArgumentException("Not a valid DER sequence");
             }
-        }
-        data.writeByte(0); // 0 byte
 
-        final ByteArrayOutputStream header = new ByteArrayOutputStream();
-        data = new DataOutputStream(header);
-        data.writeInt(1); // Policy Version
-        data.writeLong(windowsTimestamp); // Timestamp
-
-        try {
-            byte[] signature;
-            try { // Java 9+ only
-                final Signature ecdsaSignature = Signature.getInstance("SHA256withECDSAinP1363Format");
-                ecdsaSignature.initSign(privateKey);
-                ecdsaSignature.update(signatureContent.toByteArray());
-                signature = ecdsaSignature.sign();
-            } catch (NoSuchAlgorithmException e) { // Fallback for Java 8
-                signature = JwtUtil.signES256(privateKey, signatureContent.toByteArray());
+            int idx = 2;
+            if (derSignature[idx] != 0x02) {
+                throw new IllegalArgumentException("Expected integer for r");
             }
-            data.write(signature); // Signature
-        } catch (Throwable e) {
-            throw new RuntimeException("Could not sign request", e);
-        }
+            final int rLen = derSignature[idx + 1];
+            final byte[] rBytes = Arrays.copyOfRange(derSignature, idx + 2, idx + 2 + rLen);
+            idx += 2 + rLen;
 
-        return new HttpHeader("Signature", Base64.getEncoder().encodeToString(header.toByteArray()));
+            if (derSignature[idx] != 0x02) {
+                throw new IllegalArgumentException("Expected integer for s");
+            }
+            final int sLen = derSignature[idx + 1];
+            final byte[] sBytes = Arrays.copyOfRange(derSignature, idx + 2, idx + 2 + sLen);
+
+            final int size = privateKey.getParams().getOrder().bitLength() / Byte.SIZE;
+            final byte[] concat = new byte[size * 2];
+            System.arraycopy(toFixedLengthP1363(rBytes, size), 0, concat, 0, size);
+            System.arraycopy(toFixedLengthP1363(sBytes, size), 0, concat, size, size);
+            return concat;
+        }
     }
 
-    public static JsonObject getProofKey(final ECPublicKey publicKey) {
-        final JsonObject proofKey = new JsonObject();
-        proofKey.addProperty("alg", "ES256");
-        proofKey.addProperty("crv", "P-256");
-        proofKey.addProperty("kty", "EC");
-        proofKey.addProperty("use", "sig");
-        proofKey.addProperty("x", encodeECCoordinate(publicKey.getParams().getCurve().getField().getFieldSize(), publicKey.getW().getAffineX()));
-        proofKey.addProperty("y", encodeECCoordinate(publicKey.getParams().getCurve().getField().getFieldSize(), publicKey.getW().getAffineY()));
-        return proofKey;
-    }
-
-    private static String encodeECCoordinate(final int fieldSize, final BigInteger coordinate) {
-        final byte[] notPadded = bigIntegerToByteArray(coordinate);
-        final int bytesToOutput = (fieldSize + 7) / 8;
-        if (notPadded.length >= bytesToOutput) {
-            return Base64.getUrlEncoder().withoutPadding().encodeToString(notPadded);
+    private static byte[] toFixedLengthP1363(final byte[] val, final int size) {
+        if (val.length == size) {
+            return val;
+        } else if (val.length == size + 1 && val[0] == 0x00) {
+            return Arrays.copyOfRange(val, 1, val.length);
+        } else if (val.length < size) {
+            final byte[] padded = new byte[size];
+            System.arraycopy(val, 0, padded, size - val.length, val.length);
+            return padded;
+        } else {
+            throw new IllegalArgumentException("Invalid length for ECDSA integer");
         }
-        final byte[] padded = new byte[bytesToOutput];
-        System.arraycopy(notPadded, 0, padded, bytesToOutput - notPadded.length, notPadded.length);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(padded);
-    }
-
-    private static byte[] bigIntegerToByteArray(final BigInteger bigInteger) {
-        int bitlen = bigInteger.bitLength();
-        bitlen = bitlen + 7 >> 3 << 3;
-        final byte[] bigBytes = bigInteger.toByteArray();
-        if (bigInteger.bitLength() % 8 != 0 && bigInteger.bitLength() / 8 + 1 == bitlen / 8) {
-            return bigBytes;
-        }
-        int startSrc = 0;
-        int len = bigBytes.length;
-        if (bigInteger.bitLength() % 8 == 0) {
-            startSrc = 1;
-            --len;
-        }
-        final int startDst = bitlen / 8 - len;
-        final byte[] resizedBytes = new byte[bitlen / 8];
-        System.arraycopy(bigBytes, startSrc, resizedBytes, startDst, len);
-        return resizedBytes;
     }
 
 }

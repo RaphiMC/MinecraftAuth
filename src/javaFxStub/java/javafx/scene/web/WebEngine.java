@@ -17,7 +17,7 @@
  */
 package javafx.scene.web;
 
-import javafx.beans.value.ObservableValue;
+import javafx.beans.property.ReadOnlyStringProperty;
 
 public final class WebEngine {
 
@@ -25,6 +25,6 @@ public final class WebEngine {
 
     public native void load(final String url);
 
-    public native ObservableValue<String> locationProperty();
+    public native ReadOnlyStringProperty locationProperty();
 
 }
