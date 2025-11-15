@@ -43,6 +43,8 @@ import net.raphimc.minecraftauth.xbl.data.XblConstants;
 import net.raphimc.minecraftauth.xbl.model.*;
 import net.raphimc.minecraftauth.xbl.request.XblDeviceAuthenticateRequest;
 import net.raphimc.minecraftauth.xbl.request.XblSisuAuthorizeRequest;
+import net.raphimc.minecraftauth.xbl.request.XblUserAuthenticateRequest;
+import net.raphimc.minecraftauth.xbl.request.XblXstsAuthorizeRequest;
 
 import java.io.IOException;
 import java.security.KeyPair;
@@ -171,20 +173,31 @@ public class JavaAuthManager {
 
     @SneakyThrows
     private XblUserToken refreshXblUserToken() {
-        this.refreshSisuTokens();
-        return this.xblUserToken.getCached();
+        if (this.msaApplicationConfig.isTitleClientId()) {
+            this.refreshSisuTokens();
+            return this.xblUserToken.getCached();
+        } else {
+            return this.httpClient.executeAndHandle(new XblUserAuthenticateRequest(this.msaApplicationConfig, this.msaToken.getUpToDate()));
+        }
     }
 
     @SneakyThrows
     private XblTitleToken refreshXblTitleToken() {
+        if (!this.msaApplicationConfig.isTitleClientId()) {
+            throw new UnsupportedOperationException("Can't refresh XBL title token, because the MSA application client ID is not a title client ID");
+        }
         this.refreshSisuTokens();
         return this.xblTitleToken.getCached();
     }
 
     @SneakyThrows
     private XblXstsToken refreshJavaXstsToken() {
-        this.refreshSisuTokens();
-        return this.javaXstsToken.getCached();
+        if (this.msaApplicationConfig.isTitleClientId()) {
+            this.refreshSisuTokens();
+            return this.javaXstsToken.getCached();
+        } else {
+            return this.httpClient.executeAndHandle(new XblXstsAuthorizeRequest(this.xblDeviceToken.getUpToDate(), this.xblUserToken.getUpToDate(), null, XblConstants.JAVA_XSTS_RELYING_PARTY));
+        }
     }
 
     @SneakyThrows

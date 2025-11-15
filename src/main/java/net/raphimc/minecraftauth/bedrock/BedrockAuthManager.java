@@ -46,6 +46,7 @@ import net.raphimc.minecraftauth.xbl.data.XblConstants;
 import net.raphimc.minecraftauth.xbl.model.*;
 import net.raphimc.minecraftauth.xbl.request.XblDeviceAuthenticateRequest;
 import net.raphimc.minecraftauth.xbl.request.XblSisuAuthorizeRequest;
+import net.raphimc.minecraftauth.xbl.request.XblUserAuthenticateRequest;
 import net.raphimc.minecraftauth.xbl.request.XblXstsAuthorizeRequest;
 
 import java.io.IOException;
@@ -202,30 +203,43 @@ public class BedrockAuthManager {
 
     @SneakyThrows
     private XblUserToken refreshXblUserToken() {
-        this.refreshSisuTokens();
-        return this.xblUserToken.getCached();
+        if (this.msaApplicationConfig.isTitleClientId()) {
+            this.refreshSisuTokens();
+            return this.xblUserToken.getCached();
+        } else {
+            return this.httpClient.executeAndHandle(new XblUserAuthenticateRequest(this.msaApplicationConfig, this.msaToken.getUpToDate()));
+        }
     }
 
     @SneakyThrows
     private XblTitleToken refreshXblTitleToken() {
+        if (!this.msaApplicationConfig.isTitleClientId()) {
+            throw new UnsupportedOperationException("Can't refresh XBL title token, because the MSA application client ID is not a title client ID");
+        }
         this.refreshSisuTokens();
         return this.xblTitleToken.getCached();
     }
 
     @SneakyThrows
     private XblXstsToken refreshBedrockXstsToken() {
-        this.refreshSisuTokens();
-        return this.bedrockXstsToken.getCached();
+        if (this.msaApplicationConfig.isTitleClientId()) {
+            this.refreshSisuTokens();
+            return this.bedrockXstsToken.getCached();
+        } else {
+            return this.httpClient.executeAndHandle(new XblXstsAuthorizeRequest(this.xblDeviceToken.getUpToDate(), this.xblUserToken.getUpToDate(), null, XblConstants.BEDROCK_XSTS_RELYING_PARTY));
+        }
     }
 
     @SneakyThrows
     private XblXstsToken refreshPlayFabXstsToken() {
-        return this.httpClient.executeAndHandle(new XblXstsAuthorizeRequest(this.xblDeviceToken.getUpToDate(), this.xblUserToken.getUpToDate(), this.xblTitleToken.getUpToDate(), XblConstants.BEDROCK_PLAY_FAB_XSTS_RELYING_PARTY));
+        final XblTitleToken titleToken = this.msaApplicationConfig.isTitleClientId() ? this.xblTitleToken.getUpToDate() : null;
+        return this.httpClient.executeAndHandle(new XblXstsAuthorizeRequest(this.xblDeviceToken.getUpToDate(), this.xblUserToken.getUpToDate(), titleToken, XblConstants.BEDROCK_PLAY_FAB_XSTS_RELYING_PARTY));
     }
 
     @SneakyThrows
     private XblXstsToken refreshRealmsXstsToken() {
-        return this.httpClient.executeAndHandle(new XblXstsAuthorizeRequest(this.xblDeviceToken.getUpToDate(), this.xblUserToken.getUpToDate(), this.xblTitleToken.getUpToDate(), XblConstants.BEDROCK_REALMS_XSTS_RELYING_PARTY));
+        final XblTitleToken titleToken = this.msaApplicationConfig.isTitleClientId() ? this.xblTitleToken.getUpToDate() : null;
+        return this.httpClient.executeAndHandle(new XblXstsAuthorizeRequest(this.xblDeviceToken.getUpToDate(), this.xblUserToken.getUpToDate(), titleToken, XblConstants.BEDROCK_REALMS_XSTS_RELYING_PARTY));
     }
 
     @SneakyThrows
