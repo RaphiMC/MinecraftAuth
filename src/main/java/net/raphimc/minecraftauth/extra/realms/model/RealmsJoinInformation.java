@@ -24,6 +24,9 @@ import net.lenni0451.commons.gson.elements.GsonObject;
 @Value
 public class RealmsJoinInformation {
 
+    public static final String PROTOCOL_DEFAULT = "DEFAULT"; // Java and Bedrock
+    public static final String PROTOCOL_NETHERNET = "NETHERNET"; // Bedrock only
+
     public static RealmsJoinInformation fromApiJson(final GsonObject json) {
         return new RealmsJoinInformation(
                 json.reqString("address"),
