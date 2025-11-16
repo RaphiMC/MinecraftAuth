@@ -24,10 +24,20 @@ public class UuidUtil {
     private static final String UNDASHED_UUID_REGEX = "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)";
     private static final String DASHED_UUID_REGEX = "(\\p{XDigit}{8})-(\\p{XDigit}{4})-(\\p{XDigit}{4})-(\\p{XDigit}{4})-(\\p{XDigit}+)";
 
-    public static UUID fromLenientString(final String s) {
-        if (s == null) return null;
+    public static UUID fromUndashedString(final String s) {
+        if (s != null) {
+            return UUID.fromString(s.replaceFirst(UNDASHED_UUID_REGEX, "$1-$2-$3-$4-$5"));
+        } else {
+            return null;
+        }
+    }
 
-        return UUID.fromString(s.replaceFirst(UNDASHED_UUID_REGEX, "$1-$2-$3-$4-$5"));
+    public static String toUndashedString(final UUID uuid) {
+        if (uuid != null) {
+            return uuid.toString().replace("-", "");
+        } else {
+            return null;
+        }
     }
 
     public static boolean isUndashedUuid(final String s) {

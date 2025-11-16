@@ -3,10 +3,9 @@ Simple and easy to use Minecraft microsoft authentication library (Java and Bedr
 
 ## Features
 - Full support for Minecraft: Java Edition and Minecraft: Bedrock Edition
-- Basic support for Minecraft: Education Edition
 - Login using device code, credentials, a JavaFX WebView window or a local webserver
-- Refreshing and validating token chains
-- Serializing and deserializing token chains to and from json
+- Token lifecycle management (Automatic refreshing of tokens)
+- Serializing and deserializing tokens to and from json
 - Customizable login flows (Client ID, scopes, ...)
 - Basic implementation of the Minecraft Realms API (Allows listing and joining realms)
 
@@ -19,102 +18,216 @@ You can also find instructions how to implement it into your build script there.
 If you just want the latest jar file you can download it from [GitHub Actions](https://github.com/RaphiMC/MinecraftAuth/actions/workflows/build.yml) or [Lenni0451's Jenkins](https://build.lenni0451.net/job/MinecraftAuth/).
 
 ## Usage
-MinecraftAuth provides most of its functionality through the ``MinecraftAuth`` class.
-It contains predefined login flows for Minecraft: Java Edition and Minecraft: Bedrock Edition using the official client ids and scopes.
+MinecraftAuth provides its core functionality through the ``JavaAuthManager`` and ``BedrockAuthManager`` classes.  
+These classes provide predefined and customizable login flows for their respective Minecraft editions.
 
-To customize/configure a login flow in order to change application details (like client id, scope or client secret) or to use alternative login ways (like JavaFX WebView window or local webserver) you can use the ``MinecraftAuth.builder()`` method.
-For examples, you can look at the predefined login flows in the ``MinecraftAuth`` class.
-
-Here is an example of how to manage a Minecraft: Java Edition account (For Minecraft: Bedrock Edition you can use pretty much the same code, but replace ``Java`` with ``Bedrock``):
-### Log in using device code (Recommended)
-The device code auth flow blocks the thread until the user has logged in and throws an exception if the process times out.
-The timeout is 120 seconds by default.
+### Getting started
+To get started create an ``HttpClient`` which will be used for all network requests:
 ```java
-HttpClient httpClient = MinecraftAuth.createHttpClient();
-StepFullJavaSession.FullJavaSession javaSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCode -> {
-    // Method to generate a verification URL and a code for the user to enter on that page
-    System.out.println("Go to " + msaDeviceCode.getVerificationUri());
-    System.out.println("Enter code " + msaDeviceCode.getUserCode());
+// Create an HttpClient with a custom user agent (recommended)
+HttpClient httpClient = MinecraftAuth.createHttpClient(userAgent);
 
-    // There is also a method to generate a direct URL without needing the user to enter a code
-    System.out.println("Go to " + msaDeviceCode.getDirectVerificationUri());
-}));
-System.out.println("Username: " + javaSession.getMcProfile().getName());
-System.out.println("Access token: " + javaSession.getMcProfile().getMcToken().getAccessToken());
-System.out.println("Player certificates: " + javaSession.getPlayerCertificates());
+// Or you can create an HttpClient without a custom user agent (not recommended)
+HttpClient httpClient = MinecraftAuth.createHttpClient();
 ```
-### Log in using credentials
+
+### Configure the authentication manager
+The next step is to configure the authentication manager (Example is for Minecraft: Java Edition, but Minecraft: Bedrock Edition is pretty much the same):
+```java
+// Use predefined application configuration (Uses the official Minecraft application details)
+JavaAuthManager.Builder authManagerBuilder = JavaAuthManager.create(httpClient);
+
+// If you want to customize the application details (like client id, scope or client secret) you can do it like this:
+JavaAuthManager.Builder authManagerBuilder = JavaAuthManager.create(httpClient).msaApplicationConfig(new MsaApplicationConfig(...));
+```
+
+### Logging in
+The next step is to choose one of the login flows and initiate the login process.
+
+#### Log in using device code (Recommended)
+The device code auth flow blocks the thread until the user has logged in and throws an exception if the process times out.
+The default timeout is 5 minutes.
+```java
+JavaAuthManager authManager = authManagerBuilder.login(DeviceCodeMsaAuthService::new, new Consumer<MsaDeviceCode>() {
+    @Override
+    public void accept(MsaDeviceCode deviceCode) {
+        // Method to generate a verification URL and a code for the user to enter on that page
+        System.out.println("Go to " + deviceCode.getVerificationUri());
+        System.out.println("Enter code " + deviceCode.getUserCode());
+
+        // There is also a method to generate a direct URL without needing the user to enter a code
+        System.out.println("Go to " + deviceCode.getDirectVerificationUri());
+    }
+});
+System.out.println("Username: " + authManager.getMinecraftProfile().getUpToDate().getName());
+System.out.println("Access token: " + authManager.getMinecraftToken().getUpToDate().getToken());
+```
+
+#### Log in using credentials
 The credentials auth flow does not handle 2FA and will throw an exception if the user has 2FA enabled. You should consider using the device code auth flow instead if you want to support 2FA.
 ```java
-HttpClient httpClient = MinecraftAuth.createHttpClient();
-StepFullJavaSession.FullJavaSession javaSession = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(httpClient, new StepCredentialsMsaCode.MsaCredentials("email@test.com", "P4ssw0rd"));
-System.out.println("Username: " + javaSession.getMcProfile().getName());
-System.out.println("Access token: " + javaSession.getMcProfile().getMcToken().getAccessToken());
-System.out.println("Player certificates: " + javaSession.getPlayerCertificates());
+JavaAuthManager authManager = authManagerBuilder.login(CredentialsMsaAuthService::new, new MsaCredentials("email@test.com", "P4ssw0rd"));
+System.out.println("Username: " + authManager.getMinecraftProfile().getUpToDate().getName());
+System.out.println("Access token: " + authManager.getMinecraftToken().getUpToDate().getToken());
 ```
-### Save the token chain to a json object
+
+#### Log in using JavaFX WebView
+The JavaFX WebView auth flow opens a JavaFX window with a WebView for the user to log in.
+This method requires you to have JavaFX set up in your project.
 ```java
-JsonObject serializedSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.toJson(javaSession);
+JavaAuthManager authManager = authManagerBuilder.login(JfxWebViewMsaAuthService::new);
 ```
-### Load the token chain from a json object
+
+#### Advanced: Log in with custom MSA auth service
+If you want to implement your own MSA auth service (for example to implement a different login flow) or customize one of the existing ones you can do it like this:
 ```java
-StepFullJavaSession.FullJavaSession loadedSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.fromJson(serializedSession);
+// Create a customized MSA auth service (Example: Change login timeout to 60 seconds)
+DeviceCodeMsaAuthService authService = new DeviceCodeMsaAuthService(MinecraftAuth.createHttpClient(), new MsaApplicationConfig(MsaConstants.JAVA_TITLE_ID, MsaConstants.SCOPE_TITLE_AUTH), new Consumer<MsaDeviceCode>() {
+    @Override
+    public void accept(MsaDeviceCode deviceCode) {
+        System.out.println("Go to " + deviceCode.getDirectVerificationUri());
+    }
+}, 60_000);
+
+// Acquire the MSA token
+MsaToken msaToken = authService.acquireToken();
+
+// Pass it to the auth manager
+JavaAuthManager authManager = JavaAuthManager.create(MinecraftAuth.createHttpClient()).login(msaToken);
 ```
-### Refresh the token chain
-MinecraftAuth implements a refresh method that only refreshes the tokens that are expired and reuses the valid ones.
-You can call this everytime before you access/use the token chain to make sure it is valid. (Don't spam it though or else you will be rate limited by Microsoft)
+
+### Saving the tokens to a json object
+After logging the user in you can serialize the tokens to a json object to save them for later use:
+```java
+JsonObject serializedAuthManager = JavaAuthManager.toJson(authManager);
+```
+It is important to note, that MinecraftAuth does not request all tokens at once during the login process.
+Only the initial tokens are requested and the rest of the tokens are requested lazily when you access them.
+For this reason, it is recommended to attach a change listener to the auth manager after logging in to make sure new tokens are automatically saved:
+```java
+authManager.getChangeListeners().add(() -> {
+    // save the auth manager state here
+});
+```
+Alternatively you can also request the tokens you need directly after logging and then save them:
+```java
+JavaAuthManager authManager = authManagerBuilder.login(...);
+authManager.getMinecraftToken().refresh(); // If you need the Minecraft token
+authManager.getMinecraftProfile().refresh(); // If you need the Minecraft profile
+// Now save the auth manager state here or use the tokens in their cached state
+```
+
+### Loading the tokens from a json object
+Loading the tokens back from a json object is just as easy:
+```java
+JavaAuthManager authManager = JavaAuthManager.fromJson(httpClient, serializedAuthManager);
+```
+And of course don't forget to attach the change listener again after loading:
+```java
+authManager.getChangeListeners().add(() -> {
+    // save the auth manager state here
+});
+```
+Alternatively you can also refresh the tokens you need directly after loading and then save them:
+```java
+JavaAuthManager authManager = JavaAuthManager.fromJson(...);
+authManager.getMinecraftToken().refreshIfExpired(); // If you need the Minecraft token
+authManager.getMinecraftProfile().refreshIfExpired(); // If you need the Minecraft profile
+// Now save the auth manager state here and use the tokens in their cached state
+```
+
+### Token lifecycle management
+All token related methods in the auth managers return a ``Holder`` object which provides different methods to access the token.
+Tokens are requested lazily, so they are only requested/refreshed when you access them.
+
+The most important method is ``getUpToDate()`` which will automatically refresh the token if it is expired or not set yet.
 This method will throw an exception if the refresh fails (The initial refresh token is no longer valid and the user has to login again).
+
+The `getCached()` method can be used to get the current cached token without refreshing it.
+This is useful if you know, that the token is still valid (Because you maybe refreshed it somewhere else in your code recently).
+
+There are several other methods available in the ``Holder`` class, which you can learn more about in the javadoc.
+
+### Full example
+Here is a full example which demonstrates logging in using the device code flow and saving the tokens to a json file:
 ```java
-StepFullJavaSession.FullJavaSession readyToUseSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.refresh(httpClient, loadedSession);
+File tokenFile = new File("tokens.json");
+
+// Log in using device code flow
+JavaAuthManager authManager = JavaAuthManager.create(MinecraftAuth.createHttpClient()).login(DeviceCodeMsaAuthService::new, new Consumer<MsaDeviceCode>() {
+    @Override
+    public void accept(MsaDeviceCode deviceCode) {
+        System.out.println("Go to " + deviceCode.getDirectVerificationUri());
+    }
+});
+
+// Save tokens to file after login
+Files.write(tokenFile.toPath(), JavaAuthManager.toJson(authManager).toString().getBytes(StandardCharsets.UTF_8));
+
+// Attach a listener to save tokens on change
+authManager.getChangeListeners().add(() -> {
+    try {
+        Files.write(tokenFile.toPath(), JavaAuthManager.toJson(authManager).toString().getBytes(StandardCharsets.UTF_8));
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+});
+
+// Request the Minecraft token (This is going to trigger the change listener, so its not necessary to save after this)
+System.out.println("Access token: " + authManager.getMinecraftToken().getUpToDate().getToken());
+
+// The file "tokens.json" now contains all the necessary tokens to restore and use the auth manager later
 ```
+
+## Extras
+MinecraftAuth also provides some extra functionality like a basic Minecraft Realms API implementation.
+
 ### Minecraft Realms API
 MinecraftAuth provides a basic implementation of the Minecraft Realms API. It supports listing and joining the realms of an user.  
 The Realms API requires you to provide the latest supported client version of your application.
 You should hardcode this value instead of loading it from the Internet, as the Realms API will not work if your application can't handle the specified version.
+
 #### Java Edition
 ```java
-JavaRealmsService javaRealmsService = new JavaRealmsService(httpClient, "latestSupportedClientVersionHere", javaSession.getMcProfile());
-boolean isAvailable = javaRealmsService.isAvailable().join();
-if (!isAvailable) {
+JavaRealmsService javaRealmsService = new JavaRealmsService(httpClient, "latestSupportedClientVersionHere", authManager.getMinecraftToken(), authManager.getMinecraftProfile());
+boolean isCompatible = javaRealmsService.isCompatible();
+if (!isCompatible) {
     System.out.println("The client version does not support Realms");
 } else {
     System.out.println("Your client supports Realms");
-    List<RealmsWorld> realmsWorlds = javaRealmsService.getWorlds().join();
+    List<RealmsServer> realmsWorlds = javaRealmsService.getWorlds();
     System.out.println("Realms worlds: " + realmsWorlds);
     try {
-        System.out.println("Connect to: " + javaRealmsService.joinWorld(realmsWorlds.get(0)).join());
-    } catch (CompletionException e) {
-        if (e.getCause() instanceof RealmsRequestException) {
-            RealmsRequestException exception = (RealmsRequestException) e.getCause();
-            if (exception.getErrorCode() == RealmsRequestException.TOS_NOT_ACCEPTED) {
-                // The Java Edition Realms API requires users to accept the Minecraft Realms Terms of Service (https://aka.ms/MinecraftRealmsTerms)
-                // You should display the terms to the user and ask them to accept them:
-                javaRealmsService.acceptTos().join();
-                // If they accept, then you can try to join the world again
-            }
+        System.out.println("Connect to: " + javaRealmsService.joinWorld(realmsWorlds.get(0)));
+    } catch (RealmsRequestException e) {
+        if (e.getErrorCode() == RealmsRequestException.ERROR_TOS_NOT_ACCEPTED) {
+            // The Java Edition Realms API requires users to accept the Minecraft Realms Terms of Service (https://aka.ms/MinecraftRealmsTerms)
+            // You should display the terms to the user and ask them to accept them:
+            javaRealmsService.acceptTos();
+            // If they accept, then you can try to join the world again
         }
     }
 }
 ```
+
 #### Bedrock Edition
-**If you need Minecraft: Bedrock Edition Realms support, you have to make a custom auth flow with the realms boolean set to true when calling the buildMinecraftBedrockChainStep() method.**
 ```java
-BedrockRealmsService bedrockRealmsService = new BedrockRealmsService(httpClient, "latestSupportedClientVersionHere", bedrockSession.getRealmsXsts());
-boolean isAvailable = bedrockRealmsService.isAvailable().join();
-if (!isAvailable) {
+BedrockRealmsService bedrockRealmsService = new BedrockRealmsService(httpClient, "latestSupportedClientVersionHere", authManager.getRealmsXstsToken());
+boolean isCompatible = bedrockRealmsService.isCompatible();
+if (!isCompatible) {
     System.out.println("The client version does not support Realms");
 } else {
     System.out.println("Your client supports Realms");
-    List<RealmsWorld> realmsWorlds = bedrockRealmsService.getWorlds().join();
+    List<RealmsServer> realmsWorlds = bedrockRealmsService.getWorlds();
     System.out.println("Realms worlds: " + realmsWorlds);
-    System.out.println("Connect to: " + bedrockRealmsService.joinWorld(realmsWorlds.get(0)).join());
+    System.out.println("Connect to: " + bedrockRealmsService.joinWorld(realmsWorlds.get(0)));
 }
 ```
 [Here is an example implementation](https://github.com/ViaVersion/ViaProxy/blob/09e685fad9ee1b804a3b01a7eb308a444a48855f/src/main/java/net/raphimc/viaproxy/ui/impl/RealmsTab.java) which is using the Realms API of both Minecraft editions.
 
-### Logging
-MinecraftAuth by default uses SLF4J for logging.
-You can however easily redirect the log messages to your own code by setting ``MinecraftAuth.LOGGER`` to your own ``ILogger``.
+## Migrating from MinecraftAuth 4.x.x to 5.x.x
+If you are migrating from MinecraftAuth 4.x.x to 5.x.x you can use the ``MinecraftAuth4To5Migrator`` class to migrate the saved tokens of your users.
+This class provides methods to migrate the Minecraft: Java Edition and Minecraft: Bedrock Edition token chains to the new auth manager structure.
 
 ## Contact
 If you encounter any issues, please report them on the
