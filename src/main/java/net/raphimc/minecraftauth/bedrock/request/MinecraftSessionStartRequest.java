@@ -20,7 +20,6 @@ package net.raphimc.minecraftauth.bedrock.request;
 import com.google.gson.JsonObject;
 import net.lenni0451.commons.gson.elements.GsonObject;
 import net.lenni0451.commons.httpclient.HttpResponse;
-import net.lenni0451.commons.httpclient.constants.HttpHeaders;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
 import net.raphimc.minecraftauth.bedrock.model.MinecraftSession;
 import net.raphimc.minecraftauth.bedrock.responsehandler.MinecraftServicesResponseHandler;
@@ -37,7 +36,12 @@ import java.util.UUID;
 
 public class MinecraftSessionStartRequest extends PostRequest implements MinecraftServicesResponseHandler<MinecraftSession> {
 
+    @Deprecated
     public MinecraftSessionStartRequest(final XblXstsToken xstsToken, final PlayFabToken playFabToken, final String gameVersion, final UUID deviceId) throws MalformedURLException {
+        this(playFabToken, gameVersion, deviceId);
+    }
+
+    public MinecraftSessionStartRequest(final PlayFabToken playFabToken, final String gameVersion, final UUID deviceId) throws MalformedURLException {
         super("https://authorization.franchise.minecraft-services.net/api/v1.0/session/start");
 
         final JsonObject device = new JsonObject();
@@ -61,7 +65,6 @@ public class MinecraftSessionStartRequest extends PostRequest implements Minecra
         postData.add("user", user);
 
         this.setContent(new JsonContent(postData));
-        this.setHeader(HttpHeaders.AUTHORIZATION, xstsToken.getAuthorizationHeader());
     }
 
     @Override

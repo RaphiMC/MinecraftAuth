@@ -243,7 +243,7 @@ public class BedrockAuthManager {
     }
 
     private MinecraftSession refreshMinecraftSession() throws IOException {
-        return this.httpClient.executeAndHandle(new MinecraftSessionStartRequest(this.bedrockXstsToken.getUpToDate(), this.playFabToken.getUpToDate(), this.gameVersion, this.deviceId));
+        return this.httpClient.executeAndHandle(new MinecraftSessionStartRequest(this.playFabToken.getUpToDate(), this.gameVersion, this.deviceId));
     }
 
     private MinecraftMultiplayerToken refreshMinecraftMultiplayerToken() throws IOException {
