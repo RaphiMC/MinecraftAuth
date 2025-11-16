@@ -40,6 +40,17 @@ public class MinecraftAuth4To5Migrator {
      * @return The migrated save data.
      */
     public static JsonObject migrateJavaSave(final JsonObject oldSaveData) {
+        return migrateJavaSave(oldSaveData, new MsaApplicationConfig(MsaConstants.JAVA_TITLE_ID, MsaConstants.SCOPE_TITLE_AUTH));
+    }
+
+    /**
+     * Migrate a Java Edition token chain from MinecraftAuth 4.x.x to the 5.x.x format.
+     *
+     * @param oldSaveData The old save data.
+     * @param msaApplicationConfig The MSA application config the tokens were originally obtained with.
+     * @return The migrated save data.
+     */
+    public static JsonObject migrateJavaSave(final JsonObject oldSaveData, final MsaApplicationConfig msaApplicationConfig) {
         final String refreshToken = findRefreshToken(new GsonObject(oldSaveData));
         if (refreshToken == null) {
             throw new IllegalArgumentException("Failed to find refresh token in the provided save data");
@@ -47,7 +58,7 @@ public class MinecraftAuth4To5Migrator {
 
         final JsonObject newJson = new JsonObject();
         newJson.addProperty("_saveVersion", 1);
-        newJson.add("msaApplicationConfig", MsaApplicationConfig.toJson(new MsaApplicationConfig(MsaConstants.JAVA_TITLE_ID, MsaConstants.SCOPE_TITLE_AUTH)));
+        newJson.add("msaApplicationConfig", MsaApplicationConfig.toJson(msaApplicationConfig));
         newJson.addProperty("deviceType", "Win32");
         newJson.add("deviceKeyPair", JsonUtil.encodeKeyPair(CryptUtil.generateEcdsa256KeyPair()));
         newJson.addProperty("deviceId", UUID.randomUUID().toString());
@@ -62,6 +73,17 @@ public class MinecraftAuth4To5Migrator {
      * @return The migrated save data.
      */
     public static JsonObject migrateBedrockSave(final JsonObject oldSaveData) {
+        return migrateBedrockSave(oldSaveData, new MsaApplicationConfig(MsaConstants.BEDROCK_ANDROID_TITLE_ID, MsaConstants.SCOPE_TITLE_AUTH));
+    }
+
+    /**
+     * Migrate a Bedrock Edition token chain from MinecraftAuth 4.x.x to the 5.x.x format.
+     *
+     * @param oldSaveData The old save data.
+     * @param msaApplicationConfig The MSA application config the tokens were originally obtained with.
+     * @return The migrated save data.
+     */
+    public static JsonObject migrateBedrockSave(final JsonObject oldSaveData, final MsaApplicationConfig msaApplicationConfig) {
         final String refreshToken = findRefreshToken(new GsonObject(oldSaveData));
         if (refreshToken == null) {
             throw new IllegalArgumentException("Failed to find refresh token in the provided save data");
@@ -69,7 +91,7 @@ public class MinecraftAuth4To5Migrator {
 
         final JsonObject newJson = new JsonObject();
         newJson.addProperty("_saveVersion", 1);
-        newJson.add("msaApplicationConfig", MsaApplicationConfig.toJson(new MsaApplicationConfig(MsaConstants.BEDROCK_ANDROID_TITLE_ID, MsaConstants.SCOPE_TITLE_AUTH)));
+        newJson.add("msaApplicationConfig", MsaApplicationConfig.toJson(msaApplicationConfig));
         newJson.addProperty("deviceType", "Android");
         newJson.add("deviceKeyPair", JsonUtil.encodeKeyPair(CryptUtil.generateEcdsa256KeyPair()));
         newJson.addProperty("deviceId", UUID.randomUUID().toString());
