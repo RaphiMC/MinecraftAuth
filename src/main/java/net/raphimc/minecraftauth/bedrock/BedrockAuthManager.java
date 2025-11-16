@@ -18,7 +18,10 @@
 package net.raphimc.minecraftauth.bedrock;
 
 import com.google.gson.JsonObject;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.lenni0451.commons.gson.elements.GsonObject;
 import net.lenni0451.commons.httpclient.HttpClient;
@@ -188,21 +191,18 @@ public class BedrockAuthManager {
         this.hookChangeListeners();
     }
 
-    @SneakyThrows
-    private MsaToken refreshMsaToken() {
+    private MsaToken refreshMsaToken() throws IOException {
         if (this.msaToken.getCached().getRefreshToken() == null) {
             throw new IllegalStateException("Can't refresh MSA token, because it was created without a refresh token. The user has to sign in again.");
         }
         return this.httpClient.executeAndHandle(new MsaRefreshTokenRequest(this.msaApplicationConfig, this.msaToken.getCached()));
     }
 
-    @SneakyThrows
-    private XblDeviceToken refreshXblDeviceToken() {
+    private XblDeviceToken refreshXblDeviceToken() throws IOException {
         return this.httpClient.executeAndHandle(new XblDeviceAuthenticateRequest(this.deviceType, this.deviceId, this.deviceKeyPair));
     }
 
-    @SneakyThrows
-    private XblUserToken refreshXblUserToken() {
+    private XblUserToken refreshXblUserToken() throws IOException {
         if (this.msaApplicationConfig.isTitleClientId()) {
             this.refreshSisuTokens();
             return this.xblUserToken.getCached();
@@ -211,8 +211,7 @@ public class BedrockAuthManager {
         }
     }
 
-    @SneakyThrows
-    private XblTitleToken refreshXblTitleToken() {
+    private XblTitleToken refreshXblTitleToken() throws IOException {
         if (!this.msaApplicationConfig.isTitleClientId()) {
             throw new UnsupportedOperationException("Can't refresh XBL title token, because the MSA application client ID is not a title client ID");
         }
@@ -220,8 +219,7 @@ public class BedrockAuthManager {
         return this.xblTitleToken.getCached();
     }
 
-    @SneakyThrows
-    private XblXstsToken refreshBedrockXstsToken() {
+    private XblXstsToken refreshBedrockXstsToken() throws IOException {
         if (this.msaApplicationConfig.isTitleClientId()) {
             this.refreshSisuTokens();
             return this.bedrockXstsToken.getCached();
@@ -230,35 +228,29 @@ public class BedrockAuthManager {
         }
     }
 
-    @SneakyThrows
-    private XblXstsToken refreshPlayFabXstsToken() {
+    private XblXstsToken refreshPlayFabXstsToken() throws IOException {
         final XblTitleToken titleToken = this.msaApplicationConfig.isTitleClientId() ? this.xblTitleToken.getUpToDate() : null;
         return this.httpClient.executeAndHandle(new XblXstsAuthorizeRequest(this.xblDeviceToken.getUpToDate(), this.xblUserToken.getUpToDate(), titleToken, XblConstants.BEDROCK_PLAY_FAB_XSTS_RELYING_PARTY));
     }
 
-    @SneakyThrows
-    private XblXstsToken refreshRealmsXstsToken() {
+    private XblXstsToken refreshRealmsXstsToken() throws IOException {
         final XblTitleToken titleToken = this.msaApplicationConfig.isTitleClientId() ? this.xblTitleToken.getUpToDate() : null;
         return this.httpClient.executeAndHandle(new XblXstsAuthorizeRequest(this.xblDeviceToken.getUpToDate(), this.xblUserToken.getUpToDate(), titleToken, XblConstants.BEDROCK_REALMS_XSTS_RELYING_PARTY));
     }
 
-    @SneakyThrows
-    private PlayFabToken refreshPlayFabToken() {
+    private PlayFabToken refreshPlayFabToken() throws IOException {
         return this.httpClient.executeAndHandle(new PlayFabLoginWithXboxRequest(this.playFabXstsToken.getUpToDate(), PlayFabConstants.BEDROCK_PLAY_FAB_TITLE_ID));
     }
 
-    @SneakyThrows
-    private MinecraftSession refreshMinecraftSession() {
+    private MinecraftSession refreshMinecraftSession() throws IOException {
         return this.httpClient.executeAndHandle(new MinecraftSessionStartRequest(this.bedrockXstsToken.getUpToDate(), this.playFabToken.getUpToDate(), this.gameVersion, this.deviceId));
     }
 
-    @SneakyThrows
-    private MinecraftMultiplayerToken refreshMinecraftMultiplayerToken() {
+    private MinecraftMultiplayerToken refreshMinecraftMultiplayerToken() throws IOException {
         return this.httpClient.executeAndHandle(new MinecraftMultiplayerSessionStartRequest(this.minecraftSession.getUpToDate(), this.sessionKeyPair));
     }
 
-    @SneakyThrows
-    private MinecraftCertificateChain refreshMinecraftCertificateChain() {
+    private MinecraftCertificateChain refreshMinecraftCertificateChain() throws IOException {
         return this.httpClient.executeAndHandle(new MinecraftAuthenticationRequest(this.bedrockXstsToken.getUpToDate(), this.sessionKeyPair));
     }
 

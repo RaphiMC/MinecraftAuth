@@ -109,6 +109,13 @@ authManager.getChangeListeners().add(() -> {
     // save the auth manager state here
 });
 ```
+Alternatively you can also request the tokens you need directly after logging and then save them:
+```java
+JavaAuthManager authManager = authManagerBuilder.login(...);
+authManager.getMinecraftToken().refresh(); // If you need the Minecraft token
+authManager.getMinecraftProfile().refresh(); // If you need the Minecraft profile
+// Now save the auth manager state here or use the tokens in their cached state
+```
 
 ### Loading the tokens from a json object
 Loading the tokens back from a json object is just as easy:
@@ -121,6 +128,13 @@ authManager.getChangeListeners().add(() -> {
     // save the auth manager state here
 });
 ```
+Alternatively you can also refresh the tokens you need directly after loading and then save them:
+```java
+JavaAuthManager authManager = JavaAuthManager.fromJson(...);
+authManager.getMinecraftToken().refreshIfExpired(); // If you need the Minecraft token
+authManager.getMinecraftProfile().refreshIfExpired(); // If you need the Minecraft profile
+// Now save the auth manager state here and use the tokens in their cached state
+```
 
 ### Token lifecycle management
 All token related methods in the auth managers return a ``Holder`` object which provides different methods to access the token.
@@ -128,6 +142,9 @@ Tokens are requested lazily, so they are only requested/refreshed when you acces
 
 The most important method is ``getUpToDate()`` which will automatically refresh the token if it is expired or not set yet.
 This method will throw an exception if the refresh fails (The initial refresh token is no longer valid and the user has to login again).
+
+The `getCached()` method can be used to get the current cached token without refreshing it.
+This is useful if you know, that the token is still valid (Because you maybe refreshed it somewhere else in your code recently).
 
 There are several other methods available in the ``Holder`` class, which you can learn more about in the javadoc.
 
@@ -156,7 +173,7 @@ authManager.getChangeListeners().add(() -> {
     }
 });
 
-// Request the Minecraft token
+// Request the Minecraft token (This is going to trigger the change listener, so its not necessary to save after this)
 System.out.println("Access token: " + authManager.getMinecraftToken().getUpToDate().getToken());
 
 // The file "tokens.json" now contains all the necessary tokens to restore and use the auth manager later
@@ -182,15 +199,12 @@ if (!isCompatible) {
     System.out.println("Realms worlds: " + realmsWorlds);
     try {
         System.out.println("Connect to: " + javaRealmsService.joinWorld(realmsWorlds.get(0)));
-    } catch (Exception e) {
-        if (e instanceof RealmsRequestException) {
-            RealmsRequestException exception = (RealmsRequestException) e;
-            if (exception.getErrorCode() == RealmsRequestException.ERROR_TOS_NOT_ACCEPTED) {
-                // The Java Edition Realms API requires users to accept the Minecraft Realms Terms of Service (https://aka.ms/MinecraftRealmsTerms)
-                // You should display the terms to the user and ask them to accept them:
-                javaRealmsService.acceptTos();
-                // If they accept, then you can try to join the world again
-            }
+    } catch (RealmsRequestException e) {
+        if (e.getErrorCode() == RealmsRequestException.ERROR_TOS_NOT_ACCEPTED) {
+            // The Java Edition Realms API requires users to accept the Minecraft Realms Terms of Service (https://aka.ms/MinecraftRealmsTerms)
+            // You should display the terms to the user and ask them to accept them:
+            javaRealmsService.acceptTos();
+            // If they accept, then you can try to join the world again
         }
     }
 }

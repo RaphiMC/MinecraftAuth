@@ -30,6 +30,7 @@ import net.raphimc.minecraftauth.java.model.MinecraftToken;
 import net.raphimc.minecraftauth.util.UuidUtil;
 import net.raphimc.minecraftauth.util.holder.Holder;
 
+import java.io.IOException;
 import java.net.CookieManager;
 import java.net.HttpCookie;
 import java.util.concurrent.CompletableFuture;
@@ -48,22 +49,25 @@ public class JavaRealmsService extends RealmsService {
     }
 
     @Override
-    @SneakyThrows
-    public RealmsJoinInformation joinWorld(final RealmsServer server) {
+    public RealmsJoinInformation joinWorld(final RealmsServer server) throws IOException {
         return this.httpClient.executeAndHandle(this.authorizeRequest(new JavaRealmsWorldJoinRequest(server)));
     }
 
-    @SneakyThrows
-    public void acceptTos() {
+    public void acceptTos() throws IOException {
         this.httpClient.executeAndHandle(this.authorizeRequest(new JavaRealmsTosAgreedRequest()));
     }
 
+    @SneakyThrows
+    public void acceptTosUnchecked() {
+        this.acceptTos();
+    }
+
     public CompletableFuture<Void> acceptTosAsync() {
-        return CompletableFuture.runAsync(this::acceptTos);
+        return CompletableFuture.runAsync(this::acceptTosUnchecked);
     }
 
     @Override
-    protected <T extends HttpRequest> T authorizeRequest(final T httpRequest) {
+    protected <T extends HttpRequest> T authorizeRequest(final T httpRequest) throws IOException {
         final CookieManager cookieManager = new CookieManager();
         final MinecraftProfile profile = this.profile.getUpToDate();
         cookieManager.getCookieStore().add(null, this.createCookie("sid", "token:" + this.token.getUpToDate().getToken() + ':' + UuidUtil.toUndashedString(profile.getId())));

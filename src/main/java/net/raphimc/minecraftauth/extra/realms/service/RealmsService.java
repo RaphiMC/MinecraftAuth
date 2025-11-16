@@ -26,6 +26,7 @@ import net.raphimc.minecraftauth.extra.realms.model.RealmsServer;
 import net.raphimc.minecraftauth.extra.realms.request.RealmsClientCompatibleRequest;
 import net.raphimc.minecraftauth.extra.realms.request.RealmsWorldsRequest;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -40,31 +41,44 @@ public abstract class RealmsService {
         this.host = host;
     }
 
-    @SneakyThrows
-    public boolean isCompatible() {
+    public boolean isCompatible() throws IOException {
         final String response = this.httpClient.executeAndHandle(this.authorizeRequest(new RealmsClientCompatibleRequest(this.host)));
         return response.equals("COMPATIBLE");
     }
 
-    public CompletableFuture<Boolean> isCompatibleAsync() {
-        return CompletableFuture.supplyAsync(this::isCompatible);
+    @SneakyThrows
+    public boolean isCompatibleUnchecked() {
+        return this.isCompatible();
     }
 
-    @SneakyThrows
-    public List<RealmsServer> getWorlds() {
+    public CompletableFuture<Boolean> isCompatibleAsync() {
+        return CompletableFuture.supplyAsync(this::isCompatibleUnchecked);
+    }
+
+    public List<RealmsServer> getWorlds() throws IOException {
         return this.httpClient.executeAndHandle(this.authorizeRequest(new RealmsWorldsRequest(this.host)));
     }
 
-    public CompletableFuture<List<RealmsServer>> getWorldsAsync() {
-        return CompletableFuture.supplyAsync(this::getWorlds);
+    @SneakyThrows
+    public List<RealmsServer> getWorldsUnchecked() {
+        return this.getWorlds();
     }
 
-    public abstract RealmsJoinInformation joinWorld(final RealmsServer server);
+    public CompletableFuture<List<RealmsServer>> getWorldsAsync() {
+        return CompletableFuture.supplyAsync(this::getWorldsUnchecked);
+    }
+
+    public abstract RealmsJoinInformation joinWorld(final RealmsServer server) throws IOException;
+
+    @SneakyThrows
+    public RealmsJoinInformation joinWorldUnchecked(final RealmsServer server) {
+        return this.joinWorld(server);
+    }
 
     public CompletableFuture<RealmsJoinInformation> joinWorldAsync(final RealmsServer server) {
-        return CompletableFuture.supplyAsync(() -> this.joinWorld(server));
+        return CompletableFuture.supplyAsync(() -> this.joinWorldUnchecked(server));
     }
 
-    protected abstract <T extends HttpRequest> T authorizeRequest(final T httpRequest);
+    protected abstract <T extends HttpRequest> T authorizeRequest(final T httpRequest) throws IOException;
 
 }

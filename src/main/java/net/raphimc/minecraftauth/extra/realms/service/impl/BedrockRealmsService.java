@@ -30,6 +30,7 @@ import net.raphimc.minecraftauth.extra.realms.service.RealmsService;
 import net.raphimc.minecraftauth.util.holder.Holder;
 import net.raphimc.minecraftauth.xbl.model.XblXstsToken;
 
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 public class BedrockRealmsService extends RealmsService {
@@ -43,32 +44,39 @@ public class BedrockRealmsService extends RealmsService {
         this.gameVersion = gameVersion;
     }
 
-    @SneakyThrows
-    public RealmsServer acceptInvite(final String code) {
+    public RealmsServer acceptInvite(final String code) throws IOException {
         return this.httpClient.executeAndHandle(this.authorizeRequest(new BedrockRealmsInviteLinkAcceptRequest(code)));
     }
 
-    public CompletableFuture<RealmsServer> acceptInviteAsync(final String code) {
-        return CompletableFuture.supplyAsync(() -> this.acceptInvite(code));
+    @SneakyThrows
+    public RealmsServer acceptInviteUnchecked(final String code) {
+        return this.acceptInvite(code);
     }
 
-    @SneakyThrows
-    public void leaveInvitedRealm(final RealmsServer server) {
+    public CompletableFuture<RealmsServer> acceptInviteAsync(final String code) {
+        return CompletableFuture.supplyAsync(() -> this.acceptInviteUnchecked(code));
+    }
+
+    public void leaveInvitedRealm(final RealmsServer server) throws IOException {
         this.httpClient.executeAndHandle(this.authorizeRequest(new BedrockRealmsInviteDeleteRequest(server)));
     }
 
+    @SneakyThrows
+    public void leaveInvitedRealmUnchecked(final RealmsServer server) {
+        this.leaveInvitedRealm(server);
+    }
+
     public CompletableFuture<Void> leaveInvitedRealmAsync(final RealmsServer server) {
-        return CompletableFuture.runAsync(() -> this.leaveInvitedRealm(server));
+        return CompletableFuture.runAsync(() -> this.leaveInvitedRealmUnchecked(server));
     }
 
     @Override
-    @SneakyThrows
-    public RealmsJoinInformation joinWorld(final RealmsServer server) {
+    public RealmsJoinInformation joinWorld(final RealmsServer server) throws IOException {
         return this.httpClient.executeAndHandle(this.authorizeRequest(new BedrockRealmsWorldJoinRequest(server)));
     }
 
     @Override
-    protected <T extends HttpRequest> T authorizeRequest(final T httpRequest) {
+    protected <T extends HttpRequest> T authorizeRequest(final T httpRequest) throws IOException {
         httpRequest.setHeader(HttpHeaders.AUTHORIZATION, this.xstsToken.getUpToDate().getAuthorizationHeader());
         httpRequest.setHeader("Client-Version", this.gameVersion);
         return httpRequest;

@@ -18,11 +18,13 @@
 package net.raphimc.minecraftauth.msa.service;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.raphimc.minecraftauth.msa.model.MsaApplicationConfig;
 import net.raphimc.minecraftauth.msa.model.MsaToken;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 
 @Getter
@@ -37,5 +39,14 @@ public abstract class MsaAuthService {
     }
 
     public abstract MsaToken acquireToken() throws IOException, InterruptedException, TimeoutException;
+
+    @SneakyThrows
+    public MsaToken acquireTokenUnchecked() {
+        return this.acquireToken();
+    }
+
+    public CompletableFuture<MsaToken> acquireTokenAsync() {
+        return CompletableFuture.supplyAsync(this::acquireTokenUnchecked);
+    }
 
 }

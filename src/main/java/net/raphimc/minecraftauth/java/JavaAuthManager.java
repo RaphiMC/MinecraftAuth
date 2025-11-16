@@ -18,7 +18,10 @@
 package net.raphimc.minecraftauth.java;
 
 import com.google.gson.JsonObject;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.lenni0451.commons.gson.elements.GsonObject;
 import net.lenni0451.commons.httpclient.HttpClient;
@@ -158,21 +161,18 @@ public class JavaAuthManager {
         this.hookChangeListeners();
     }
 
-    @SneakyThrows
-    private MsaToken refreshMsaToken() {
+    private MsaToken refreshMsaToken() throws IOException {
         if (this.msaToken.getCached().getRefreshToken() == null) {
             throw new IllegalStateException("Can't refresh MSA token, because it was created without a refresh token. The user has to sign in again.");
         }
         return this.httpClient.executeAndHandle(new MsaRefreshTokenRequest(this.msaApplicationConfig, this.msaToken.getCached()));
     }
 
-    @SneakyThrows
-    private XblDeviceToken refreshXblDeviceToken() {
+    private XblDeviceToken refreshXblDeviceToken() throws IOException {
         return this.httpClient.executeAndHandle(new XblDeviceAuthenticateRequest(this.deviceType, this.deviceId, this.deviceKeyPair));
     }
 
-    @SneakyThrows
-    private XblUserToken refreshXblUserToken() {
+    private XblUserToken refreshXblUserToken() throws IOException {
         if (this.msaApplicationConfig.isTitleClientId()) {
             this.refreshSisuTokens();
             return this.xblUserToken.getCached();
@@ -181,8 +181,7 @@ public class JavaAuthManager {
         }
     }
 
-    @SneakyThrows
-    private XblTitleToken refreshXblTitleToken() {
+    private XblTitleToken refreshXblTitleToken() throws IOException {
         if (!this.msaApplicationConfig.isTitleClientId()) {
             throw new UnsupportedOperationException("Can't refresh XBL title token, because the MSA application client ID is not a title client ID");
         }
@@ -190,8 +189,7 @@ public class JavaAuthManager {
         return this.xblTitleToken.getCached();
     }
 
-    @SneakyThrows
-    private XblXstsToken refreshJavaXstsToken() {
+    private XblXstsToken refreshJavaXstsToken() throws IOException {
         if (this.msaApplicationConfig.isTitleClientId()) {
             this.refreshSisuTokens();
             return this.javaXstsToken.getCached();
@@ -200,18 +198,15 @@ public class JavaAuthManager {
         }
     }
 
-    @SneakyThrows
-    private MinecraftToken refreshMinecraftToken() {
+    private MinecraftToken refreshMinecraftToken() throws IOException {
         return this.httpClient.executeAndHandle(new MinecraftLauncherLoginRequest(this.javaXstsToken.getUpToDate()));
     }
 
-    @SneakyThrows
-    private MinecraftProfile refreshMinecraftProfile() {
+    private MinecraftProfile refreshMinecraftProfile() throws IOException {
         return this.httpClient.executeAndHandle(new MinecraftProfileRequest(this.minecraftToken.getUpToDate()));
     }
 
-    @SneakyThrows
-    private MinecraftPlayerCertificates refreshMinecraftPlayerCertificates() {
+    private MinecraftPlayerCertificates refreshMinecraftPlayerCertificates() throws IOException {
         return this.httpClient.executeAndHandle(new MinecraftPlayerCertificatesRequest(this.minecraftToken.getUpToDate()));
     }
 
