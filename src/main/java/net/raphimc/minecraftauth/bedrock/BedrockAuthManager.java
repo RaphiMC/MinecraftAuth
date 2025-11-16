@@ -80,6 +80,7 @@ public class BedrockAuthManager {
                 json.optObject("bedrockXstsToken").map(XblXstsToken::fromJson).orElse(null),
                 json.optObject("playFabXstsToken").map(XblXstsToken::fromJson).orElse(null),
                 json.optObject("realmsXstsToken").map(XblXstsToken::fromJson).orElse(null),
+                json.optObject("xboxLiveXstsToken").map(XblXstsToken::fromJson).orElse(null),
                 json.optObject("playFabToken").map(PlayFabToken::fromJson).orElse(null),
                 json.optObject("minecraftSession").map(MinecraftSession::fromJson).orElse(null),
                 json.optObject("minecraftMultiplayerToken").map(MinecraftMultiplayerToken::fromJson).orElse(null),
@@ -113,6 +114,9 @@ public class BedrockAuthManager {
         }
         if (authManager.realmsXstsToken.hasValue()) {
             json.add("realmsXstsToken", XblXstsToken.toJson(authManager.realmsXstsToken.getCached()));
+        }
+        if (authManager.xboxLiveXstsToken.hasValue()) {
+            json.add("xboxLiveXstsToken", XblXstsToken.toJson(authManager.xboxLiveXstsToken.getCached()));
         }
         if (authManager.playFabToken.hasValue()) {
             json.add("playFabToken", PlayFabToken.toJson(authManager.playFabToken.getCached()));
@@ -152,6 +156,7 @@ public class BedrockAuthManager {
     private final Holder<XblXstsToken> bedrockXstsToken = new Holder<>(this::refreshBedrockXstsToken, this.sisuTokenLock);
     private final Holder<XblXstsToken> playFabXstsToken = new Holder<>(this::refreshPlayFabXstsToken);
     private final Holder<XblXstsToken> realmsXstsToken = new Holder<>(this::refreshRealmsXstsToken);
+    private final Holder<XblXstsToken> xboxLiveXstsToken = new Holder<>(this::refreshXboxLiveXstsToken);
     private final Holder<PlayFabToken> playFabToken = new Holder<>(this::refreshPlayFabToken);
     private final Holder<MinecraftSession> minecraftSession = new Holder<>(this::refreshMinecraftSession);
     private final Holder<MinecraftMultiplayerToken> minecraftMultiplayerToken = new Holder<>(this::refreshMinecraftMultiplayerToken);
@@ -169,7 +174,7 @@ public class BedrockAuthManager {
         this.hookChangeListeners();
     }
 
-    private BedrockAuthManager(final HttpClient httpClient, final String gameVersion, final MsaApplicationConfig msaApplicationConfig, final String deviceType, final KeyPair deviceKeyPair, final UUID deviceId, final KeyPair sessionKeyPair, final MsaToken msaToken, final XblDeviceToken xblDeviceToken, final XblUserToken xblUserToken, final XblTitleToken xblTitleToken, final XblXstsToken bedrockXstsToken, final XblXstsToken playFabXstsToken, final XblXstsToken realmsXstsToken, final PlayFabToken playFabToken, final MinecraftSession minecraftSession, final MinecraftMultiplayerToken minecraftMultiplayerToken, final MinecraftCertificateChain minecraftCertificateChain) {
+    private BedrockAuthManager(final HttpClient httpClient, final String gameVersion, final MsaApplicationConfig msaApplicationConfig, final String deviceType, final KeyPair deviceKeyPair, final UUID deviceId, final KeyPair sessionKeyPair, final MsaToken msaToken, final XblDeviceToken xblDeviceToken, final XblUserToken xblUserToken, final XblTitleToken xblTitleToken, final XblXstsToken bedrockXstsToken, final XblXstsToken playFabXstsToken, final XblXstsToken realmsXstsToken, final XblXstsToken xboxLiveXstsToken, final PlayFabToken playFabToken, final MinecraftSession minecraftSession, final MinecraftMultiplayerToken minecraftMultiplayerToken, final MinecraftCertificateChain minecraftCertificateChain) {
         this.httpClient = httpClient;
         this.gameVersion = gameVersion;
         this.msaApplicationConfig = msaApplicationConfig;
@@ -184,6 +189,7 @@ public class BedrockAuthManager {
         this.bedrockXstsToken.set(bedrockXstsToken);
         this.playFabXstsToken.set(playFabXstsToken);
         this.realmsXstsToken.set(realmsXstsToken);
+        this.xboxLiveXstsToken.set(xboxLiveXstsToken);
         this.playFabToken.set(playFabToken);
         this.minecraftSession.set(minecraftSession);
         this.minecraftMultiplayerToken.set(minecraftMultiplayerToken);
@@ -238,6 +244,11 @@ public class BedrockAuthManager {
         return this.httpClient.executeAndHandle(new XblXstsAuthorizeRequest(this.xblDeviceToken.getUpToDate(), this.xblUserToken.getUpToDate(), titleToken, XblConstants.BEDROCK_REALMS_XSTS_RELYING_PARTY));
     }
 
+    private XblXstsToken refreshXboxLiveXstsToken() throws IOException {
+        final XblTitleToken titleToken = this.msaApplicationConfig.isTitleClientId() ? this.xblTitleToken.getUpToDate() : null;
+        return this.httpClient.executeAndHandle(new XblXstsAuthorizeRequest(this.xblDeviceToken.getUpToDate(), this.xblUserToken.getUpToDate(), titleToken, XblConstants.XBL_XSTS_RELYING_PARTY));
+    }
+
     private PlayFabToken refreshPlayFabToken() throws IOException {
         return this.httpClient.executeAndHandle(new PlayFabLoginWithXboxRequest(this.playFabXstsToken.getUpToDate(), PlayFabConstants.BEDROCK_PLAY_FAB_TITLE_ID));
     }
@@ -269,6 +280,7 @@ public class BedrockAuthManager {
         this.bedrockXstsToken.getChangeListeners().add(this.changeListeners::invoke);
         this.playFabXstsToken.getChangeListeners().add(this.changeListeners::invoke);
         this.realmsXstsToken.getChangeListeners().add(this.changeListeners::invoke);
+        this.xboxLiveXstsToken.getChangeListeners().add(this.changeListeners::invoke);
         this.playFabToken.getChangeListeners().add(this.changeListeners::invoke);
         this.minecraftSession.getChangeListeners().add(this.changeListeners::invoke);
         this.minecraftMultiplayerToken.getChangeListeners().add(this.changeListeners::invoke);
