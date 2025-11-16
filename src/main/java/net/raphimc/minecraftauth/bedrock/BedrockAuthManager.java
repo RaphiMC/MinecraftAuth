@@ -147,13 +147,13 @@ public class BedrockAuthManager {
     private final ChangeListeners changeListeners = new ChangeListeners();
 
     @Getter(AccessLevel.NONE)
-    private final Object sisuTokenLock = new Object();
+    private final Object sisuTokensLock = new Object();
 
     private final Holder<MsaToken> msaToken = new Holder<>(this::refreshMsaToken);
     private final Holder<XblDeviceToken> xblDeviceToken = new Holder<>(this::refreshXblDeviceToken);
-    private final Holder<XblUserToken> xblUserToken = new Holder<>(this::refreshXblUserToken, this.sisuTokenLock);
-    private final Holder<XblTitleToken> xblTitleToken = new Holder<>(this::refreshXblTitleToken, this.sisuTokenLock);
-    private final Holder<XblXstsToken> bedrockXstsToken = new Holder<>(this::refreshBedrockXstsToken, this.sisuTokenLock);
+    private final Holder<XblUserToken> xblUserToken = new Holder<>(this::refreshXblUserToken, this.sisuTokensLock);
+    private final Holder<XblTitleToken> xblTitleToken = new Holder<>(this::refreshXblTitleToken, this.sisuTokensLock);
+    private final Holder<XblXstsToken> bedrockXstsToken = new Holder<>(this::refreshBedrockXstsToken, this.sisuTokensLock);
     private final Holder<XblXstsToken> playFabXstsToken = new Holder<>(this::refreshPlayFabXstsToken);
     private final Holder<XblXstsToken> realmsXstsToken = new Holder<>(this::refreshRealmsXstsToken);
     private final Holder<XblXstsToken> xboxLiveXstsToken = new Holder<>(this::refreshXboxLiveXstsToken);

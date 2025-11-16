@@ -123,13 +123,13 @@ public class JavaAuthManager {
     private final ChangeListeners changeListeners = new ChangeListeners();
 
     @Getter(AccessLevel.NONE)
-    private final Object sisuTokenLock = new Object();
+    private final Object sisuTokensLock = new Object();
 
     private final Holder<MsaToken> msaToken = new Holder<>(this::refreshMsaToken);
     private final Holder<XblDeviceToken> xblDeviceToken = new Holder<>(this::refreshXblDeviceToken);
-    private final Holder<XblUserToken> xblUserToken = new Holder<>(this::refreshXblUserToken, this.sisuTokenLock);
-    private final Holder<XblTitleToken> xblTitleToken = new Holder<>(this::refreshXblTitleToken, this.sisuTokenLock);
-    private final Holder<XblXstsToken> javaXstsToken = new Holder<>(this::refreshJavaXstsToken, this.sisuTokenLock);
+    private final Holder<XblUserToken> xblUserToken = new Holder<>(this::refreshXblUserToken, this.sisuTokensLock);
+    private final Holder<XblTitleToken> xblTitleToken = new Holder<>(this::refreshXblTitleToken, this.sisuTokensLock);
+    private final Holder<XblXstsToken> javaXstsToken = new Holder<>(this::refreshJavaXstsToken, this.sisuTokensLock);
     private final Holder<MinecraftToken> minecraftToken = new Holder<>(this::refreshMinecraftToken);
     private final Holder<MinecraftProfile> minecraftProfile = new Holder<>(this::refreshMinecraftProfile);
     private final Holder<MinecraftPlayerCertificates> minecraftPlayerCertificates = new Holder<>(this::refreshMinecraftPlayerCertificates);
