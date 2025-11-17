@@ -30,7 +30,6 @@ import java.net.MalformedURLException;
 import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.time.Instant;
 
 public class XblSisuAuthorizeRequest extends SignedXblPostRequest implements XblResponseHandler<XblSisuTokens> {
 
@@ -55,25 +54,10 @@ public class XblSisuAuthorizeRequest extends SignedXblPostRequest implements Xbl
 
     @Override
     public XblSisuTokens handle(final HttpResponse response, final GsonObject json) {
-        final GsonObject userTokenJson = json.reqObject("UserToken");
-        final GsonObject titleTokenJson = json.reqObject("TitleToken");
-        final GsonObject xstsTokenJson = json.reqObject("AuthorizationToken");
         return new XblSisuTokens(
-                new XblUserToken(
-                        Instant.parse(userTokenJson.reqString("NotAfter")).toEpochMilli(),
-                        userTokenJson.reqString("Token"),
-                        userTokenJson.reqObject("DisplayClaims").reqArray("xui").get(0).asObject().reqString("uhs")
-                ),
-                new XblTitleToken(
-                        Instant.parse(titleTokenJson.reqString("NotAfter")).toEpochMilli(),
-                        titleTokenJson.reqString("Token"),
-                        titleTokenJson.reqObject("DisplayClaims").reqObject("xti").reqString("tid")
-                ),
-                new XblXstsToken(
-                        Instant.parse(xstsTokenJson.reqString("NotAfter")).toEpochMilli(),
-                        xstsTokenJson.reqString("Token"),
-                        xstsTokenJson.reqObject("DisplayClaims").reqArray("xui").get(0).asObject().reqString("uhs")
-                )
+                XblUserToken.fromApiJson(json.reqObject("UserToken")),
+                XblTitleToken.fromApiJson(json.reqObject("TitleToken")),
+                XblXstsToken.fromApiJson(json.reqObject("AuthorizationToken"))
         );
     }
 

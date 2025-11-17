@@ -21,6 +21,9 @@ import com.google.gson.JsonObject;
 import lombok.Value;
 import net.lenni0451.commons.gson.elements.GsonObject;
 import net.raphimc.minecraftauth.util.Expirable;
+import org.jetbrains.annotations.ApiStatus;
+
+import java.time.Instant;
 
 @Value
 public class XblXstsToken implements Expirable {
@@ -44,6 +47,15 @@ public class XblXstsToken implements Expirable {
         json.addProperty("token", xstsToken.token);
         json.addProperty("userHash", xstsToken.userHash);
         return json;
+    }
+
+    @ApiStatus.Internal
+    public static XblXstsToken fromApiJson(final GsonObject json) {
+        return new XblXstsToken(
+                Instant.parse(json.reqString("NotAfter")).toEpochMilli(),
+                json.reqString("Token"),
+                json.reqObject("DisplayClaims").reqArray("xui").get(0).asObject().reqString("uhs")
+        );
     }
 
     long expireTimeMs;

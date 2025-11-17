@@ -21,10 +21,12 @@ import com.google.gson.JsonObject;
 import lombok.Value;
 import net.lenni0451.commons.gson.elements.GsonObject;
 import net.raphimc.minecraftauth.util.StringUtil;
+import org.jetbrains.annotations.ApiStatus;
 
 @Value
 public class RealmsServer {
 
+    @ApiStatus.Internal
     public static RealmsServer fromApiJson(final GsonObject json) {
         return new RealmsServer(
                 json.getLong("id", -1L),

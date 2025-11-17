@@ -29,7 +29,6 @@ import net.raphimc.minecraftauth.xbl.model.XblUserToken;
 import net.raphimc.minecraftauth.xbl.responsehandler.XblResponseHandler;
 
 import java.net.MalformedURLException;
-import java.time.Instant;
 
 public class XblUserAuthenticateRequest extends PostRequest implements XblResponseHandler<XblUserToken> {
 
@@ -51,11 +50,7 @@ public class XblUserAuthenticateRequest extends PostRequest implements XblRespon
 
     @Override
     public XblUserToken handle(final HttpResponse response, final GsonObject json) {
-        return new XblUserToken(
-                Instant.parse(json.reqString("NotAfter")).toEpochMilli(),
-                json.reqString("Token"),
-                json.reqObject("DisplayClaims").reqArray("xui").get(0).asObject().reqString("uhs")
-        );
+        return XblUserToken.fromApiJson(json);
     }
 
 }
