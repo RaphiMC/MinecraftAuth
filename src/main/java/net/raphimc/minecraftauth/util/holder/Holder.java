@@ -61,6 +61,24 @@ public class Holder<T extends Expirable> {
     }
 
     /**
+     * Checks if the holder currently has a non-null value.
+     *
+     * @return True if the holder has a non-null value, false otherwise.
+     */
+    public boolean hasValue() {
+        return this.value != null;
+    }
+
+    /**
+     * Checks if the currently cached value is null or expired.
+     *
+     * @return True if the value is null or expired, false otherwise.
+     */
+    public boolean isExpired() {
+        return this.value == null || this.value.isExpired();
+    }
+
+    /**
      * Returns the up-to-date value, refreshing it if necessary.<br>
      * If the cached value is null or expired, this method may send network requests to obtain a fresh or valid value.<br>
      * Use this method when you need to ensure that the value is current and valid (For example, before using it for authentication).
@@ -96,22 +114,13 @@ public class Holder<T extends Expirable> {
     }
 
     /**
-     * Checks if the holder currently has a non-null value.
-     *
-     * @return True if the holder has a non-null value, false otherwise.
-     */
-    public boolean hasValue() {
-        return this.value != null;
-    }
-
-    /**
      * Refreshes the value if it is null or expired.
      *
      * @return True if a refresh was performed, false otherwise.
      */
     public boolean refreshIfExpired() throws IOException {
         synchronized (this.lock) {
-            if (this.value == null || this.value.isExpired()) {
+            if (this.isExpired()) {
                 this.refresh();
                 return true;
             }
