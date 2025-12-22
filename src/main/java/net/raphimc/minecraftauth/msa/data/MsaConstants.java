@@ -24,7 +24,7 @@ public class MsaConstants {
     public static final String BEDROCK_ANDROID_TITLE_ID = "0000000048183522"; // Android
     public static final String BEDROCK_IOS_TITLE_ID = "000000004c17c01a"; // iOS
     public static final String BEDROCK_NINTENDO_TITLE_ID = "00000000441cc96b"; // Nintendo
-    public static final String BEDROCK_PLAYSTATION_TITLE_ID = "000000004827c78e"; // Playstation
+    public static final String BEDROCK_PLAYSTATION_TITLE_ID = "000000004827c78e"; // PlayStation
     public static final String EDU_CLIENT_ID = "b36b1432-1a1c-4c82-9b76-24de1cab42f2"; // Win32
 
     public static final String SCOPE_NO_OFFLINE_ACCESS = "XboxLive.signin";
