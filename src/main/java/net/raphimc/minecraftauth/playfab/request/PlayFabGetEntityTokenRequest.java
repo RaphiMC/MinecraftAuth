@@ -22,39 +22,29 @@ import net.lenni0451.commons.gson.elements.GsonObject;
 import net.lenni0451.commons.httpclient.HttpResponse;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
 import net.raphimc.minecraftauth.playfab.model.PlayFabEntityToken;
-import net.raphimc.minecraftauth.playfab.model.PlayFabToken;
 import net.raphimc.minecraftauth.playfab.responsehandler.PlayFabResponseHandler;
 import net.raphimc.minecraftauth.util.http.content.JsonContent;
-import net.raphimc.minecraftauth.xbl.model.XblXstsToken;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Locale;
 
-public class PlayFabLoginWithXboxRequest extends PostRequest implements PlayFabResponseHandler<PlayFabToken> {
+public class PlayFabGetEntityTokenRequest extends PostRequest implements PlayFabResponseHandler<PlayFabEntityToken> {
 
-    public PlayFabLoginWithXboxRequest(final XblXstsToken xstsToken, final String titleId) throws MalformedURLException {
-        super("https://" + titleId.toLowerCase(Locale.ROOT) + ".playfabapi.com/Client/LoginWithXbox");
+    public PlayFabGetEntityTokenRequest(final PlayFabEntityToken entityToken, final String titleId, final String id, final String type) throws MalformedURLException {
+        super("https://" + titleId.toLowerCase(Locale.ROOT) + ".playfabapi.com/Authentication/GetEntityToken");
 
-        final JsonObject infoRequestParameters = new JsonObject();
-        infoRequestParameters.addProperty("GetPlayerProfile", true);
-        infoRequestParameters.addProperty("GetUserAccountInfo", true);
+        final JsonObject entity = new JsonObject();
+        entity.addProperty("Id", id);
+        entity.addProperty("Type", type);
         final JsonObject postData = new JsonObject();
-        postData.addProperty("CreateAccount", true);
-        postData.add("InfoRequestParameters", infoRequestParameters);
-        postData.addProperty("TitleId", titleId.toUpperCase(Locale.ROOT));
-        postData.addProperty("XboxToken", xstsToken.getAuthorizationHeader());
+        postData.add("Entity", entity);
         this.setContent(new JsonContent(postData));
+        this.setHeader("X-EntityToken", entityToken.getToken());
     }
 
     @Override
-    public PlayFabToken handle(final HttpResponse response, final GsonObject json) throws IOException {
-        final GsonObject data = json.reqObject("data");
-        return new PlayFabToken(
-                PlayFabEntityToken.fromApiJson(data.reqObject("EntityToken")),
-                data.reqString("PlayFabId"),
-                data.reqString("SessionTicket")
-        );
+    public PlayFabEntityToken handle(final HttpResponse response, final GsonObject json) {
+        return PlayFabEntityToken.fromApiJson(json.reqObject("data"));
     }
 
 }
