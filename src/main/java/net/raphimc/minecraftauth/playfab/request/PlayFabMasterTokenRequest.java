@@ -49,8 +49,8 @@ public class PlayFabMasterTokenRequest extends PostRequest implements PlayFabRes
         final GsonObject entity = data.reqObject("Entity");
         return new PlayFabMasterToken(
                 Instant.parse(data.reqString("TokenExpiration")).toEpochMilli(),
-                data.reqString("EntityToken"),
                 entity.reqString("Id"),
+                data.reqString("EntityToken"),
                 entity.reqString("Type")
         );
     }
