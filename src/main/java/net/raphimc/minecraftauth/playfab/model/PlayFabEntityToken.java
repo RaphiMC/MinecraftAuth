@@ -21,36 +21,50 @@ import com.google.gson.JsonObject;
 import lombok.Value;
 import net.lenni0451.commons.gson.elements.GsonObject;
 import net.raphimc.minecraftauth.util.Expirable;
+import org.jetbrains.annotations.ApiStatus;
+
+import java.time.Instant;
 
 @Value
-public class PlayFabMasterToken implements Expirable {
+public class PlayFabEntityToken implements Expirable {
 
-    public static PlayFabMasterToken fromJson(final JsonObject json) {
+    public static PlayFabEntityToken fromJson(final JsonObject json) {
         return fromJson(new GsonObject(json));
     }
 
-    public static PlayFabMasterToken fromJson(final GsonObject json) {
-        return new PlayFabMasterToken(
+    public static PlayFabEntityToken fromJson(final GsonObject json) {
+        return new PlayFabEntityToken(
                 json.reqLong("expireTimeMs"),
+                json.reqString("token"),
                 json.reqString("entityId"),
-                json.reqString("entityToken"),
                 json.reqString("entityType")
         );
     }
 
-    public static JsonObject toJson(final PlayFabMasterToken masterToken) {
+    public static JsonObject toJson(final PlayFabEntityToken entityToken) {
         final JsonObject json = new JsonObject();
         json.addProperty("_saveVersion", 1);
-        json.addProperty("expireTimeMs", masterToken.expireTimeMs);
-        json.addProperty("entityId", masterToken.entityId);
-        json.addProperty("entityToken", masterToken.entityToken);
-        json.addProperty("entityType", masterToken.entityType);
+        json.addProperty("expireTimeMs", entityToken.expireTimeMs);
+        json.addProperty("token", entityToken.token);
+        json.addProperty("entityId", entityToken.entityId);
+        json.addProperty("entityType", entityToken.entityType);
         return json;
     }
 
+    @ApiStatus.Internal
+    public static PlayFabEntityToken fromApiJson(final GsonObject json) {
+        final GsonObject entity = json.reqObject("Entity");
+        return new PlayFabEntityToken(
+                Instant.parse(json.reqString("TokenExpiration")).toEpochMilli(),
+                json.reqString("EntityToken"),
+                entity.reqString("Id"),
+                entity.reqString("Type")
+        );
+    }
+
     long expireTimeMs;
+    String token;
     String entityId;
-    String entityToken;
     String entityType;
 
 }

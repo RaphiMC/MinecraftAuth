@@ -21,37 +21,30 @@ import com.google.gson.JsonObject;
 import net.lenni0451.commons.gson.elements.GsonObject;
 import net.lenni0451.commons.httpclient.HttpResponse;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
-import net.raphimc.minecraftauth.playfab.model.PlayFabMasterToken;
-import net.raphimc.minecraftauth.playfab.model.PlayFabToken;
+import net.raphimc.minecraftauth.playfab.model.PlayFabEntityToken;
 import net.raphimc.minecraftauth.playfab.responsehandler.PlayFabResponseHandler;
 import net.raphimc.minecraftauth.util.http.content.JsonContent;
 
 import java.net.MalformedURLException;
-import java.time.Instant;
 import java.util.Locale;
 
-public class PlayFabMasterTokenRequest extends PostRequest implements PlayFabResponseHandler<PlayFabMasterToken> {
-    public PlayFabMasterTokenRequest(final PlayFabToken playFabToken, final String titleId) throws MalformedURLException {
+public class PlayFabGetEntityTokenRequest extends PostRequest implements PlayFabResponseHandler<PlayFabEntityToken> {
+
+    public PlayFabGetEntityTokenRequest(final PlayFabEntityToken entityToken, final String titleId, final String id, final String type) throws MalformedURLException {
         super("https://" + titleId.toLowerCase(Locale.ROOT) + ".playfabapi.com/Authentication/GetEntityToken");
 
-        this.appendHeader("X-EntityToken", playFabToken.getEntityToken());
         final JsonObject entity = new JsonObject();
-        entity.addProperty("Id", playFabToken.getPlayFabId());
-        entity.addProperty("Type", "master_player_account");
-        final JsonObject object = new JsonObject();
-        object.add("Entity", entity);
-        this.setContent(new JsonContent(object));
+        entity.addProperty("Id", id);
+        entity.addProperty("Type", type);
+        final JsonObject postData = new JsonObject();
+        postData.add("Entity", entity);
+        this.setContent(new JsonContent(postData));
+        this.setHeader("X-EntityToken", entityToken.getToken());
     }
 
     @Override
-    public PlayFabMasterToken handle(final HttpResponse response, final GsonObject json) {
-        final GsonObject data = json.reqObject("data");
-        final GsonObject entity = data.reqObject("Entity");
-        return new PlayFabMasterToken(
-                Instant.parse(data.reqString("TokenExpiration")).toEpochMilli(),
-                entity.reqString("Id"),
-                data.reqString("EntityToken"),
-                entity.reqString("Type")
-        );
+    public PlayFabEntityToken handle(final HttpResponse response, final GsonObject json) {
+        return PlayFabEntityToken.fromApiJson(json.reqObject("data"));
     }
+
 }

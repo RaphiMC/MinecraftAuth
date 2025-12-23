@@ -21,6 +21,7 @@ import com.google.gson.JsonObject;
 import net.lenni0451.commons.gson.elements.GsonObject;
 import net.lenni0451.commons.httpclient.HttpResponse;
 import net.lenni0451.commons.httpclient.requests.impl.PostRequest;
+import net.raphimc.minecraftauth.playfab.model.PlayFabEntityToken;
 import net.raphimc.minecraftauth.playfab.model.PlayFabToken;
 import net.raphimc.minecraftauth.playfab.responsehandler.PlayFabResponseHandler;
 import net.raphimc.minecraftauth.util.http.content.JsonContent;
@@ -28,7 +29,6 @@ import net.raphimc.minecraftauth.xbl.model.XblXstsToken;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.time.Instant;
 import java.util.Locale;
 
 public class PlayFabLoginWithXboxRequest extends PostRequest implements PlayFabResponseHandler<PlayFabToken> {
@@ -50,11 +50,8 @@ public class PlayFabLoginWithXboxRequest extends PostRequest implements PlayFabR
     @Override
     public PlayFabToken handle(final HttpResponse response, final GsonObject json) throws IOException {
         final GsonObject data = json.reqObject("data");
-        final GsonObject entityToken = data.reqObject("EntityToken");
         return new PlayFabToken(
-                Instant.parse(entityToken.reqString("TokenExpiration")).toEpochMilli(),
-                entityToken.reqObject("Entity").reqString("Id"),
-                entityToken.reqString("EntityToken"),
+                PlayFabEntityToken.fromApiJson(data.reqObject("EntityToken")),
                 data.reqString("PlayFabId"),
                 data.reqString("SessionTicket")
         );

@@ -30,10 +30,22 @@ public class PlayFabToken implements Expirable {
     }
 
     public static PlayFabToken fromJson(final GsonObject json) {
+        if (json.reqInt("_saveVersion") == 1) {
+            final PlayFabEntityToken entityToken = new PlayFabEntityToken(
+                    json.reqLong("expireTimeMs"),
+                    json.reqString("entityToken"),
+                    json.reqString("entityId"),
+                    "title_player_account"
+            );
+            return new PlayFabToken(
+                    entityToken,
+                    json.reqString("playFabId"),
+                    json.reqString("sessionTicket")
+            );
+        }
+
         return new PlayFabToken(
-                json.reqLong("expireTimeMs"),
-                json.reqString("entityId"),
-                json.reqString("entityToken"),
+                PlayFabEntityToken.fromJson(json.getObject("entityToken")),
                 json.reqString("playFabId"),
                 json.reqString("sessionTicket")
         );
@@ -41,19 +53,25 @@ public class PlayFabToken implements Expirable {
 
     public static JsonObject toJson(final PlayFabToken token) {
         final JsonObject json = new JsonObject();
-        json.addProperty("_saveVersion", 1);
-        json.addProperty("expireTimeMs", token.expireTimeMs);
-        json.addProperty("entityId", token.entityId);
-        json.addProperty("entityToken", token.entityToken);
+        json.addProperty("_saveVersion", 2);
+        json.add("entityToken", PlayFabEntityToken.toJson(token.entityToken));
         json.addProperty("playFabId", token.playFabId);
         json.addProperty("sessionTicket", token.sessionTicket);
         return json;
     }
 
-    long expireTimeMs;
-    String entityId;
-    String entityToken;
+    PlayFabEntityToken entityToken;
     String playFabId;
     String sessionTicket;
+
+    @Override
+    public long getExpireTimeMs() {
+        return this.entityToken.getExpireTimeMs();
+    }
+
+    @Deprecated
+    public String getEntityId() {
+        return this.entityToken.getEntityId();
+    }
 
 }
