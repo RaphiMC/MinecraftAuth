@@ -16,6 +16,6 @@ dependencies {
     compileOnly sourceSets.javaFxStub.output
 
     api "com.google.code.gson:gson:2.13.2"
-    api "net.lenni0451.commons:httpclient:1.9.0"
-    api "net.lenni0451.commons:gson:1.9.0"
+    api "net.lenni0451.commons:httpclient:1.9.1"
+    api "net.lenni0451.commons:gson:1.9.1"
 }
