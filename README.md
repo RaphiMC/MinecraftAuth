@@ -233,4 +233,4 @@ This class provides methods to migrate the Minecraft: Java Edition and Minecraft
 If you encounter any issues, please report them on the
 [issue tracker](https://github.com/RaphiMC/MinecraftAuth/issues).  
 If you just want to talk or need help implementing MinecraftAuth feel free to join my
-[Discord](https://discord.gg/dCzT9XHEWu).
+[Discord](https://raphimc.net/discord).
