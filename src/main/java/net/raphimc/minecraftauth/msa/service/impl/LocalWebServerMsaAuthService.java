@@ -78,7 +78,7 @@ public class LocalWebServerMsaAuthService extends MsaAuthService {
                     }
                     final Optional<String> code = parameters.getFirstValue("code");
                     if (!code.isPresent()) {
-                        throw new IllegalStateException("Could not extract auth code from response url");
+                        throw new IllegalStateException("Failed to extract auth code from response url");
                     }
 
                     final byte[] response = "You have been logged in! You can now close this window.".getBytes(StandardCharsets.UTF_8);

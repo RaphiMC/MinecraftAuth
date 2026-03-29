@@ -78,7 +78,7 @@ public abstract class SignedXblPostRequest extends PostRequest {
             data.writeLong(windowsTimestamp); // Timestamp
             data.write(CryptUtil.signSha256InP1363Format(privateKey, signatureContent.toByteArray())); // Signature
         } catch (Throwable e) {
-            throw new RuntimeException("Could not sign request", e);
+            throw new RuntimeException("Failed to sign request", e);
         }
         this.appendHeader("Signature", Base64.getEncoder().encodeToString(headerData.toByteArray()));
     }

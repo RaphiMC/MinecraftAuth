@@ -65,8 +65,8 @@ public class CredentialsMsaAuthService extends MsaAuthService {
         final CookieManager cookieManager = new CookieManager();
         final PostRequest loginRequest = this.prepareLoginRequest(credentials, cookieManager);
         final HttpResponse loginResponse = this.sendLoginRequest(loginRequest);
-        final String location = loginResponse.getFirstHeader(HttpHeaders.LOCATION).orElseThrow(() -> new IllegalStateException("Could not get redirect url"));
-        final String code = URLWrapper.ofURI(location).wrapQueryParameters().getFirstValue("code").orElseThrow(() -> new IllegalStateException("Could not extract auth code from redirect url"));
+        final String location = loginResponse.getFirstHeader(HttpHeaders.LOCATION).orElseThrow(() -> new IllegalStateException("Failed to get redirect url"));
+        final String code = URLWrapper.ofURI(location).wrapQueryParameters().getFirstValue("code").orElseThrow(() -> new IllegalStateException("Failed to extract auth code from redirect url"));
         return this.httpClient.executeAndHandle(new MsaAuthCodeTokenRequest(this.applicationConfig, code));
     }
 
@@ -143,7 +143,7 @@ public class CredentialsMsaAuthService extends MsaAuthService {
                 actionUrl = actionUrl.substring(0, actionUrl.indexOf("\""));
                 final String returnUrl = URLWrapper.ofURL(actionUrl).wrapQueryParameters().getFirstValue("ru").orElse(null);
                 if (returnUrl == null) {
-                    throw new IllegalStateException("Could not extract return url from html");
+                    throw new IllegalStateException("Failed to extract return url from html");
                 }
 
                 final GetRequest getRequest = new GetRequest(returnUrl);
@@ -169,7 +169,7 @@ public class CredentialsMsaAuthService extends MsaAuthService {
                     default:
                         throw new IllegalStateException("Unsupported MsaEnvironment: " + this.applicationConfig.getEnvironment());
                 }
-                throw new IllegalStateException("Could not extract config from html. This most likely indicates that the application config or credentials are not valid");
+                throw new IllegalStateException("Failed to extract config from html. This most likely indicates that the application config or credentials are not valid");
             }
         } else {
             return loginResponse;
@@ -182,7 +182,7 @@ public class CredentialsMsaAuthService extends MsaAuthService {
             case LIVE: {
                 final int configStartIndex = html.indexOf("var ServerData = ");
                 if (configStartIndex == -1) {
-                    throw new IllegalStateException("Could not find config start in html");
+                    throw new IllegalStateException("Failed to find config start in html");
                 }
                 configStart = html.substring(configStartIndex + 17);
                 break;
@@ -191,7 +191,7 @@ public class CredentialsMsaAuthService extends MsaAuthService {
             case MICROSOFT_ONLINE_CONSUMERS: {
                 final int configStartIndex = html.indexOf("$Config=");
                 if (configStartIndex == -1) {
-                    throw new IllegalStateException("Could not find config start in html");
+                    throw new IllegalStateException("Failed to find config start in html");
                 }
                 configStart = html.substring(configStartIndex + 8);
                 break;
@@ -204,7 +204,7 @@ public class CredentialsMsaAuthService extends MsaAuthService {
             jsonReader.setLenient(true);
             return GsonParser.parse(jsonReader).asObject();
         } catch (Throwable e) {
-            throw new IllegalStateException("Could not extract config from html. This most likely indicates that the application config or credentials are not valid", e);
+            throw new IllegalStateException("Failed to extract config from html. This most likely indicates that the application config or credentials are not valid", e);
         }
     }
 

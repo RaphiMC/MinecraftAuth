@@ -17,8 +17,6 @@
  */
 package net.raphimc.minecraftauth.util;
 
-import lombok.SneakyThrows;
-
 import java.security.*;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
@@ -40,12 +38,12 @@ public class CryptUtil {
         try {
             RSA_KEYFACTORY = KeyFactory.getInstance("RSA");
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Could not create RSA KeyFactory", e);
+            throw new RuntimeException("Failed to create RSA KeyFactory", e);
         }
         try {
             EC_KEYFACTORY = KeyFactory.getInstance("EC");
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Could not create EllipticCurve KeyFactory", e);
+            throw new RuntimeException("Failed to create EllipticCurve KeyFactory", e);
         }
     }
 
@@ -61,7 +59,7 @@ public class CryptUtil {
         try {
             return (ECPublicKey) EC_KEYFACTORY.generatePublic(new X509EncodedKeySpec(bytes));
         } catch (InvalidKeySpecException e) {
-            throw new RuntimeException("Could not decode public key", e);
+            throw new RuntimeException("Failed to decode public key", e);
         }
     }
 
@@ -69,7 +67,7 @@ public class CryptUtil {
         try {
             return (ECPrivateKey) EC_KEYFACTORY.generatePrivate(new PKCS8EncodedKeySpec(bytes));
         } catch (InvalidKeySpecException e) {
-            throw new RuntimeException("Could not decode private key", e);
+            throw new RuntimeException("Failed to decode private key", e);
         }
     }
 
@@ -85,7 +83,7 @@ public class CryptUtil {
         try {
             return (RSAPublicKey) RSA_KEYFACTORY.generatePublic(new X509EncodedKeySpec(bytes));
         } catch (InvalidKeySpecException e) {
-            throw new RuntimeException("Could not decode public key", e);
+            throw new RuntimeException("Failed to decode public key", e);
         }
     }
 
@@ -93,22 +91,28 @@ public class CryptUtil {
         try {
             return (RSAPrivateKey) RSA_KEYFACTORY.generatePrivate(new PKCS8EncodedKeySpec(bytes));
         } catch (InvalidKeySpecException e) {
-            throw new RuntimeException("Could not decode private key", e);
+            throw new RuntimeException("Failed to decode private key", e);
         }
     }
 
-    @SneakyThrows
     public static KeyPair generateEcdsa256KeyPair() {
-        final KeyPairGenerator secp256r1 = KeyPairGenerator.getInstance("EC");
-        secp256r1.initialize(new ECGenParameterSpec("secp256r1"));
-        return secp256r1.generateKeyPair();
+        try {
+            final KeyPairGenerator secp256r1 = KeyPairGenerator.getInstance("EC");
+            secp256r1.initialize(new ECGenParameterSpec("secp256r1"));
+            return secp256r1.generateKeyPair();
+        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+            throw new RuntimeException("Failed to generate key pair", e);
+        }
     }
 
-    @SneakyThrows
     public static KeyPair generateEcdsa384KeyPair() {
-        final KeyPairGenerator secp384r1 = KeyPairGenerator.getInstance("EC");
-        secp384r1.initialize(new ECGenParameterSpec("secp384r1"));
-        return secp384r1.generateKeyPair();
+        try {
+            final KeyPairGenerator secp384r1 = KeyPairGenerator.getInstance("EC");
+            secp384r1.initialize(new ECGenParameterSpec("secp384r1"));
+            return secp384r1.generateKeyPair();
+        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+            throw new RuntimeException("Failed to generate key pair", e);
+        }
     }
 
     public static byte[] signSha256InP1363Format(final ECPrivateKey privateKey, final byte[] data) throws SignatureException, InvalidKeyException, NoSuchAlgorithmException {
