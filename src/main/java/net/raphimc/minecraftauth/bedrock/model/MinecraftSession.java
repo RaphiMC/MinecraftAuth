@@ -18,9 +18,13 @@
 package net.raphimc.minecraftauth.bedrock.model;
 
 import com.google.gson.JsonObject;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 import lombok.Value;
 import net.lenni0451.commons.gson.elements.GsonObject;
 import net.raphimc.minecraftauth.util.Expirable;
+import net.raphimc.minecraftauth.util.jwt.Jwt;
 
 @Value
 public class MinecraftSession implements Expirable {
@@ -46,5 +50,10 @@ public class MinecraftSession implements Expirable {
 
     long expireTimeMs;
     String authorizationHeader;
+
+    @Getter(lazy = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    Jwt parsedToken = Jwt.parse(this.authorizationHeader.split(" ", 2)[1]);
 
 }

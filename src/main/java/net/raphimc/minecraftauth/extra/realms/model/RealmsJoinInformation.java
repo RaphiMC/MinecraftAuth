@@ -20,6 +20,7 @@ package net.raphimc.minecraftauth.extra.realms.model;
 import com.google.gson.JsonObject;
 import lombok.Value;
 import net.lenni0451.commons.gson.elements.GsonObject;
+import org.jetbrains.annotations.ApiStatus;
 
 @Value
 public class RealmsJoinInformation {
@@ -28,6 +29,7 @@ public class RealmsJoinInformation {
     public static final String PROTOCOL_NETHERNET = "NETHERNET"; // Bedrock only
     public static final String PROTOCOL_NETHERNET_JSONRPC = "NETHERNET_JSONRPC"; // Bedrock only
 
+    @ApiStatus.Internal
     public static RealmsJoinInformation fromApiJson(final GsonObject json) {
         return new RealmsJoinInformation(
                 json.reqString("address"),
