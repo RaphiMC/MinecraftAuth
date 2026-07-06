@@ -36,7 +36,9 @@ public class XblXstsToken implements Expirable {
         return new XblXstsToken(
                 json.reqLong("expireTimeMs"),
                 json.reqString("token"),
-                json.reqString("userHash")
+                json.reqString("userHash"),
+                json.getString("xuid", null),
+                json.getString("gamertag", null)
         );
     }
 
@@ -46,21 +48,37 @@ public class XblXstsToken implements Expirable {
         json.addProperty("expireTimeMs", xstsToken.expireTimeMs);
         json.addProperty("token", xstsToken.token);
         json.addProperty("userHash", xstsToken.userHash);
+        json.addProperty("xuid", xstsToken.xuid);
+        json.addProperty("gamertag", xstsToken.gamertag);
         return json;
     }
 
     @ApiStatus.Internal
     public static XblXstsToken fromApiJson(final GsonObject json) {
+        final GsonObject xui = json.reqObject("DisplayClaims").reqArray("xui").get(0).asObject();
         return new XblXstsToken(
                 Instant.parse(json.reqString("NotAfter")).toEpochMilli(),
                 json.reqString("Token"),
-                json.reqObject("DisplayClaims").reqArray("xui").get(0).asObject().reqString("uhs")
+                xui.reqString("uhs"),
+                xui.getString("xid", null),
+                xui.getString("gtg", null)
         );
     }
 
     long expireTimeMs;
     String token;
     String userHash;
+    /**
+     * The XUID (Xbox user ID) of the account. Only populated when the relying party returns identity
+     * display claims (e.g. {@code http://xboxlive.com}); {@code null} for relying parties that don't,
+     * such as the Minecraft services one.
+     */
+    String xuid;
+    /**
+     * The gamertag of the account. Only populated when the relying party returns identity display
+     * claims (e.g. {@code http://xboxlive.com}); {@code null} otherwise.
+     */
+    String gamertag;
 
     public String getAuthorizationHeader() {
         return "XBL3.0 x=" + this.userHash + ';' + this.token;
