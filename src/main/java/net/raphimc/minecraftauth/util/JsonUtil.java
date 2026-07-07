@@ -18,12 +18,31 @@
 package net.raphimc.minecraftauth.util;
 
 import com.google.gson.JsonObject;
+import net.lenni0451.commons.gson.elements.GsonElement;
 import net.lenni0451.commons.gson.elements.GsonObject;
 
 import java.security.KeyPair;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 public class JsonUtil {
+
+    public static JsonObject encodeMap(final Map<String, String> map) {
+        final JsonObject json = new JsonObject();
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            json.addProperty(entry.getKey(), entry.getValue());
+        }
+        return json;
+    }
+
+    public static Map<String, String> decodeMap(final GsonObject json) {
+        final Map<String, String> map = new HashMap<>(json.size());
+        for (Map.Entry<String, GsonElement> entry : json.entrySet()) {
+            map.put(entry.getKey(), entry.getValue().asString());
+        }
+        return map;
+    }
 
     public static JsonObject encodeKeyPair(final KeyPair keyPair) {
         if (keyPair.getPublic() == null || keyPair.getPrivate() == null) {
