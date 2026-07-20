@@ -30,8 +30,7 @@ import net.raphimc.minecraftauth.xbl.responsehandler.XblResponseHandler;
 
 import java.net.MalformedURLException;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 public class XblUserProfileSettingsRequest extends GetRequest implements XblResponseHandler<XblUserProfile> {
 
@@ -55,11 +54,10 @@ public class XblUserProfileSettingsRequest extends GetRequest implements XblResp
         final GsonObject profileUser = profileUsers.getObject(0);
         return new XblUserProfile(
                 profileUser.reqString("id"),
-                profileUser.reqArray("settings").stream().map(GsonElement::asObject).collect(
-                        HashMap::new,
-                        (map, setting) -> map.put(setting.reqString("id"), setting.reqString("value")),
-                        Map::putAll
-                )
+                profileUser.reqArray("settings").stream().map(GsonElement::asObject).collect(Collectors.toMap(
+                        setting -> setting.reqString("id"),
+                        setting -> setting.reqString("value")
+                ))
         );
     }
 

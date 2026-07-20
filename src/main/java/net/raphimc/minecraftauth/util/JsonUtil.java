@@ -17,16 +17,32 @@
  */
 package net.raphimc.minecraftauth.util;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import net.lenni0451.commons.gson.elements.GsonArray;
 import net.lenni0451.commons.gson.elements.GsonElement;
 import net.lenni0451.commons.gson.elements.GsonObject;
 
 import java.security.KeyPair;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class JsonUtil {
+
+    public static JsonArray encodeSet(final Set<String> set) {
+        final JsonArray json = new JsonArray();
+        for (String item : set) {
+            json.add(item);
+        }
+        return json;
+    }
+
+    public static Set<String> decodeSet(final GsonArray json) {
+        final Set<String> set = new HashSet<>(json.size());
+        for (GsonElement element : json) {
+            set.add(element.asString());
+        }
+        return Collections.unmodifiableSet(set);
+    }
 
     public static JsonObject encodeMap(final Map<String, String> map) {
         final JsonObject json = new JsonObject();
@@ -41,7 +57,7 @@ public class JsonUtil {
         for (Map.Entry<String, GsonElement> entry : json.entrySet()) {
             map.put(entry.getKey(), entry.getValue().asString());
         }
-        return map;
+        return Collections.unmodifiableMap(map);
     }
 
     public static JsonObject encodeKeyPair(final KeyPair keyPair) {

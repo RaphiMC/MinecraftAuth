@@ -77,8 +77,8 @@ public class XblRequestException extends ApiHttpRequestException {
     public static final long XO_E_INVALID_TITLE_TOKEN = 0x8015DC24L;
     public static final long XO_E_INVALID_USER_TOKEN = 0x8015DC25L;
 
-    public static final Map<Long, String> ERRORS = new HashMap<>();
-    public static final Map<Long, String> ERROR_MESSAGES = new HashMap<>();
+    private static final Map<Long, String> ERRORS = new HashMap<>();
+    private static final Map<Long, String> ERROR_MESSAGES = new HashMap<>();
 
     static {
         ERRORS.put(AM_E_XASD_UNEXPECTED, "AM_E_XASD_UNEXPECTED");

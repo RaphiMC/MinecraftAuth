@@ -25,9 +25,11 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.lenni0451.commons.gson.elements.GsonObject;
 import net.lenni0451.commons.httpclient.HttpClient;
+import net.raphimc.minecraftauth.java.model.MinecraftEntitlements;
 import net.raphimc.minecraftauth.java.model.MinecraftPlayerCertificates;
 import net.raphimc.minecraftauth.java.model.MinecraftProfile;
 import net.raphimc.minecraftauth.java.model.MinecraftToken;
+import net.raphimc.minecraftauth.java.request.MinecraftEntitlementsRequest;
 import net.raphimc.minecraftauth.java.request.MinecraftLauncherLoginRequest;
 import net.raphimc.minecraftauth.java.request.MinecraftPlayerCertificatesRequest;
 import net.raphimc.minecraftauth.java.request.MinecraftProfileRequest;
@@ -73,6 +75,7 @@ public class JavaAuthManager {
                 json.optObject("xboxLiveXstsToken").map(XblXstsToken::fromJson).orElse(null),
                 json.optObject("xboxUserProfile").map(XblUserProfile::fromJson).orElse(null),
                 json.optObject("minecraftToken").map(MinecraftToken::fromJson).orElse(null),
+                json.optObject("minecraftEntitlements").map(MinecraftEntitlements::fromJson).orElse(null),
                 json.optObject("minecraftProfile").map(MinecraftProfile::fromJson).orElse(null),
                 json.optObject("minecraftPlayerCertificates").map(MinecraftPlayerCertificates::fromJson).orElse(null)
         );
@@ -107,6 +110,9 @@ public class JavaAuthManager {
         if (authManager.minecraftToken.hasValue()) {
             json.add("minecraftToken", MinecraftToken.toJson(authManager.minecraftToken.getCached()));
         }
+        if (authManager.minecraftEntitlements.hasValue()) {
+            json.add("minecraftEntitlements", MinecraftEntitlements.toJson(authManager.minecraftEntitlements.getCached()));
+        }
         if (authManager.minecraftProfile.hasValue()) {
             json.add("minecraftProfile", MinecraftProfile.toJson(authManager.minecraftProfile.getCached()));
         }
@@ -138,6 +144,7 @@ public class JavaAuthManager {
     private final Holder<XblXstsToken> xboxLiveXstsToken = new Holder<>(this::refreshXboxLiveXstsToken);
     private final Holder<XblUserProfile> xboxUserProfile = new Holder<>(this::refreshXboxUserProfile);
     private final Holder<MinecraftToken> minecraftToken = new Holder<>(this::refreshMinecraftToken);
+    private final Holder<MinecraftEntitlements> minecraftEntitlements = new Holder<>(this::refreshMinecraftEntitlements);
     private final Holder<MinecraftProfile> minecraftProfile = new Holder<>(this::refreshMinecraftProfile);
     private final Holder<MinecraftPlayerCertificates> minecraftPlayerCertificates = new Holder<>(this::refreshMinecraftPlayerCertificates);
 
@@ -151,7 +158,7 @@ public class JavaAuthManager {
         this.hookChangeListeners();
     }
 
-    private JavaAuthManager(final HttpClient httpClient, final MsaApplicationConfig msaApplicationConfig, final String deviceType, final KeyPair deviceKeyPair, final UUID deviceId, final MsaToken msaToken, final XblDeviceToken xblDeviceToken, final XblUserToken xblUserToken, final XblTitleToken xblTitleToken, final XblXstsToken javaXstsToken, final XblXstsToken xboxLiveXstsToken, final XblUserProfile xboxUserProfile, final MinecraftToken minecraftToken, final MinecraftProfile minecraftProfile, final MinecraftPlayerCertificates minecraftPlayerCertificates) {
+    private JavaAuthManager(final HttpClient httpClient, final MsaApplicationConfig msaApplicationConfig, final String deviceType, final KeyPair deviceKeyPair, final UUID deviceId, final MsaToken msaToken, final XblDeviceToken xblDeviceToken, final XblUserToken xblUserToken, final XblTitleToken xblTitleToken, final XblXstsToken javaXstsToken, final XblXstsToken xboxLiveXstsToken, final XblUserProfile xboxUserProfile, final MinecraftToken minecraftToken, final MinecraftEntitlements minecraftEntitlements, final MinecraftProfile minecraftProfile, final MinecraftPlayerCertificates minecraftPlayerCertificates) {
         this.httpClient = httpClient;
         this.msaApplicationConfig = msaApplicationConfig;
         this.deviceType = deviceType;
@@ -165,6 +172,7 @@ public class JavaAuthManager {
         this.xboxLiveXstsToken.set(xboxLiveXstsToken);
         this.xboxUserProfile.set(xboxUserProfile);
         this.minecraftToken.set(minecraftToken);
+        this.minecraftEntitlements.set(minecraftEntitlements);
         this.minecraftProfile.set(minecraftProfile);
         this.minecraftPlayerCertificates.set(minecraftPlayerCertificates);
         this.hookChangeListeners();
@@ -220,6 +228,10 @@ public class JavaAuthManager {
         return this.httpClient.executeAndHandle(new MinecraftLauncherLoginRequest(this.javaXstsToken.getUpToDate()));
     }
 
+    private MinecraftEntitlements refreshMinecraftEntitlements() throws IOException {
+        return this.httpClient.executeAndHandle(new MinecraftEntitlementsRequest(this.minecraftToken.getUpToDate()));
+    }
+
     private MinecraftProfile refreshMinecraftProfile() throws IOException {
         return this.httpClient.executeAndHandle(new MinecraftProfileRequest(this.minecraftToken.getUpToDate()));
     }
@@ -244,6 +256,7 @@ public class JavaAuthManager {
         this.xboxLiveXstsToken.getChangeListeners().add(this.changeListeners::invoke);
         this.xboxUserProfile.getChangeListeners().add(this.changeListeners::invoke);
         this.minecraftToken.getChangeListeners().add(this.changeListeners::invoke);
+        this.minecraftEntitlements.getChangeListeners().add(this.changeListeners::invoke);
         this.minecraftProfile.getChangeListeners().add(this.changeListeners::invoke);
         this.minecraftPlayerCertificates.getChangeListeners().add(this.changeListeners::invoke);
     }
