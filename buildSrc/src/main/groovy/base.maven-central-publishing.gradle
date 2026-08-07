@@ -21,7 +21,7 @@ tasks.withType(PublishToMavenRepository).configureEach {
         def centralUsername = providers.gradleProperty("centralUsername")
         def centralPassword = providers.gradleProperty("centralPassword")
         def mavenGroup = it.publication.groupId
-        it.doLast {
+        doLast {
             def connection = URI.create("https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/$mavenGroup").toURL().openConnection() as HttpURLConnection
             connection.setRequestMethod("POST")
             connection.setRequestProperty("Authorization", "Basic " + "${centralUsername.get()}:${centralPassword.get()}".bytes.encodeBase64().toString())
