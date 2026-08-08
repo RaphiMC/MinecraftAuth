@@ -27,9 +27,12 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
-public class TimeUtil {
+public final class TimeUtil {
 
     private static Duration CLIENT_TIME_OFFSET = null;
+
+    private TimeUtil() {
+    }
 
     /**
      * Gets the time offset between the client and the microsoft server. This is used to calculate the correct time for authentication and signatures.
@@ -45,7 +48,7 @@ public class TimeUtil {
                 final Instant clientTime = Instant.now();
                 final Instant serverTime = response.getFirstHeader("Date").map(s -> DateTimeFormatter.RFC_1123_DATE_TIME.parse(s, Instant::from)).get();
                 CLIENT_TIME_OFFSET = Duration.between(clientTime, serverTime);
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 new RuntimeException("Failed to get client time offset. This may cause issues with authentication if the local clock is wrong", e).printStackTrace();
                 CLIENT_TIME_OFFSET = Duration.ZERO;
             }

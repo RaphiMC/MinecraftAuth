@@ -24,15 +24,19 @@ import net.lenni0451.commons.gson.elements.GsonObject;
 @Value
 public class XblSisuTokens {
 
+    XblUserToken userToken;
+    XblTitleToken titleToken;
+    XblXstsToken xstsToken;
+
     public static XblSisuTokens fromJson(final JsonObject json) {
         return fromJson(new GsonObject(json));
     }
 
     public static XblSisuTokens fromJson(final GsonObject json) {
         return new XblSisuTokens(
-                XblUserToken.fromJson(json.getObject("userToken")),
-                XblTitleToken.fromJson(json.getObject("titleToken")),
-                XblXstsToken.fromJson(json.getObject("xstsToken"))
+            XblUserToken.fromJson(json.getObject("userToken")),
+            XblTitleToken.fromJson(json.getObject("titleToken")),
+            XblXstsToken.fromJson(json.getObject("xstsToken"))
         );
     }
 
@@ -44,9 +48,5 @@ public class XblSisuTokens {
         json.add("xstsToken", XblXstsToken.toJson(sisuTokens.xstsToken));
         return json;
     }
-
-    XblUserToken userToken;
-    XblTitleToken titleToken;
-    XblXstsToken xstsToken;
 
 }

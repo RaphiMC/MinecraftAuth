@@ -25,15 +25,19 @@ import net.raphimc.minecraftauth.util.Expirable;
 @Value
 public class XblDeviceToken implements Expirable {
 
+    long expireTimeMs;
+    String token;
+    String deviceId;
+
     public static XblDeviceToken fromJson(final JsonObject json) {
         return fromJson(new GsonObject(json));
     }
 
     public static XblDeviceToken fromJson(final GsonObject json) {
         return new XblDeviceToken(
-                json.reqLong("expireTimeMs"),
-                json.reqString("token"),
-                json.reqString("deviceId")
+            json.reqLong("expireTimeMs"),
+            json.reqString("token"),
+            json.reqString("deviceId")
         );
     }
 
@@ -45,9 +49,5 @@ public class XblDeviceToken implements Expirable {
         json.addProperty("deviceId", deviceToken.deviceId);
         return json;
     }
-
-    long expireTimeMs;
-    String token;
-    String deviceId;
 
 }

@@ -77,7 +77,7 @@ public abstract class SignedXblPostRequest extends PostRequest {
             data.writeInt(1); // Policy Version
             data.writeLong(windowsTimestamp); // Timestamp
             data.write(CryptUtil.signSha256InP1363Format(privateKey, signatureContent.toByteArray())); // Signature
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             throw new RuntimeException("Failed to sign request", e);
         }
         this.appendHeader("Signature", Base64.getEncoder().encodeToString(headerData.toByteArray()));

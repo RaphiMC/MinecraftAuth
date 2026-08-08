@@ -28,14 +28,17 @@ import java.util.Map;
 @Value
 public class XblUserProfile implements Expirable {
 
+    String id;
+    Map<String, String> settings;
+
     public static XblUserProfile fromJson(final JsonObject json) {
         return fromJson(new GsonObject(json));
     }
 
     public static XblUserProfile fromJson(final GsonObject json) {
         return new XblUserProfile(
-                json.reqString("id"),
-                JsonUtil.decodeMap(json.reqObject("settings"))
+            json.reqString("id"),
+            JsonUtil.decodeMap(json.reqObject("settings"))
         );
     }
 
@@ -46,9 +49,6 @@ public class XblUserProfile implements Expirable {
         json.add("settings", JsonUtil.encodeMap(profile.settings));
         return json;
     }
-
-    String id;
-    Map<String, String> settings;
 
     @Override
     public long getExpireTimeMs() {

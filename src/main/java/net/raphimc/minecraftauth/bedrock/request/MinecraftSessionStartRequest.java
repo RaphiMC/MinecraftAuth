@@ -71,8 +71,8 @@ public class MinecraftSessionStartRequest extends PostRequest implements Minecra
     public MinecraftSession handle(final HttpResponse response, final GsonObject json) throws IOException {
         final GsonObject result = json.reqObject("result");
         return new MinecraftSession(
-                Instant.parse(result.reqString("validUntil")).toEpochMilli(),
-                result.reqString("authorizationHeader")
+            Instant.parse(result.reqString("validUntil")).toEpochMilli(),
+            result.reqString("authorizationHeader")
         );
     }
 

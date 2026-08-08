@@ -42,8 +42,8 @@ public class MinecraftProfileRequest extends GetRequest implements MinecraftServ
     @Override
     public MinecraftProfile handle(final HttpResponse response, final GsonObject json) throws IOException {
         return new MinecraftProfile(
-                UuidUtil.fromUndashedString(json.reqString("id")),
-                json.reqString("name")
+            UuidUtil.fromUndashedString(json.reqString("id")),
+            json.reqString("name")
         );
     }
 
@@ -51,7 +51,7 @@ public class MinecraftProfileRequest extends GetRequest implements MinecraftServ
     public void handleError(final HttpResponse response, final GsonObject json) throws IOException {
         try {
             MinecraftServicesResponseHandler.super.handleError(response, json);
-        } catch (MinecraftServicesRequestException e) {
+        } catch (final MinecraftServicesRequestException e) {
             if (e.getResponse().getStatusCode() == 404) {
                 throw new MinecraftProfileNotFoundException(e);
             } else {

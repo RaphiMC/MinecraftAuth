@@ -51,9 +51,9 @@ public class PlayFabLoginWithXboxRequest extends PostRequest implements PlayFabR
     public PlayFabToken handle(final HttpResponse response, final GsonObject json) throws IOException {
         final GsonObject data = json.reqObject("data");
         return new PlayFabToken(
-                PlayFabEntityToken.fromApiJson(data.reqObject("EntityToken")),
-                data.reqString("PlayFabId"),
-                data.reqString("SessionTicket")
+            PlayFabEntityToken.fromApiJson(data.reqObject("EntityToken")),
+            data.reqString("PlayFabId"),
+            data.reqString("SessionTicket")
         );
     }
 

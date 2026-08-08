@@ -25,15 +25,19 @@ import net.raphimc.minecraftauth.util.Expirable;
 @Value
 public class MinecraftToken implements Expirable {
 
+    long expireTimeMs;
+    String type;
+    String token;
+
     public static MinecraftToken fromJson(final JsonObject json) {
         return fromJson(new GsonObject(json));
     }
 
     public static MinecraftToken fromJson(final GsonObject json) {
         return new MinecraftToken(
-                json.reqLong("expireTimeMs"),
-                json.reqString("type"),
-                json.reqString("token")
+            json.reqLong("expireTimeMs"),
+            json.reqString("type"),
+            json.reqString("token")
         );
     }
 
@@ -45,10 +49,6 @@ public class MinecraftToken implements Expirable {
         json.addProperty("token", token.token);
         return json;
     }
-
-    long expireTimeMs;
-    String type;
-    String token;
 
     public String getAuthorizationHeader() {
         return this.type + ' ' + this.token;

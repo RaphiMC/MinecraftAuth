@@ -28,16 +28,21 @@ import java.time.Instant;
 @Value
 public class PlayFabEntityToken implements Expirable {
 
+    long expireTimeMs;
+    String token;
+    String entityId;
+    String entityType;
+
     public static PlayFabEntityToken fromJson(final JsonObject json) {
         return fromJson(new GsonObject(json));
     }
 
     public static PlayFabEntityToken fromJson(final GsonObject json) {
         return new PlayFabEntityToken(
-                json.reqLong("expireTimeMs"),
-                json.reqString("token"),
-                json.reqString("entityId"),
-                json.reqString("entityType")
+            json.reqLong("expireTimeMs"),
+            json.reqString("token"),
+            json.reqString("entityId"),
+            json.reqString("entityType")
         );
     }
 
@@ -55,16 +60,11 @@ public class PlayFabEntityToken implements Expirable {
     public static PlayFabEntityToken fromApiJson(final GsonObject json) {
         final GsonObject entity = json.reqObject("Entity");
         return new PlayFabEntityToken(
-                Instant.parse(json.reqString("TokenExpiration")).toEpochMilli(),
-                json.reqString("EntityToken"),
-                entity.reqString("Id"),
-                entity.reqString("Type")
+            Instant.parse(json.reqString("TokenExpiration")).toEpochMilli(),
+            json.reqString("EntityToken"),
+            entity.reqString("Id"),
+            entity.reqString("Type")
         );
     }
-
-    long expireTimeMs;
-    String token;
-    String entityId;
-    String entityType;
 
 }

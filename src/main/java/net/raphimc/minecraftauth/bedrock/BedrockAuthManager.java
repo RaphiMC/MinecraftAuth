@@ -48,8 +48,17 @@ import net.raphimc.minecraftauth.util.JsonUtil;
 import net.raphimc.minecraftauth.util.holder.Holder;
 import net.raphimc.minecraftauth.util.holder.listener.ChangeListeners;
 import net.raphimc.minecraftauth.xbl.data.XblConstants;
-import net.raphimc.minecraftauth.xbl.model.*;
-import net.raphimc.minecraftauth.xbl.request.*;
+import net.raphimc.minecraftauth.xbl.model.XblDeviceToken;
+import net.raphimc.minecraftauth.xbl.model.XblSisuTokens;
+import net.raphimc.minecraftauth.xbl.model.XblTitleToken;
+import net.raphimc.minecraftauth.xbl.model.XblUserProfile;
+import net.raphimc.minecraftauth.xbl.model.XblUserToken;
+import net.raphimc.minecraftauth.xbl.model.XblXstsToken;
+import net.raphimc.minecraftauth.xbl.request.XblDeviceAuthenticateRequest;
+import net.raphimc.minecraftauth.xbl.request.XblSisuAuthorizeRequest;
+import net.raphimc.minecraftauth.xbl.request.XblUserAuthenticateRequest;
+import net.raphimc.minecraftauth.xbl.request.XblUserProfileSettingsRequest;
+import net.raphimc.minecraftauth.xbl.request.XblXstsAuthorizeRequest;
 
 import java.io.IOException;
 import java.security.KeyPair;
@@ -57,7 +66,34 @@ import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 @Getter
-public class BedrockAuthManager {
+public final class BedrockAuthManager {
+
+    private final HttpClient httpClient;
+    private final String gameVersion;
+    private final MsaApplicationConfig msaApplicationConfig;
+    private final String deviceType;
+    private final KeyPair deviceKeyPair;
+    private final UUID deviceId;
+    private final KeyPair sessionKeyPair;
+    private final ChangeListeners changeListeners = new ChangeListeners();
+
+    @Getter(AccessLevel.NONE)
+    private final Object sisuTokensLock = new Object();
+
+    private final Holder<MsaToken> msaToken = new Holder<>(this::refreshMsaToken);
+    private final Holder<XblDeviceToken> xblDeviceToken = new Holder<>(this::refreshXblDeviceToken);
+    private final Holder<XblUserToken> xblUserToken = new Holder<>(this::refreshXblUserToken, this.sisuTokensLock);
+    private final Holder<XblTitleToken> xblTitleToken = new Holder<>(this::refreshXblTitleToken, this.sisuTokensLock);
+    private final Holder<XblXstsToken> bedrockXstsToken = new Holder<>(this::refreshBedrockXstsToken, this.sisuTokensLock);
+    private final Holder<XblXstsToken> playFabXstsToken = new Holder<>(this::refreshPlayFabXstsToken);
+    private final Holder<XblXstsToken> realmsXstsToken = new Holder<>(this::refreshRealmsXstsToken);
+    private final Holder<XblXstsToken> xboxLiveXstsToken = new Holder<>(this::refreshXboxLiveXstsToken);
+    private final Holder<XblUserProfile> xboxUserProfile = new Holder<>(this::refreshXboxUserProfile);
+    private final Holder<PlayFabToken> playFabToken = new Holder<>(this::refreshPlayFabToken);
+    private final Holder<PlayFabEntityToken> playFabMasterToken = new Holder<>(this::refreshPlayFabMasterToken);
+    private final Holder<MinecraftSession> minecraftSession = new Holder<>(this::refreshMinecraftSession);
+    private final Holder<MinecraftMultiplayerToken> minecraftMultiplayerToken = new Holder<>(this::refreshMinecraftMultiplayerToken);
+    private final Holder<MinecraftCertificateChain> minecraftCertificateChain = new Holder<>(this::refreshMinecraftCertificateChain);
 
     public static BedrockAuthManager fromJson(final HttpClient httpClient, final String gameVersion, final JsonObject json) {
         return fromJson(httpClient, gameVersion, new GsonObject(json));
@@ -65,27 +101,27 @@ public class BedrockAuthManager {
 
     public static BedrockAuthManager fromJson(final HttpClient httpClient, final String gameVersion, final GsonObject json) {
         return new BedrockAuthManager(
-                httpClient,
-                gameVersion,
-                MsaApplicationConfig.fromJson(json.reqObject("msaApplicationConfig")),
-                json.reqString("deviceType"),
-                JsonUtil.decodeKeyPair(json.reqObject("deviceKeyPair")),
-                UUID.fromString(json.reqString("deviceId")),
-                JsonUtil.decodeKeyPair(json.reqObject("sessionKeyPair")),
-                MsaToken.fromJson(json.reqObject("msaToken")),
-                json.optObject("xblDeviceToken").map(XblDeviceToken::fromJson).orElse(null),
-                json.optObject("xblUserToken").map(XblUserToken::fromJson).orElse(null),
-                json.optObject("xblTitleToken").map(XblTitleToken::fromJson).orElse(null),
-                json.optObject("bedrockXstsToken").map(XblXstsToken::fromJson).orElse(null),
-                json.optObject("playFabXstsToken").map(XblXstsToken::fromJson).orElse(null),
-                json.optObject("realmsXstsToken").map(XblXstsToken::fromJson).orElse(null),
-                json.optObject("xboxLiveXstsToken").map(XblXstsToken::fromJson).orElse(null),
-                json.optObject("xboxUserProfile").map(XblUserProfile::fromJson).orElse(null),
-                json.optObject("playFabToken").map(PlayFabToken::fromJson).orElse(null),
-                json.optObject("playFabMasterToken").map(PlayFabEntityToken::fromJson).orElse(null),
-                json.optObject("minecraftSession").map(MinecraftSession::fromJson).orElse(null),
-                json.optObject("minecraftMultiplayerToken").map(MinecraftMultiplayerToken::fromJson).orElse(null),
-                json.optObject("minecraftCertificateChain").map(MinecraftCertificateChain::fromJson).orElse(null)
+            httpClient,
+            gameVersion,
+            MsaApplicationConfig.fromJson(json.reqObject("msaApplicationConfig")),
+            json.reqString("deviceType"),
+            JsonUtil.decodeKeyPair(json.reqObject("deviceKeyPair")),
+            UUID.fromString(json.reqString("deviceId")),
+            JsonUtil.decodeKeyPair(json.reqObject("sessionKeyPair")),
+            MsaToken.fromJson(json.reqObject("msaToken")),
+            json.optObject("xblDeviceToken").map(XblDeviceToken::fromJson).orElse(null),
+            json.optObject("xblUserToken").map(XblUserToken::fromJson).orElse(null),
+            json.optObject("xblTitleToken").map(XblTitleToken::fromJson).orElse(null),
+            json.optObject("bedrockXstsToken").map(XblXstsToken::fromJson).orElse(null),
+            json.optObject("playFabXstsToken").map(XblXstsToken::fromJson).orElse(null),
+            json.optObject("realmsXstsToken").map(XblXstsToken::fromJson).orElse(null),
+            json.optObject("xboxLiveXstsToken").map(XblXstsToken::fromJson).orElse(null),
+            json.optObject("xboxUserProfile").map(XblUserProfile::fromJson).orElse(null),
+            json.optObject("playFabToken").map(PlayFabToken::fromJson).orElse(null),
+            json.optObject("playFabMasterToken").map(PlayFabEntityToken::fromJson).orElse(null),
+            json.optObject("minecraftSession").map(MinecraftSession::fromJson).orElse(null),
+            json.optObject("minecraftMultiplayerToken").map(MinecraftMultiplayerToken::fromJson).orElse(null),
+            json.optObject("minecraftCertificateChain").map(MinecraftCertificateChain::fromJson).orElse(null)
         );
     }
 
@@ -143,33 +179,6 @@ public class BedrockAuthManager {
     public static Builder create(final HttpClient httpClient, final String gameVersion) {
         return new Builder(httpClient, gameVersion);
     }
-
-    private final HttpClient httpClient;
-    private final String gameVersion;
-    private final MsaApplicationConfig msaApplicationConfig;
-    private final String deviceType;
-    private final KeyPair deviceKeyPair;
-    private final UUID deviceId;
-    private final KeyPair sessionKeyPair;
-    private final ChangeListeners changeListeners = new ChangeListeners();
-
-    @Getter(AccessLevel.NONE)
-    private final Object sisuTokensLock = new Object();
-
-    private final Holder<MsaToken> msaToken = new Holder<>(this::refreshMsaToken);
-    private final Holder<XblDeviceToken> xblDeviceToken = new Holder<>(this::refreshXblDeviceToken);
-    private final Holder<XblUserToken> xblUserToken = new Holder<>(this::refreshXblUserToken, this.sisuTokensLock);
-    private final Holder<XblTitleToken> xblTitleToken = new Holder<>(this::refreshXblTitleToken, this.sisuTokensLock);
-    private final Holder<XblXstsToken> bedrockXstsToken = new Holder<>(this::refreshBedrockXstsToken, this.sisuTokensLock);
-    private final Holder<XblXstsToken> playFabXstsToken = new Holder<>(this::refreshPlayFabXstsToken);
-    private final Holder<XblXstsToken> realmsXstsToken = new Holder<>(this::refreshRealmsXstsToken);
-    private final Holder<XblXstsToken> xboxLiveXstsToken = new Holder<>(this::refreshXboxLiveXstsToken);
-    private final Holder<XblUserProfile> xboxUserProfile = new Holder<>(this::refreshXboxUserProfile);
-    private final Holder<PlayFabToken> playFabToken = new Holder<>(this::refreshPlayFabToken);
-    private final Holder<PlayFabEntityToken> playFabMasterToken = new Holder<>(this::refreshPlayFabMasterToken);
-    private final Holder<MinecraftSession> minecraftSession = new Holder<>(this::refreshMinecraftSession);
-    private final Holder<MinecraftMultiplayerToken> minecraftMultiplayerToken = new Holder<>(this::refreshMinecraftMultiplayerToken);
-    private final Holder<MinecraftCertificateChain> minecraftCertificateChain = new Holder<>(this::refreshMinecraftCertificateChain);
 
     private BedrockAuthManager(final HttpClient httpClient, final String gameVersion, final MsaApplicationConfig msaApplicationConfig, final String deviceType, final KeyPair deviceKeyPair, final UUID deviceId, final KeyPair sessionKeyPair, final MsaToken msaToken) {
         this.httpClient = httpClient;
@@ -368,14 +377,14 @@ public class BedrockAuthManager {
          */
         public BedrockAuthManager login(final MsaToken msaToken) {
             return new BedrockAuthManager(
-                    this.httpClient,
-                    this.gameVersion,
-                    this.msaApplicationConfig,
-                    this.deviceType,
-                    this.deviceKeyPair != null ? this.deviceKeyPair : CryptUtil.generateEcdsa256KeyPair(),
-                    this.deviceId != null ? this.deviceId : UUID.randomUUID(),
-                    this.sessionKeyPair != null ? this.sessionKeyPair : CryptUtil.generateEcdsa384KeyPair(),
-                    msaToken
+                this.httpClient,
+                this.gameVersion,
+                this.msaApplicationConfig,
+                this.deviceType,
+                this.deviceKeyPair != null ? this.deviceKeyPair : CryptUtil.generateEcdsa256KeyPair(),
+                this.deviceId != null ? this.deviceId : UUID.randomUUID(),
+                this.sessionKeyPair != null ? this.sessionKeyPair : CryptUtil.generateEcdsa384KeyPair(),
+                msaToken
             );
         }
 

@@ -62,7 +62,7 @@ public class DeviceCodeMsaAuthService extends MsaAuthService {
         while (!deviceCode.isExpired() && System.currentTimeMillis() - start <= this.timeoutMs) {
             try {
                 return this.httpClient.executeAndHandle(new MsaDeviceCodeTokenRequest(this.applicationConfig, deviceCode));
-            } catch (MsaRequestException e) {
+            } catch (final MsaRequestException e) {
                 if (e.getResponse().getStatusCode() == StatusCodes.BAD_REQUEST && e.getError().equals("authorization_pending")) {
                     Thread.sleep(deviceCode.getIntervalMs());
                 } else {

@@ -53,11 +53,11 @@ public class XblUserProfileSettingsRequest extends GetRequest implements XblResp
         }
         final GsonObject profileUser = profileUsers.getObject(0);
         return new XblUserProfile(
-                profileUser.reqString("id"),
-                profileUser.reqArray("settings").stream().map(GsonElement::asObject).collect(Collectors.toMap(
-                        setting -> setting.reqString("id"),
-                        setting -> setting.reqString("value")
-                ))
+            profileUser.reqString("id"),
+            profileUser.reqArray("settings").stream().map(GsonElement::asObject).collect(Collectors.toMap(
+                setting -> setting.reqString("id"),
+                setting -> setting.reqString("value")
+            ))
         );
     }
 

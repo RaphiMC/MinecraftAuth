@@ -19,8 +19,9 @@ package javafx.embed.swing;
 
 import javafx.scene.Scene;
 
-import javax.swing.*;
+import javax.swing.JComponent;
 
+@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class JFXPanel extends JComponent {
 
     public native Scene getScene();

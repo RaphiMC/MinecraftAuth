@@ -25,6 +25,10 @@ import net.raphimc.minecraftauth.util.Expirable;
 @Value
 public class PlayFabToken implements Expirable {
 
+    PlayFabEntityToken entityToken;
+    String playFabId;
+    String sessionTicket;
+
     public static PlayFabToken fromJson(final JsonObject json) {
         return fromJson(new GsonObject(json));
     }
@@ -32,22 +36,22 @@ public class PlayFabToken implements Expirable {
     public static PlayFabToken fromJson(final GsonObject json) {
         if (json.reqInt("_saveVersion") == 1) {
             final PlayFabEntityToken entityToken = new PlayFabEntityToken(
-                    json.reqLong("expireTimeMs"),
-                    json.reqString("entityToken"),
-                    json.reqString("entityId"),
-                    "title_player_account"
+                json.reqLong("expireTimeMs"),
+                json.reqString("entityToken"),
+                json.reqString("entityId"),
+                "title_player_account"
             );
             return new PlayFabToken(
-                    entityToken,
-                    json.reqString("playFabId"),
-                    json.reqString("sessionTicket")
+                entityToken,
+                json.reqString("playFabId"),
+                json.reqString("sessionTicket")
             );
         }
 
         return new PlayFabToken(
-                PlayFabEntityToken.fromJson(json.getObject("entityToken")),
-                json.reqString("playFabId"),
-                json.reqString("sessionTicket")
+            PlayFabEntityToken.fromJson(json.getObject("entityToken")),
+            json.reqString("playFabId"),
+            json.reqString("sessionTicket")
         );
     }
 
@@ -59,10 +63,6 @@ public class PlayFabToken implements Expirable {
         json.addProperty("sessionTicket", token.sessionTicket);
         return json;
     }
-
-    PlayFabEntityToken entityToken;
-    String playFabId;
-    String sessionTicket;
 
     @Override
     public long getExpireTimeMs() {

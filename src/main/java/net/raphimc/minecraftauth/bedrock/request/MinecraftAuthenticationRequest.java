@@ -52,8 +52,8 @@ public class MinecraftAuthenticationRequest extends PostRequest implements Minec
             throw new IllegalStateException("Invalid certificate chain length: " + chain.size());
         }
         return new MinecraftCertificateChain(
-                chain.get(0).asString(),
-                chain.get(1).asString()
+            chain.get(0).asString(),
+            chain.get(1).asString()
         );
     }
 

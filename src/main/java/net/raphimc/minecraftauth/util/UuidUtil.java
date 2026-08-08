@@ -19,10 +19,13 @@ package net.raphimc.minecraftauth.util;
 
 import java.util.UUID;
 
-public class UuidUtil {
+public final class UuidUtil {
 
     private static final String UNDASHED_UUID_REGEX = "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)";
     private static final String DASHED_UUID_REGEX = "(\\p{XDigit}{8})-(\\p{XDigit}{4})-(\\p{XDigit}{4})-(\\p{XDigit}{4})-(\\p{XDigit}+)";
+
+    private UuidUtil() {
+    }
 
     public static UUID fromUndashedString(final String s) {
         if (s != null) {

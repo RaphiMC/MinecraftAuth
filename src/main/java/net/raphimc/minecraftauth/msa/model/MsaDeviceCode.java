@@ -25,17 +25,23 @@ import net.raphimc.minecraftauth.util.Expirable;
 @Value
 public class MsaDeviceCode implements Expirable {
 
+    long expireTimeMs;
+    long intervalMs;
+    String deviceCode;
+    String userCode;
+    String verificationUri;
+
     public static MsaDeviceCode fromJson(final JsonObject json) {
         return fromJson(new GsonObject(json));
     }
 
     public static MsaDeviceCode fromJson(final GsonObject json) {
         return new MsaDeviceCode(
-                json.reqLong("expireTimeMs"),
-                json.reqLong("intervalMs"),
-                json.reqString("deviceCode"),
-                json.reqString("userCode"),
-                json.reqString("verificationUri")
+            json.reqLong("expireTimeMs"),
+            json.reqLong("intervalMs"),
+            json.reqString("deviceCode"),
+            json.reqString("userCode"),
+            json.reqString("verificationUri")
         );
     }
 
@@ -49,12 +55,6 @@ public class MsaDeviceCode implements Expirable {
         json.addProperty("verificationUri", deviceCode.verificationUri);
         return json;
     }
-
-    long expireTimeMs;
-    long intervalMs;
-    String deviceCode;
-    String userCode;
-    String verificationUri;
 
     public String getDirectVerificationUri() {
         return this.verificationUri + "?otc=" + this.userCode;

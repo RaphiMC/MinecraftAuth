@@ -23,7 +23,11 @@ import net.lenni0451.commons.httpclient.HttpResponse;
 import net.raphimc.minecraftauth.msa.model.MsaApplicationConfig;
 import net.raphimc.minecraftauth.msa.model.MsaToken;
 import net.raphimc.minecraftauth.util.http.content.JsonContent;
-import net.raphimc.minecraftauth.xbl.model.*;
+import net.raphimc.minecraftauth.xbl.model.XblDeviceToken;
+import net.raphimc.minecraftauth.xbl.model.XblSisuTokens;
+import net.raphimc.minecraftauth.xbl.model.XblTitleToken;
+import net.raphimc.minecraftauth.xbl.model.XblUserToken;
+import net.raphimc.minecraftauth.xbl.model.XblXstsToken;
 import net.raphimc.minecraftauth.xbl.responsehandler.XblResponseHandler;
 
 import java.net.MalformedURLException;
@@ -55,9 +59,9 @@ public class XblSisuAuthorizeRequest extends SignedXblPostRequest implements Xbl
     @Override
     public XblSisuTokens handle(final HttpResponse response, final GsonObject json) {
         return new XblSisuTokens(
-                XblUserToken.fromApiJson(json.reqObject("UserToken")),
-                XblTitleToken.fromApiJson(json.reqObject("TitleToken")),
-                XblXstsToken.fromApiJson(json.reqObject("AuthorizationToken"))
+            XblUserToken.fromApiJson(json.reqObject("UserToken")),
+            XblTitleToken.fromApiJson(json.reqObject("TitleToken")),
+            XblXstsToken.fromApiJson(json.reqObject("AuthorizationToken"))
         );
     }
 

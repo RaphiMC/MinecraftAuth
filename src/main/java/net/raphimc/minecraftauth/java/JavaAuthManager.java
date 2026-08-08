@@ -45,8 +45,17 @@ import net.raphimc.minecraftauth.util.JsonUtil;
 import net.raphimc.minecraftauth.util.holder.Holder;
 import net.raphimc.minecraftauth.util.holder.listener.ChangeListeners;
 import net.raphimc.minecraftauth.xbl.data.XblConstants;
-import net.raphimc.minecraftauth.xbl.model.*;
-import net.raphimc.minecraftauth.xbl.request.*;
+import net.raphimc.minecraftauth.xbl.model.XblDeviceToken;
+import net.raphimc.minecraftauth.xbl.model.XblSisuTokens;
+import net.raphimc.minecraftauth.xbl.model.XblTitleToken;
+import net.raphimc.minecraftauth.xbl.model.XblUserProfile;
+import net.raphimc.minecraftauth.xbl.model.XblUserToken;
+import net.raphimc.minecraftauth.xbl.model.XblXstsToken;
+import net.raphimc.minecraftauth.xbl.request.XblDeviceAuthenticateRequest;
+import net.raphimc.minecraftauth.xbl.request.XblSisuAuthorizeRequest;
+import net.raphimc.minecraftauth.xbl.request.XblUserAuthenticateRequest;
+import net.raphimc.minecraftauth.xbl.request.XblUserProfileSettingsRequest;
+import net.raphimc.minecraftauth.xbl.request.XblXstsAuthorizeRequest;
 
 import java.io.IOException;
 import java.security.KeyPair;
@@ -54,7 +63,29 @@ import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 @Getter
-public class JavaAuthManager {
+public final class JavaAuthManager {
+
+    private final HttpClient httpClient;
+    private final MsaApplicationConfig msaApplicationConfig;
+    private final String deviceType;
+    private final KeyPair deviceKeyPair;
+    private final UUID deviceId;
+    private final ChangeListeners changeListeners = new ChangeListeners();
+
+    @Getter(AccessLevel.NONE)
+    private final Object sisuTokensLock = new Object();
+
+    private final Holder<MsaToken> msaToken = new Holder<>(this::refreshMsaToken);
+    private final Holder<XblDeviceToken> xblDeviceToken = new Holder<>(this::refreshXblDeviceToken);
+    private final Holder<XblUserToken> xblUserToken = new Holder<>(this::refreshXblUserToken, this.sisuTokensLock);
+    private final Holder<XblTitleToken> xblTitleToken = new Holder<>(this::refreshXblTitleToken, this.sisuTokensLock);
+    private final Holder<XblXstsToken> javaXstsToken = new Holder<>(this::refreshJavaXstsToken, this.sisuTokensLock);
+    private final Holder<XblXstsToken> xboxLiveXstsToken = new Holder<>(this::refreshXboxLiveXstsToken);
+    private final Holder<XblUserProfile> xboxUserProfile = new Holder<>(this::refreshXboxUserProfile);
+    private final Holder<MinecraftToken> minecraftToken = new Holder<>(this::refreshMinecraftToken);
+    private final Holder<MinecraftEntitlements> minecraftEntitlements = new Holder<>(this::refreshMinecraftEntitlements);
+    private final Holder<MinecraftProfile> minecraftProfile = new Holder<>(this::refreshMinecraftProfile);
+    private final Holder<MinecraftPlayerCertificates> minecraftPlayerCertificates = new Holder<>(this::refreshMinecraftPlayerCertificates);
 
     public static JavaAuthManager fromJson(final HttpClient httpClient, final JsonObject json) {
         return fromJson(httpClient, new GsonObject(json));
@@ -62,22 +93,22 @@ public class JavaAuthManager {
 
     public static JavaAuthManager fromJson(final HttpClient httpClient, final GsonObject json) {
         return new JavaAuthManager(
-                httpClient,
-                MsaApplicationConfig.fromJson(json.reqObject("msaApplicationConfig")),
-                json.reqString("deviceType"),
-                JsonUtil.decodeKeyPair(json.reqObject("deviceKeyPair")),
-                UUID.fromString(json.reqString("deviceId")),
-                MsaToken.fromJson(json.reqObject("msaToken")),
-                json.optObject("xblDeviceToken").map(XblDeviceToken::fromJson).orElse(null),
-                json.optObject("xblUserToken").map(XblUserToken::fromJson).orElse(null),
-                json.optObject("xblTitleToken").map(XblTitleToken::fromJson).orElse(null),
-                json.optObject("javaXstsToken").map(XblXstsToken::fromJson).orElse(null),
-                json.optObject("xboxLiveXstsToken").map(XblXstsToken::fromJson).orElse(null),
-                json.optObject("xboxUserProfile").map(XblUserProfile::fromJson).orElse(null),
-                json.optObject("minecraftToken").map(MinecraftToken::fromJson).orElse(null),
-                json.optObject("minecraftEntitlements").map(MinecraftEntitlements::fromJson).orElse(null),
-                json.optObject("minecraftProfile").map(MinecraftProfile::fromJson).orElse(null),
-                json.optObject("minecraftPlayerCertificates").map(MinecraftPlayerCertificates::fromJson).orElse(null)
+            httpClient,
+            MsaApplicationConfig.fromJson(json.reqObject("msaApplicationConfig")),
+            json.reqString("deviceType"),
+            JsonUtil.decodeKeyPair(json.reqObject("deviceKeyPair")),
+            UUID.fromString(json.reqString("deviceId")),
+            MsaToken.fromJson(json.reqObject("msaToken")),
+            json.optObject("xblDeviceToken").map(XblDeviceToken::fromJson).orElse(null),
+            json.optObject("xblUserToken").map(XblUserToken::fromJson).orElse(null),
+            json.optObject("xblTitleToken").map(XblTitleToken::fromJson).orElse(null),
+            json.optObject("javaXstsToken").map(XblXstsToken::fromJson).orElse(null),
+            json.optObject("xboxLiveXstsToken").map(XblXstsToken::fromJson).orElse(null),
+            json.optObject("xboxUserProfile").map(XblUserProfile::fromJson).orElse(null),
+            json.optObject("minecraftToken").map(MinecraftToken::fromJson).orElse(null),
+            json.optObject("minecraftEntitlements").map(MinecraftEntitlements::fromJson).orElse(null),
+            json.optObject("minecraftProfile").map(MinecraftProfile::fromJson).orElse(null),
+            json.optObject("minecraftPlayerCertificates").map(MinecraftPlayerCertificates::fromJson).orElse(null)
         );
     }
 
@@ -125,28 +156,6 @@ public class JavaAuthManager {
     public static Builder create(final HttpClient httpClient) {
         return new Builder(httpClient);
     }
-
-    private final HttpClient httpClient;
-    private final MsaApplicationConfig msaApplicationConfig;
-    private final String deviceType;
-    private final KeyPair deviceKeyPair;
-    private final UUID deviceId;
-    private final ChangeListeners changeListeners = new ChangeListeners();
-
-    @Getter(AccessLevel.NONE)
-    private final Object sisuTokensLock = new Object();
-
-    private final Holder<MsaToken> msaToken = new Holder<>(this::refreshMsaToken);
-    private final Holder<XblDeviceToken> xblDeviceToken = new Holder<>(this::refreshXblDeviceToken);
-    private final Holder<XblUserToken> xblUserToken = new Holder<>(this::refreshXblUserToken, this.sisuTokensLock);
-    private final Holder<XblTitleToken> xblTitleToken = new Holder<>(this::refreshXblTitleToken, this.sisuTokensLock);
-    private final Holder<XblXstsToken> javaXstsToken = new Holder<>(this::refreshJavaXstsToken, this.sisuTokensLock);
-    private final Holder<XblXstsToken> xboxLiveXstsToken = new Holder<>(this::refreshXboxLiveXstsToken);
-    private final Holder<XblUserProfile> xboxUserProfile = new Holder<>(this::refreshXboxUserProfile);
-    private final Holder<MinecraftToken> minecraftToken = new Holder<>(this::refreshMinecraftToken);
-    private final Holder<MinecraftEntitlements> minecraftEntitlements = new Holder<>(this::refreshMinecraftEntitlements);
-    private final Holder<MinecraftProfile> minecraftProfile = new Holder<>(this::refreshMinecraftProfile);
-    private final Holder<MinecraftPlayerCertificates> minecraftPlayerCertificates = new Holder<>(this::refreshMinecraftPlayerCertificates);
 
     private JavaAuthManager(final HttpClient httpClient, final MsaApplicationConfig msaApplicationConfig, final String deviceType, final KeyPair deviceKeyPair, final UUID deviceId, final MsaToken msaToken) {
         this.httpClient = httpClient;
@@ -318,12 +327,12 @@ public class JavaAuthManager {
          */
         public JavaAuthManager login(final MsaToken msaToken) {
             return new JavaAuthManager(
-                    this.httpClient,
-                    this.msaApplicationConfig,
-                    this.deviceType,
-                    this.deviceKeyPair != null ? this.deviceKeyPair : CryptUtil.generateEcdsa256KeyPair(),
-                    this.deviceId != null ? this.deviceId : UUID.randomUUID(),
-                    msaToken
+                this.httpClient,
+                this.msaApplicationConfig,
+                this.deviceType,
+                this.deviceKeyPair != null ? this.deviceKeyPair : CryptUtil.generateEcdsa256KeyPair(),
+                this.deviceId != null ? this.deviceId : UUID.randomUUID(),
+                msaToken
             );
         }
 

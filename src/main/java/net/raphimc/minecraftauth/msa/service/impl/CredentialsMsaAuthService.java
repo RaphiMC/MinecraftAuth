@@ -96,17 +96,17 @@ public class CredentialsMsaAuthService extends MsaAuthService {
         switch (this.applicationConfig.getEnvironment()) {
             case LIVE: {
                 postUrl = config.reqString("urlPost");
-                final String sFTTag = config.reqString("sFTTag");
+                final String sftTag = config.reqString("sFTTag");
 
-                String sFT = sFTTag.substring(sFTTag.indexOf("value=\"") + 7);
-                sFT = sFT.substring(0, sFT.indexOf("\""));
-                String sFTName = sFTTag.substring(sFTTag.indexOf("name=\"") + 6);
-                sFTName = sFTName.substring(0, sFTName.indexOf("\""));
+                String sft = sftTag.substring(sftTag.indexOf("value=\"") + 7);
+                sft = sft.substring(0, sft.indexOf("\""));
+                String sftName = sftTag.substring(sftTag.indexOf("name=\"") + 6);
+                sftName = sftName.substring(0, sftName.indexOf("\""));
 
                 postData.put("login", credentials.getEmail());
                 postData.put("loginfmt", credentials.getEmail());
                 postData.put("passwd", credentials.getPassword());
-                postData.put(sFTName, sFT);
+                postData.put(sftName, sft);
                 break;
             }
             case MICROSOFT_ONLINE_COMMON:
@@ -203,7 +203,7 @@ public class CredentialsMsaAuthService extends MsaAuthService {
             final JsonReader jsonReader = new JsonReader(new StringReader(configStart));
             jsonReader.setLenient(true);
             return GsonParser.parse(jsonReader).asObject();
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             throw new IllegalStateException("Failed to extract config from html. This most likely indicates that the application config or credentials are not valid", e);
         }
     }

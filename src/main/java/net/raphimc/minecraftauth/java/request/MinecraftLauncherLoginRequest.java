@@ -43,9 +43,9 @@ public class MinecraftLauncherLoginRequest extends PostRequest implements Minecr
     @Override
     public MinecraftToken handle(final HttpResponse response, final GsonObject json) throws IOException {
         return new MinecraftToken(
-                System.currentTimeMillis() + json.reqInt("expires_in") * 1000L,
-                json.reqString("token_type"),
-                json.reqString("access_token")
+            System.currentTimeMillis() + json.reqInt("expires_in") * 1000L,
+            json.reqString("token_type"),
+            json.reqString("access_token")
         );
     }
 

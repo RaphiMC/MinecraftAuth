@@ -52,9 +52,9 @@ public class MsaRefreshTokenRequest extends PostRequest implements MsaResponseHa
     @Override
     public MsaToken handle(final HttpResponse response, final GsonObject json) {
         return new MsaToken(
-                System.currentTimeMillis() + json.reqInt("expires_in") * 1000L,
-                json.reqString("access_token"),
-                json.getString("refresh_token", null)
+            System.currentTimeMillis() + json.reqInt("expires_in") * 1000L,
+            json.reqString("access_token"),
+            json.getString("refresh_token", null)
         );
     }
 

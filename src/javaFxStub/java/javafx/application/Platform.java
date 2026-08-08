@@ -17,6 +17,7 @@
  */
 package javafx.application;
 
+@SuppressWarnings("checkstyle:HideUtilityClassConstructor")
 public class Platform {
 
     public static native void runLater(final Runnable runnable);

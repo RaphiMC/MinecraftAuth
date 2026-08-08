@@ -28,15 +28,19 @@ import java.time.Instant;
 @Value
 public class XblUserToken implements Expirable {
 
+    long expireTimeMs;
+    String token;
+    String userHash;
+
     public static XblUserToken fromJson(final JsonObject json) {
         return fromJson(new GsonObject(json));
     }
 
     public static XblUserToken fromJson(final GsonObject json) {
         return new XblUserToken(
-                json.reqLong("expireTimeMs"),
-                json.reqString("token"),
-                json.reqString("userHash")
+            json.reqLong("expireTimeMs"),
+            json.reqString("token"),
+            json.reqString("userHash")
         );
     }
 
@@ -52,14 +56,10 @@ public class XblUserToken implements Expirable {
     @ApiStatus.Internal
     public static XblUserToken fromApiJson(final GsonObject json) {
         return new XblUserToken(
-                Instant.parse(json.reqString("NotAfter")).toEpochMilli(),
-                json.reqString("Token"),
-                json.reqObject("DisplayClaims").reqArray("xui").get(0).asObject().reqString("uhs")
+            Instant.parse(json.reqString("NotAfter")).toEpochMilli(),
+            json.reqString("Token"),
+            json.reqObject("DisplayClaims").reqArray("xui").get(0).asObject().reqString("uhs")
         );
     }
-
-    long expireTimeMs;
-    String token;
-    String userHash;
 
 }

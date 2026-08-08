@@ -47,11 +47,11 @@ public class MsaDeviceCodeRequest extends PostRequest implements MsaResponseHand
     @Override
     public MsaDeviceCode handle(final HttpResponse response, final GsonObject json) {
         return new MsaDeviceCode(
-                System.currentTimeMillis() + json.reqInt("expires_in") * 1000L,
-                json.reqInt("interval") * 1000L,
-                json.reqString("device_code"),
-                json.reqString("user_code"),
-                json.reqString("verification_uri")
+            System.currentTimeMillis() + json.reqInt("expires_in") * 1000L,
+            json.reqInt("interval") * 1000L,
+            json.reqString("device_code"),
+            json.reqString("user_code"),
+            json.reqString("verification_uri")
         );
     }
 

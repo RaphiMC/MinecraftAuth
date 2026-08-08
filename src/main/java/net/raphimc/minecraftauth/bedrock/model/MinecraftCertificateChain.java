@@ -31,25 +31,6 @@ import java.util.UUID;
 @Value
 public class MinecraftCertificateChain implements Expirable {
 
-    public static MinecraftCertificateChain fromJson(final JsonObject json) {
-        return fromJson(new GsonObject(json));
-    }
-
-    public static MinecraftCertificateChain fromJson(final GsonObject json) {
-        return new MinecraftCertificateChain(
-                json.reqString("mojangJwt"),
-                json.reqString("identityJwt")
-        );
-    }
-
-    public static JsonObject toJson(final MinecraftCertificateChain certificateChain) {
-        final JsonObject json = new JsonObject();
-        json.addProperty("_saveVersion", 1);
-        json.addProperty("mojangJwt", certificateChain.mojangJwt);
-        json.addProperty("identityJwt", certificateChain.identityJwt);
-        return json;
-    }
-
     String mojangJwt;
     String identityJwt;
 
@@ -62,6 +43,25 @@ public class MinecraftCertificateChain implements Expirable {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     Jwt parsedIdentityJwt = Jwt.parse(this.identityJwt);
+
+    public static MinecraftCertificateChain fromJson(final JsonObject json) {
+        return fromJson(new GsonObject(json));
+    }
+
+    public static MinecraftCertificateChain fromJson(final GsonObject json) {
+        return new MinecraftCertificateChain(
+            json.reqString("mojangJwt"),
+            json.reqString("identityJwt")
+        );
+    }
+
+    public static JsonObject toJson(final MinecraftCertificateChain certificateChain) {
+        final JsonObject json = new JsonObject();
+        json.addProperty("_saveVersion", 1);
+        json.addProperty("mojangJwt", certificateChain.mojangJwt);
+        json.addProperty("identityJwt", certificateChain.identityJwt);
+        return json;
+    }
 
     @Override
     public long getExpireTimeMs() {

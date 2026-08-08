@@ -32,14 +32,22 @@ import java.util.UUID;
 @Value
 public class MinecraftMultiplayerToken implements Expirable {
 
+    long expireTimeMs;
+    String token;
+
+    @Getter(lazy = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    Jwt parsedToken = Jwt.parse(this.token);
+
     public static MinecraftMultiplayerToken fromJson(final JsonObject json) {
         return fromJson(new GsonObject(json));
     }
 
     public static MinecraftMultiplayerToken fromJson(final GsonObject json) {
         return new MinecraftMultiplayerToken(
-                json.reqLong("expireTimeMs"),
-                json.reqString("token")
+            json.reqLong("expireTimeMs"),
+            json.reqString("token")
         );
     }
 
@@ -50,14 +58,6 @@ public class MinecraftMultiplayerToken implements Expirable {
         json.addProperty("token", multiplayerToken.token);
         return json;
     }
-
-    long expireTimeMs;
-    String token;
-
-    @Getter(lazy = true)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    Jwt parsedToken = Jwt.parse(this.token);
 
     public String getDisplayName() {
         return this.getParsedToken().getPayload().reqString("xname");

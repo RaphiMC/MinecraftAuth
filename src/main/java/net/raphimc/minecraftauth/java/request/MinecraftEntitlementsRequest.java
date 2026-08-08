@@ -40,7 +40,7 @@ public class MinecraftEntitlementsRequest extends GetRequest implements Minecraf
     @Override
     public MinecraftEntitlements handle(final HttpResponse response, final GsonObject json) throws IOException {
         return new MinecraftEntitlements(
-                json.reqArray("items").stream().map(item -> item.asObject().reqString("name")).collect(Collectors.toSet())
+            json.reqArray("items").stream().map(item -> item.asObject().reqString("name")).collect(Collectors.toSet())
         );
     }
 

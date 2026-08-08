@@ -86,7 +86,7 @@ public class LocalWebServerMsaAuthService extends MsaAuthService {
                     httpExchange.getResponseBody().write(response);
                     httpExchange.close();
                     authCodeFuture.complete(code.get());
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     final byte[] response = ("Login failed. Error message: " + e.getMessage()).getBytes(StandardCharsets.UTF_8);
                     httpExchange.sendResponseHeaders(StatusCodes.INTERNAL_SERVER_ERROR, response.length);
                     httpExchange.getResponseBody().write(response);
@@ -100,9 +100,9 @@ public class LocalWebServerMsaAuthService extends MsaAuthService {
             try {
                 final String authCode = authCodeFuture.get(this.timeoutMs, TimeUnit.MILLISECONDS);
                 return this.httpClient.executeAndHandle(new MsaAuthCodeTokenRequest(applicationConfig, authCode));
-            } catch (TimeoutException e) {
+            } catch (final TimeoutException e) {
                 throw new TimeoutException("Login timed out");
-            } catch (ExecutionException e) {
+            } catch (final ExecutionException e) {
                 if (e.getCause() instanceof RuntimeException) {
                     throw (RuntimeException) e.getCause();
                 } else {

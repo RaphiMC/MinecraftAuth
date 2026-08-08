@@ -49,8 +49,8 @@ public class MinecraftMultiplayerSessionStartRequest extends PostRequest impleme
     public MinecraftMultiplayerToken handle(final HttpResponse response, final GsonObject json) throws IOException {
         final GsonObject result = json.reqObject("result");
         return new MinecraftMultiplayerToken(
-                Instant.parse(result.reqString("validUntil")).toEpochMilli(),
-                result.reqString("signedToken")
+            Instant.parse(result.reqString("validUntil")).toEpochMilli(),
+            result.reqString("signedToken")
         );
     }
 

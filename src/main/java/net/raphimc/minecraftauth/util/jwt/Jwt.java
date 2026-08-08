@@ -28,6 +28,10 @@ import java.util.Base64;
 @Value
 public class Jwt implements Expirable {
 
+    GsonObject header;
+    GsonObject payload;
+    byte[] signature;
+
     public static Jwt parse(final String compactJwt) {
         if (compactJwt == null) {
             throw new IllegalArgumentException("JWT string is null");
@@ -41,10 +45,6 @@ public class Jwt implements Expirable {
         final byte[] signature = parts.length > 2 ? Base64.getUrlDecoder().decode(parts[2]) : null;
         return new Jwt(header, payload, signature);
     }
-
-    GsonObject header;
-    GsonObject payload;
-    byte[] signature;
 
     @Override
     public long getExpireTimeMs() {

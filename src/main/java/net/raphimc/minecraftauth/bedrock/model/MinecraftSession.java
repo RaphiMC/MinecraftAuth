@@ -29,14 +29,22 @@ import net.raphimc.minecraftauth.util.jwt.Jwt;
 @Value
 public class MinecraftSession implements Expirable {
 
+    long expireTimeMs;
+    String authorizationHeader;
+
+    @Getter(lazy = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    Jwt parsedToken = Jwt.parse(this.authorizationHeader.split(" ", 2)[1]);
+
     public static MinecraftSession fromJson(final JsonObject json) {
         return fromJson(new GsonObject(json));
     }
 
     public static MinecraftSession fromJson(final GsonObject json) {
         return new MinecraftSession(
-                json.reqLong("expireTimeMs"),
-                json.reqString("authorizationHeader")
+            json.reqLong("expireTimeMs"),
+            json.reqString("authorizationHeader")
         );
     }
 
@@ -47,13 +55,5 @@ public class MinecraftSession implements Expirable {
         json.addProperty("authorizationHeader", session.authorizationHeader);
         return json;
     }
-
-    long expireTimeMs;
-    String authorizationHeader;
-
-    @Getter(lazy = true)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    Jwt parsedToken = Jwt.parse(this.authorizationHeader.split(" ", 2)[1]);
 
 }

@@ -55,9 +55,9 @@ public class XblDeviceAuthenticateRequest extends SignedXblPostRequest implement
     @Override
     public XblDeviceToken handle(final HttpResponse response, final GsonObject json) {
         return new XblDeviceToken(
-                Instant.parse(json.reqString("NotAfter")).toEpochMilli(),
-                json.reqString("Token"),
-                json.reqObject("DisplayClaims").reqObject("xdi").reqString("did")
+            Instant.parse(json.reqString("NotAfter")).toEpochMilli(),
+            json.reqString("Token"),
+            json.reqObject("DisplayClaims").reqObject("xdi").reqString("did")
         );
     }
 

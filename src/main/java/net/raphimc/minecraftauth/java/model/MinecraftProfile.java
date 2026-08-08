@@ -27,14 +27,17 @@ import java.util.UUID;
 @Value
 public class MinecraftProfile implements Expirable {
 
+    UUID id;
+    String name;
+
     public static MinecraftProfile fromJson(final JsonObject json) {
         return fromJson(new GsonObject(json));
     }
 
     public static MinecraftProfile fromJson(final GsonObject json) {
         return new MinecraftProfile(
-                UUID.fromString(json.reqString("id")),
-                json.reqString("name")
+            UUID.fromString(json.reqString("id")),
+            json.reqString("name")
         );
     }
 
@@ -45,9 +48,6 @@ public class MinecraftProfile implements Expirable {
         json.addProperty("name", profile.name);
         return json;
     }
-
-    UUID id;
-    String name;
 
     @Override
     public long getExpireTimeMs() {

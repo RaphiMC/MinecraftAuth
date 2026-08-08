@@ -24,14 +24,17 @@ import net.lenni0451.commons.gson.elements.GsonObject;
 @Value
 public class MsaCredentials {
 
+    String email;
+    String password;
+
     public static MsaCredentials fromJson(final JsonObject json) {
         return fromJson(new GsonObject(json));
     }
 
     public static MsaCredentials fromJson(final GsonObject json) {
         return new MsaCredentials(
-                json.reqString("email"),
-                json.reqString("password")
+            json.reqString("email"),
+            json.reqString("password")
         );
     }
 
@@ -42,8 +45,5 @@ public class MsaCredentials {
         json.addProperty("password", credentials.password);
         return json;
     }
-
-    String email;
-    String password;
 
 }

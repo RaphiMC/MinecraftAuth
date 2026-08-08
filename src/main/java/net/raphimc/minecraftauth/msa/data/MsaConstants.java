@@ -17,7 +17,7 @@
  */
 package net.raphimc.minecraftauth.msa.data;
 
-public class MsaConstants {
+public final class MsaConstants {
 
     public static final String JAVA_TITLE_ID = "00000000402b5328"; // Win32
     public static final String BEDROCK_WIN32_TITLE_ID = "0000000040159362"; // Win32
@@ -30,5 +30,8 @@ public class MsaConstants {
     public static final String SCOPE_NO_OFFLINE_ACCESS = "XboxLive.signin";
     public static final String SCOPE_OFFLINE_ACCESS = "XboxLive.signin XboxLive.offline_access";
     public static final String SCOPE_TITLE_AUTH = "service::user.auth.xboxlive.com::MBI_SSL";
+
+    private MsaConstants() {
+    }
 
 }

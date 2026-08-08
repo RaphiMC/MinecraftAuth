@@ -25,15 +25,19 @@ import net.raphimc.minecraftauth.util.Expirable;
 @Value
 public class MsaToken implements Expirable {
 
+    long expireTimeMs;
+    String accessToken;
+    String refreshToken;
+
     public static MsaToken fromJson(final JsonObject json) {
         return fromJson(new GsonObject(json));
     }
 
     public static MsaToken fromJson(final GsonObject json) {
         return new MsaToken(
-                json.reqLong("expireTimeMs"),
-                json.reqString("accessToken"),
-                json.getString("refreshToken", null)
+            json.reqLong("expireTimeMs"),
+            json.reqString("accessToken"),
+            json.getString("refreshToken", null)
         );
     }
 
@@ -45,9 +49,5 @@ public class MsaToken implements Expirable {
         json.addProperty("refreshToken", token.refreshToken);
         return json;
     }
-
-    long expireTimeMs;
-    String accessToken;
-    String refreshToken;
 
 }

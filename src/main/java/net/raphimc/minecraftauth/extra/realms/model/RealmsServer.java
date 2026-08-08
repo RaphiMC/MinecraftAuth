@@ -26,25 +26,6 @@ import org.jetbrains.annotations.ApiStatus;
 @Value
 public class RealmsServer {
 
-    @ApiStatus.Internal
-    public static RealmsServer fromApiJson(final GsonObject json) {
-        return new RealmsServer(
-                json.getLong("id", -1L),
-                StringUtil.emptyToNull(json.getString("name", null)),
-                StringUtil.emptyToNull(json.getString("motd", null)),
-                StringUtil.emptyToNull(json.getString("owner", null)),
-                StringUtil.emptyToNull(json.getString("ownerUUID", null)),
-                json.getString("state", "CLOSED"),
-                json.getBoolean("expired", false),
-                json.getInt("daysLeft", 0),
-                json.getString("worldType", "NORMAL"),
-                json.getInt("maxPlayers", 0),
-                json.getString("compatibility", "COMPATIBLE").equals("COMPATIBLE"),
-                StringUtil.emptyToNull(json.getString("activeVersion", null)),
-                json.getJsonObject()
-        );
-    }
-
     long id;
     String name;
     String motd;
@@ -58,6 +39,25 @@ public class RealmsServer {
     boolean compatible;
     String activeVersion;
     JsonObject rawResponse;
+
+    @ApiStatus.Internal
+    public static RealmsServer fromApiJson(final GsonObject json) {
+        return new RealmsServer(
+            json.getLong("id", -1L),
+            StringUtil.emptyToNull(json.getString("name", null)),
+            StringUtil.emptyToNull(json.getString("motd", null)),
+            StringUtil.emptyToNull(json.getString("owner", null)),
+            StringUtil.emptyToNull(json.getString("ownerUUID", null)),
+            json.getString("state", "CLOSED"),
+            json.getBoolean("expired", false),
+            json.getInt("daysLeft", 0),
+            json.getString("worldType", "NORMAL"),
+            json.getInt("maxPlayers", 0),
+            json.getString("compatibility", "COMPATIBLE").equals("COMPATIBLE"),
+            StringUtil.emptyToNull(json.getString("activeVersion", null)),
+            json.getJsonObject()
+        );
+    }
 
     public String getNameOr(final String fallback) {
         return this.name == null ? fallback : this.name;

@@ -44,19 +44,19 @@ public class MinecraftPlayerCertificatesRequest extends PostRequest implements M
     public MinecraftPlayerCertificates handle(final HttpResponse response, final GsonObject json) throws IOException {
         final GsonObject keyPairJson = json.reqObject("keyPair");
         return new MinecraftPlayerCertificates(
-                Instant.parse(json.reqString("expiresAt")).toEpochMilli(),
-                new KeyPair(
-                        CryptUtil.rsaPublicKeyFromBytes(Base64.getMimeDecoder().decode(keyPairJson.reqString("publicKey")
-                                .replace("-----BEGIN RSA PUBLIC KEY-----", "")
-                                .replace("-----END RSA PUBLIC KEY-----", ""))
-                        ),
-                        CryptUtil.rsaPrivateKeyFromBytes(Base64.getMimeDecoder().decode(keyPairJson.reqString("privateKey")
-                                .replace("-----BEGIN RSA PRIVATE KEY-----", "")
-                                .replace("-----END RSA PRIVATE KEY-----", ""))
-                        )
+            Instant.parse(json.reqString("expiresAt")).toEpochMilli(),
+            new KeyPair(
+                CryptUtil.rsaPublicKeyFromBytes(Base64.getMimeDecoder().decode(keyPairJson.reqString("publicKey")
+                    .replace("-----BEGIN RSA PUBLIC KEY-----", "")
+                    .replace("-----END RSA PUBLIC KEY-----", ""))
                 ),
-                Base64.getDecoder().decode(json.reqString("publicKeySignatureV2")),
-                json.optString("publicKeySignature").map(Base64.getDecoder()::decode).orElse(null)
+                CryptUtil.rsaPrivateKeyFromBytes(Base64.getMimeDecoder().decode(keyPairJson.reqString("privateKey")
+                    .replace("-----BEGIN RSA PRIVATE KEY-----", "")
+                    .replace("-----END RSA PRIVATE KEY-----", ""))
+                )
+            ),
+            Base64.getDecoder().decode(json.reqString("publicKeySignatureV2")),
+            json.optString("publicKeySignature").map(Base64.getDecoder()::decode).orElse(null)
         );
     }
 

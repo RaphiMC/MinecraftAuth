@@ -28,13 +28,15 @@ import java.util.Set;
 @Value
 public class MinecraftEntitlements implements Expirable {
 
+    Set<String> items;
+
     public static MinecraftEntitlements fromJson(final JsonObject json) {
         return fromJson(new GsonObject(json));
     }
 
     public static MinecraftEntitlements fromJson(final GsonObject json) {
         return new MinecraftEntitlements(
-                JsonUtil.decodeSet(json.reqArray("items"))
+            JsonUtil.decodeSet(json.reqArray("items"))
         );
     }
 
@@ -44,8 +46,6 @@ public class MinecraftEntitlements implements Expirable {
         json.add("items", JsonUtil.encodeSet(entitlements.items));
         return json;
     }
-
-    Set<String> items;
 
     @Override
     public long getExpireTimeMs() {

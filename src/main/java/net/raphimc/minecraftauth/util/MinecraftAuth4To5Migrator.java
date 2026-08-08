@@ -31,7 +31,10 @@ import java.util.UUID;
  * A utility class to migrate MinecraftAuth 4.x.x save data to 5.x.x format.<br>
  * Starting with MinecraftAuth 5.x.x, the save data format has changed significantly and supports automatic migration from that point on.
  */
-public class MinecraftAuth4To5Migrator {
+public final class MinecraftAuth4To5Migrator {
+
+    private MinecraftAuth4To5Migrator() {
+    }
 
     /**
      * Migrate a Java Edition token chain from MinecraftAuth 4.x.x to the 5.x.x format.
@@ -46,7 +49,7 @@ public class MinecraftAuth4To5Migrator {
     /**
      * Migrate a Java Edition token chain from MinecraftAuth 4.x.x to the 5.x.x format.
      *
-     * @param oldSaveData The old save data.
+     * @param oldSaveData          The old save data.
      * @param msaApplicationConfig The MSA application config the tokens were originally obtained with.
      * @return The migrated save data.
      */
@@ -79,7 +82,7 @@ public class MinecraftAuth4To5Migrator {
     /**
      * Migrate a Bedrock Edition token chain from MinecraftAuth 4.x.x to the 5.x.x format.
      *
-     * @param oldSaveData The old save data.
+     * @param oldSaveData          The old save data.
      * @param msaApplicationConfig The MSA application config the tokens were originally obtained with.
      * @return The migrated save data.
      */

@@ -24,9 +24,17 @@ import net.lenni0451.commons.gson.elements.GsonElement;
 import net.lenni0451.commons.gson.elements.GsonObject;
 
 import java.security.KeyPair;
-import java.util.*;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-public class JsonUtil {
+public final class JsonUtil {
+
+    private JsonUtil() {
+    }
 
     public static JsonArray encodeSet(final Set<String> set) {
         final JsonArray json = new JsonArray();

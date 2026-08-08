@@ -17,7 +17,10 @@
  */
 package net.raphimc.minecraftauth.util;
 
-public class StringUtil {
+public final class StringUtil {
+
+    private StringUtil() {
+    }
 
     public static String emptyToNull(final String s) {
         if (s == null || s.isEmpty() || s.trim().isEmpty()) {

@@ -33,17 +33,23 @@ import java.util.Map;
 @AllArgsConstructor
 public class MsaApplicationConfig {
 
+    String clientId;
+    String scope;
+    String clientSecret;
+    String redirectUri;
+    MsaEnvironment environment;
+
     public static MsaApplicationConfig fromJson(final JsonObject json) {
         return fromJson(new GsonObject(json));
     }
 
     public static MsaApplicationConfig fromJson(final GsonObject json) {
         return new MsaApplicationConfig(
-                json.reqString("clientId"),
-                json.reqString("scope"),
-                json.getString("clientSecret", null),
-                json.getString("redirectUri", null),
-                MsaEnvironment.valueOf(json.getString("environment", MsaEnvironment.LIVE.name()))
+            json.reqString("clientId"),
+            json.reqString("scope"),
+            json.getString("clientSecret", null),
+            json.getString("redirectUri", null),
+            MsaEnvironment.valueOf(json.getString("environment", MsaEnvironment.LIVE.name()))
         );
     }
 
@@ -57,12 +63,6 @@ public class MsaApplicationConfig {
         json.addProperty("environment", applicationConfig.environment.name());
         return json;
     }
-
-    String clientId;
-    String scope;
-    String clientSecret;
-    String redirectUri;
-    MsaEnvironment environment;
 
     public MsaApplicationConfig(final String clientId, final String scope) {
         this(clientId, scope, null, null, MsaEnvironment.LIVE);

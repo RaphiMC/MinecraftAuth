@@ -32,7 +32,7 @@ import net.raphimc.minecraftauth.msa.model.MsaToken;
 import net.raphimc.minecraftauth.msa.request.MsaAuthCodeTokenRequest;
 import net.raphimc.minecraftauth.msa.service.MsaAuthService;
 
-import javax.swing.*;
+import javax.swing.JFrame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -102,7 +102,7 @@ public class JfxWebViewMsaAuthService extends MsaAuthService {
                         throw new MsaRequestException(fakeResponse, error.get(), errorDescription.get());
                     }
                     parameters.getFirstValue("code").ifPresent(authCodeFuture::complete);
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     authCodeFuture.completeExceptionally(e);
                 }
             });
@@ -113,9 +113,9 @@ public class JfxWebViewMsaAuthService extends MsaAuthService {
         try {
             final String authCode = authCodeFuture.get(this.timeoutMs, TimeUnit.MILLISECONDS);
             return this.httpClient.executeAndHandle(new MsaAuthCodeTokenRequest(this.applicationConfig, authCode));
-        } catch (TimeoutException e) {
+        } catch (final TimeoutException e) {
             throw new TimeoutException("Login timed out");
-        } catch (ExecutionException e) {
+        } catch (final ExecutionException e) {
             if (e.getCause() instanceof RuntimeException) {
                 throw (RuntimeException) e.getCause();
             } else {

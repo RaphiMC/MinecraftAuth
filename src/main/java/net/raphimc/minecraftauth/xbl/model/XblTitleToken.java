@@ -28,15 +28,19 @@ import java.time.Instant;
 @Value
 public class XblTitleToken implements Expirable {
 
+    long expireTimeMs;
+    String token;
+    String titleId;
+
     public static XblTitleToken fromJson(final JsonObject json) {
         return fromJson(new GsonObject(json));
     }
 
     public static XblTitleToken fromJson(final GsonObject json) {
         return new XblTitleToken(
-                json.reqLong("expireTimeMs"),
-                json.reqString("token"),
-                json.reqString("titleId")
+            json.reqLong("expireTimeMs"),
+            json.reqString("token"),
+            json.reqString("titleId")
         );
     }
 
@@ -52,14 +56,10 @@ public class XblTitleToken implements Expirable {
     @ApiStatus.Internal
     public static XblTitleToken fromApiJson(final GsonObject json) {
         return new XblTitleToken(
-                Instant.parse(json.reqString("NotAfter")).toEpochMilli(),
-                json.reqString("Token"),
-                json.reqObject("DisplayClaims").reqObject("xti").reqString("tid")
+            Instant.parse(json.reqString("NotAfter")).toEpochMilli(),
+            json.reqString("Token"),
+            json.reqObject("DisplayClaims").reqObject("xti").reqString("tid")
         );
     }
-
-    long expireTimeMs;
-    String token;
-    String titleId;
 
 }

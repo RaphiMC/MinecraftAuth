@@ -26,8 +26,7 @@ public enum MsaEnvironment {
 
     LIVE("https://login.live.com/", "oauth20_connect.srf", "oauth20_authorize.srf", "oauth20_token.srf", "oauth20_desktop.srf"),
     MICROSOFT_ONLINE_COMMON("https://login.microsoftonline.com/common/oauth2/", "v2.0/devicecode", "v2.0/authorize", "v2.0/token", "nativeclient"),
-    MICROSOFT_ONLINE_CONSUMERS("https://login.microsoftonline.com/consumers/oauth2/", "v2.0/devicecode", "v2.0/authorize", "v2.0/token", "nativeclient"),
-    ;
+    MICROSOFT_ONLINE_CONSUMERS("https://login.microsoftonline.com/consumers/oauth2/", "v2.0/devicecode", "v2.0/authorize", "v2.0/token", "nativeclient");
 
     private final String baseUrl;
     private final String deviceCodePath;

@@ -29,16 +29,21 @@ import java.util.Base64;
 @Value
 public class MinecraftPlayerCertificates implements Expirable {
 
+    long expireTimeMs;
+    KeyPair keyPair;
+    byte[] publicKeySignature;
+    byte[] legacyPublicKeySignature;
+
     public static MinecraftPlayerCertificates fromJson(final JsonObject json) {
         return fromJson(new GsonObject(json));
     }
 
     public static MinecraftPlayerCertificates fromJson(final GsonObject json) {
         return new MinecraftPlayerCertificates(
-                json.reqLong("expireTimeMs"),
-                JsonUtil.decodeKeyPair(json.reqObject("keyPair")),
-                Base64.getDecoder().decode(json.reqString("publicKeySignature")),
-                json.optString("legacyPublicKeySignature").map(Base64.getDecoder()::decode).orElse(null)
+            json.reqLong("expireTimeMs"),
+            JsonUtil.decodeKeyPair(json.reqObject("keyPair")),
+            Base64.getDecoder().decode(json.reqString("publicKeySignature")),
+            json.optString("legacyPublicKeySignature").map(Base64.getDecoder()::decode).orElse(null)
         );
     }
 
@@ -53,10 +58,5 @@ public class MinecraftPlayerCertificates implements Expirable {
         }
         return json;
     }
-
-    long expireTimeMs;
-    KeyPair keyPair;
-    byte[] publicKeySignature;
-    byte[] legacyPublicKeySignature;
 
 }
