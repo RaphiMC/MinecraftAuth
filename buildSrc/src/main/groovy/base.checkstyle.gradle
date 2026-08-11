@@ -3,7 +3,7 @@ plugins {
 }
 
 checkstyle {
-    toolVersion = "13.9.0"
+    toolVersion = "13.10.0"
     configProperties = [
         javaVersion: java.toolchain.languageVersion.get().asInt(),
         typeParameterNameFormat: "^[A-Z0-9_]+\$",
@@ -133,7 +133,6 @@ checkstyle {
                 <module name="OneTopLevelClass"/>
                 <module name="OperatorWrap"/>
                 <module name="OuterTypeFilename"/>
-                <module name="OverloadMethodsDeclarationOrder"/>
                 <module name="PackageName">
                     <property name="format" value="^[a-z]+(\\.[a-z][a-z0-9_]*)*\$"/>
                 </module>
