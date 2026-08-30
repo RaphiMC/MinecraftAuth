@@ -3,7 +3,7 @@ plugins {
 }
 
 checkstyle {
-    toolVersion = "13.10.0"
+    toolVersion = "14.1.0"
     configProperties = [
         javaVersion: java.toolchain.languageVersion.get().asInt(),
         typeParameterNameFormat: "^[A-Z0-9_]+\$",
@@ -30,6 +30,7 @@ checkstyle {
                 <module name="ArrayTypeStyle"/>
                 <module name="AtclauseOrder"/>
                 <module name="AvoidEscapedUnicodeCharacters"/>
+                <module name="AvoidModuleImport"/>
                 <module name="AvoidNoArgumentSuperConstructorCall"/>
                 <module name="AvoidStarImport">
                     <property name="allowStaticMemberImports" value="true"/>
@@ -66,6 +67,7 @@ checkstyle {
                 </module>
                 <module name="EmptyStatement"/>
                 <module name="EqualsHashCode"/>
+                <module name="ExpressionOverBlockLambda"/>
                 <module name="FallThrough">
                     <property name="checkLastCaseGroup" value="true"/>
                 </module>
@@ -79,6 +81,9 @@ checkstyle {
                 <module name="HideUtilityClassConstructor"/>
                 <module name="IllegalImport"/>
                 <module name="IllegalSymbol"/>
+                <module name="InappropriateJavadocBlockTagsOnField"/>
+                <module name="InappropriateJavadocBlockTagsOnPackage"/>
+                <module name="InappropriateJavadocBlockTagsOnType"/>
                 <module name="Indentation"/>
                 <module name="InnerTypeLast"/>
                 <module name="InterfaceIsType"/>
@@ -88,9 +93,11 @@ checkstyle {
                 <module name="InvalidJavadocPosition"/>
                 <module name="JavadocBlockTagLocation"/>
                 <module name="JavadocContentLocation"/>
+                <module name="JavadocEndCommentDelimiter"/>
                 <module name="JavadocLeadingAsteriskAlign"/>
                 <module name="JavadocMissingLeadingAsterisk"/>
                 <module name="JavadocMissingWhitespaceAfterAsterisk"/>
+                <module name="JavadocParamOrder"/>
                 <module name="JavadocTagContinuationIndentation"/>
                 <module name="LambdaParameterName"/>
                 <module name="LeftCurly">
@@ -178,6 +185,7 @@ checkstyle {
                     <property name="format" value="^[A-Z]\\w*\$"/>
                 </module>
                 <module name="TypecastParenPad"/>
+                <module name="UnnecessaryFullyQualifiedType"/>
                 <module name="UnnecessaryNullCheckWithInstanceOf"/>
                 <module name="UnnecessarySemicolonAfterOuterTypeDeclaration"/>
                 <module name="UnnecessarySemicolonAfterTypeMemberDeclaration"/>
@@ -190,6 +198,7 @@ checkstyle {
                     <property name="allowUnnamedVariables" value="false"/>
                     <property name="jdkVersion" value="\${javaVersion}"/>
                 </module>
+                <module name="UnusedPrivateField"/>
                 ${configProperties.javaVersion >= 22 ? '<module name="UnusedTryResourceShouldBeUnnamed"/>' : ''}
                 <module name="UpperEll"/>
                 ${configProperties.javaVersion >= 14 ? '<module name="UseEnhancedSwitch"/>' : ''}

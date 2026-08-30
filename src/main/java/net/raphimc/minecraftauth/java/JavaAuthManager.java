@@ -295,9 +295,9 @@ public final class JavaAuthManager {
         /**
          * Login with the given {@link ParamMsaAuthServiceSupplier} and parameter.
          *
+         * @param <T>                    The type of the parameter.
          * @param msaAuthServiceSupplier The MSA auth service supplier (For example {@link net.raphimc.minecraftauth.msa.service.impl.DeviceCodeMsaAuthService} or {@link net.raphimc.minecraftauth.msa.service.impl.CredentialsMsaAuthService}).
          * @param param                  The parameter to pass to the supplier.
-         * @param <T>                    The type of the parameter.
          * @return A logged in {@link JavaAuthManager}.
          */
         public <T> JavaAuthManager login(final ParamMsaAuthServiceSupplier<T> msaAuthServiceSupplier, final T param) throws IOException, InterruptedException, TimeoutException {
