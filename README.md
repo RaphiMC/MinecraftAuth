@@ -223,7 +223,7 @@ if (!isCompatible) {
     System.out.println("Connect to: " + bedrockRealmsService.joinWorld(realmsWorlds.get(0)));
 }
 ```
-[Here is an example implementation](https://github.com/ViaVersion/ViaProxy/blob/09e685fad9ee1b804a3b01a7eb308a444a48855f/src/main/java/net/raphimc/viaproxy/ui/impl/RealmsTab.java) which is using the Realms API of both Minecraft editions.
+[Here is an example implementation](https://github.com/ViaVersion/ViaProxy/blob/0dd40daea33cb4dfe8b1ab065593362db81688b4/src/main/java/net/raphimc/viaproxy/ui/impl/RealmsTab.java) which is using the Realms API of both Minecraft editions.
 
 ## Migrating from MinecraftAuth 4.x.x to 5.x.x
 If you are migrating from MinecraftAuth 4.x.x to 5.x.x you can use the ``MinecraftAuth4To5Migrator`` class to migrate the saved tokens of your users.
