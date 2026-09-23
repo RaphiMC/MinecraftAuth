@@ -26,6 +26,7 @@ import net.raphimc.minecraftauth.extra.realms.model.RealmsServer;
 import net.raphimc.minecraftauth.extra.realms.request.BedrockRealmsInviteDeleteRequest;
 import net.raphimc.minecraftauth.extra.realms.request.BedrockRealmsInviteLinkAcceptRequest;
 import net.raphimc.minecraftauth.extra.realms.request.BedrockRealmsWorldJoinRequest;
+import net.raphimc.minecraftauth.extra.realms.request.BedrockRealmsWorldStorySettingsRequest;
 import net.raphimc.minecraftauth.extra.realms.service.RealmsService;
 import net.raphimc.minecraftauth.util.holder.Holder;
 import net.raphimc.minecraftauth.xbl.model.XblXstsToken;
@@ -73,6 +74,19 @@ public class BedrockRealmsService extends RealmsService {
     @Override
     public RealmsJoinInformation joinWorld(final RealmsServer server) throws IOException {
         return this.httpClient.executeAndHandle(this.authorizeRequest(new BedrockRealmsWorldJoinRequest(server)));
+    }
+
+    public void updateWorldStorySettings(final RealmsServer server, final Boolean notifications, final Boolean playerOptIn) throws IOException {
+        this.httpClient.executeAndHandle(this.authorizeRequest(new BedrockRealmsWorldStorySettingsRequest(server, notifications, playerOptIn)));
+    }
+
+    @SneakyThrows
+    public void updateWorldStorySettingsUnchecked(final RealmsServer server, final Boolean notifications, final Boolean playerOptIn) {
+        this.updateWorldStorySettings(server, notifications, playerOptIn);
+    }
+
+    public CompletableFuture<Void> updateWorldStorySettingsAsync(final RealmsServer server, final Boolean notifications, final Boolean playerOptIn) {
+        return CompletableFuture.runAsync(() -> this.updateWorldStorySettingsUnchecked(server, notifications, playerOptIn));
     }
 
     @Override

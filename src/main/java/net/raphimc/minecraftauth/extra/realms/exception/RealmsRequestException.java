@@ -24,7 +24,8 @@ import net.raphimc.minecraftauth.util.http.exception.ApiHttpRequestException;
 @Getter
 public class RealmsRequestException extends ApiHttpRequestException {
 
-    public static final int ERROR_TOS_NOT_ACCEPTED = 6002;
+    public static final int ERROR_TOS_NOT_ACCEPTED = 6002; // Java Edition
+    public static final int ERROR_TIMELINE_OPT_IN_REQUIRED = 6015; // Bedrock Edition
 
     private final int errorCode;
 
