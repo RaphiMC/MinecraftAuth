@@ -3,7 +3,7 @@ plugins {
 }
 
 checkstyle {
-    toolVersion = "14.1.0"
+    toolVersion = "14.3.0"
     configProperties = [
         javaVersion: java.toolchain.languageVersion.get().asInt(),
         typeParameterNameFormat: "^[A-Z0-9_]+\$",
@@ -207,7 +207,9 @@ checkstyle {
                     <property name="protectedAllowed" value="true"/>
                 </module>
                 ${configProperties.javaVersion >= 21 ? '<module name="WhenShouldBeUsed"/>' : ''}
-                <module name="WhitespaceAfter"/>
+                <module name="WhitespaceAfter">
+                    <property name="tokens" value="COMMA, SEMI, TYPECAST, LITERAL_IF, LITERAL_ELSE, LITERAL_WHILE, LITERAL_DO, LITERAL_FOR, LITERAL_FINALLY, LITERAL_RETURN, LITERAL_YIELD, LITERAL_CATCH, DO_WHILE, ELLIPSIS, LITERAL_SWITCH, LITERAL_SYNCHRONIZED, LITERAL_TRY, LITERAL_CASE, LAMBDA, LITERAL_WHEN, ANNOTATIONS, SINGLE_LINE_COMMENT"/>
+                </module>
                 <module name="WhitespaceAround">
                     <property name="ignoreEnhancedForColon" value="false"/>
                 </module>
