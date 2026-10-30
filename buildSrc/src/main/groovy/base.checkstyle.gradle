@@ -84,7 +84,6 @@ checkstyle {
                 <module name="InappropriateJavadocBlockTagsOnField"/>
                 <module name="InappropriateJavadocBlockTagsOnPackage"/>
                 <module name="InappropriateJavadocBlockTagsOnType"/>
-                <module name="Indentation"/>
                 <module name="InnerTypeLast"/>
                 <module name="InterfaceIsType"/>
                 <module name="InterfaceTypeParameterName">
